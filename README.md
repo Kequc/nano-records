@@ -1,8 +1,6 @@
 Nano Records
 ===
 
-Utility returns objects for interacting with couchdb.
-
 Note: As of the time of this writing this code has not been run a single time, I just wrote it.
 
     var NanoRecords = require('nano-records');
@@ -25,6 +23,9 @@ Note: As of the time of this writing this code has not been run a single time, I
       // myInstance.attachmentRemove(name, callback);
     });
 
-    // db.update(id, data, callback);
     // db.find(id, callback);
+    // db.update(id, data, callback);
+    // db.destroy(id, callback);
     // db.view(name, data, callback);
+
+Ideally the software will take care of creating databases, managing views, fetching data, and recovering from problems. The first parameter in every callback is an error object or null.

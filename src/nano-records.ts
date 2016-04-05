@@ -14,6 +14,10 @@ class NanoRecord
   
   attachmentGet (name: string, callback: Function = ()=>{})
   {
+    if (!this.data['_id']) {
+      callback(new Error('Document does not exist.'));
+      return;
+    }
     this._parent.db.attachment.get(this.data['_id'], name, {}, function (err: Error, body: any) {
       if (err)
         callback(err);
@@ -24,6 +28,10 @@ class NanoRecord
   
   attachmentAdd (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
   {
+    if (!this.data['_id']) {
+      callback(new Error('Document does not exist.'));
+      return;
+    }
     tries++;
     let next = function () {
       this._parent.db.attachment.insert(this.data['_id'], name, data, mimeType, { rev: this.data['_rev'] }, function (err: Error, body: any) {
@@ -52,6 +60,10 @@ class NanoRecord
   
   attachmentRemove (name: string, callback: Function = ()=>{})
   {
+    if (!this.data['_id']) {
+      callback(new Error('Document does not exist.'));
+      return;
+    }
     this.fetch(function (err) {
       if (err)
         callback(err);
@@ -173,6 +185,16 @@ class NanoRecords
         callback(err);
       else
         instance.update(data, callback);
+    });
+  }
+  
+  destroy (id: string, callback: Function = ()=>{})
+  {
+    this.find(id, function (err: Error, instance: NanoRecord) {
+      if (err)
+        callback(err);
+      else
+        instance.destroy(callback);
     });
   }
   

@@ -19,6 +19,7 @@ declare class NanoRecords {
     constructor(nano: any, dbName: string, views?: Object);
     create(data: Object, callback?: Function, tries?: number): void;
     update(id: string, data: Object, callback?: Function): void;
+    destroy(id: string, callback?: Function): void;
     find(id: string, callback?: Function): void;
     view(name: string, data: Object, callback?: Function, tries?: number): void;
 }
