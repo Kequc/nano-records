@@ -31,16 +31,16 @@ declare class NanoRecords {
     views: Object;
     db: any;
     constructor(nano: any, dbName: string, views?: Object);
-    docs: {
+    doc: {
         create: (data: Object, callback?: Function, tries?: number) => void;
         find: (id: string, callback?: Function) => void;
         update: (id: string, data: Object, callback?: Function) => void;
         destroy: (id: string, callback?: Function) => void;
     };
-    docsCreate(data: Object, callback?: Function, tries?: number): void;
-    docsFind(id: string, callback?: Function): void;
-    docsUpdate(id: string, data: Object, callback?: Function): void;
-    docsDestroy(id: string, callback?: Function): void;
+    docCreate(data: Object, callback?: Function, tries?: number): void;
+    docFind(id: string, callback?: Function): void;
+    docUpdate(id: string, data: Object, callback?: Function): void;
+    docDestroy(id: string, callback?: Function): void;
     view(name: string, data: Object, callback?: Function, tries?: number): void;
 }
 declare var module: any;

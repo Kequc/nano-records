@@ -209,14 +209,14 @@ class NanoRecords
     this.db = this.nano.use(this.dbName);
   }
   
-  docs = {
-    create: this.docsCreate,
-    find: this.docsFind,
-    update: this.docsUpdate,
-    destroy: this.docsDestroy
+  doc = {
+    create: this.docCreate,
+    find: this.docFind,
+    update: this.docUpdate,
+    destroy: this.docDestroy
   };
   
-  docsCreate (data: Object, callback: Function = ()=>{}, tries: number = 0)
+  docCreate (data: Object, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
     this.db.insert(data, function (err: Error, body: Object) {
@@ -235,7 +235,7 @@ class NanoRecords
     }.bind(this));
   }
   
-  docsFind (id: string, callback: Function = ()=>{})
+  docFind (id: string, callback: Function = ()=>{})
   {
     this.db.get(id, function (err: Error, body: Object) {
       if (err)
@@ -245,9 +245,9 @@ class NanoRecords
     }.bind(this));
   }
   
-  docsUpdate (id: string, data: Object, callback: Function = ()=>{})
+  docUpdate (id: string, data: Object, callback: Function = ()=>{})
   {
-    this.docsFind(id, function (err: Error, instance: NanoRecord) {
+    this.docFind(id, function (err: Error, instance: NanoRecord) {
       if (err)
         callback(err);
       else
@@ -255,9 +255,9 @@ class NanoRecords
     });
   }
   
-  docsDestroy (id: string, callback: Function = ()=>{})
+  docDestroy (id: string, callback: Function = ()=>{})
   {
-    this.docsFind(id, function (err: Error, instance: NanoRecord) {
+    this.docFind(id, function (err: Error, instance: NanoRecord) {
       if (err)
         callback(err);
       else
