@@ -6,10 +6,10 @@ declare class NanoRecords_Document {
     data: Object;
     constructor(parent: NanoRecords, data?: Object);
     attachment: {
-        find: (name: string, callback?: Function) => void;
-        add: (name: string, data: any, mimeType: string, callback?: Function, tries?: number) => void;
-        stream: (name: string, mimetype: string, callback?: Function) => any;
-        destroy: (name: string, callback?: Function, tries?: number) => void;
+        find: any;
+        add: any;
+        stream: any;
+        destroy: any;
     };
     attachmentFind(name: string, callback?: Function): void;
     private _performAttachmentFind(name, callback);
@@ -33,10 +33,10 @@ declare class NanoRecords {
     db: any;
     constructor(nano: any, dbName: string, views?: Object);
     doc: {
-        create: (data: Object, callback?: Function, tries?: number) => void;
-        find: (id: string, callback?: Function) => void;
-        update: (id: string, data: Object, callback?: Function) => void;
-        destroy: (id: string, callback?: Function) => void;
+        create: any;
+        find: any;
+        update: any;
+        destroy: any;
     };
     docCreate(data: Object, callback?: Function, tries?: number): void;
     docFind(id: string, callback?: Function): void;

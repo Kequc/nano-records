@@ -15,10 +15,10 @@ class NanoRecords_Document
   }
   
   attachment = {
-    find: this.attachmentFind,
-    add: this.attachmentAdd,
-    stream: this.attachmentStream,
-    destroy: this.attachmentDestroy
+    find: this.attachmentFind.bind(this),
+    add: this.attachmentAdd.bind(this),
+    stream: this.attachmentStream.bind(this),
+    destroy: this.attachmentDestroy.bind(this)
   };
   
   attachmentFind (name: string, callback: Function = ()=>{})
@@ -217,10 +217,10 @@ class NanoRecords
   }
   
   doc = {
-    create: this.docCreate,
-    find: this.docFind,
-    update: this.docUpdate,
-    destroy: this.docDestroy
+    create: this.docCreate.bind(this),
+    find: this.docFind.bind(this),
+    update: this.docUpdate.bind(this),
+    destroy: this.docDestroy.bind(this)
   };
   
   docCreate (data: Object, callback: Function = ()=>{}, tries: number = 0)
@@ -240,8 +240,11 @@ class NanoRecords
         else
           callback(err);
       }
-      else
-        callback(null, new NanoRecords_Document(this, body)); // created successfully
+      else {
+        data['_id'] = body['id'];
+        data['_rev'] = body['rev'];
+        callback(null, new NanoRecords_Document(this, data)); // created successfully
+      }
     }.bind(this));
   }
   
