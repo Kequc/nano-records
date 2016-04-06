@@ -1,5 +1,5 @@
 /// <reference path="../typings/main.d.ts" />
-declare var _: any;
+declare var _: _.LoDashStatic;
 declare var maxTries: number;
 declare class NanoRecords_Document {
     private _parent;
@@ -22,6 +22,7 @@ declare class NanoRecords_Document {
     private _performRetrieveLatest(callback);
     update(data: Object, callback?: Function, tries?: number): void;
     private _performUpdate(data, callback);
+    private _extend(data);
     destroy(callback?: Function, tries?: number): void;
     private _performDestroy(callback);
 }
