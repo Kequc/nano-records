@@ -41,7 +41,7 @@ Ideally the software will take care of creating databases, managing views, fetch
 
     var db = new NanoRecords(nano, dbName, views);
 
-A new instance of NanoRecords takes your running instance of nano, a chosen database name, and optional set of views. This command will do nothing on its own just construct an instance, no database is created, no views are saved, anything like that.
+A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of views. This command will do nothing on its own just construct an instance, no database is created, no views are saved, anything like that.
 
     db.doc.create(data, cb[err, doc]);
 
