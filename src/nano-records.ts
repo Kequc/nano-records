@@ -1,6 +1,6 @@
 /// <reference path="../typings/main.d.ts" />
 
-var _: _.LoDashStatic = require('lodash');
+var deepExtend = require('deep-extend');
 var maxTries: number = 5;
 
 class NanoRecords_Document
@@ -153,7 +153,7 @@ class NanoRecords_Document
           callback(err);
       }
       else {
-        this.data = this._extend(data);
+        this.data = this._extendData(data);
         this.data['_rev'] = body['rev'];
         callback(null, true); // success
       }
@@ -162,12 +162,12 @@ class NanoRecords_Document
   
   private _performUpdate (data: Object, callback: Function)
   {
-    return this._parent.db.insert(this._extend(data), callback);
+    return this._parent.db.insert(this._extendData(data), callback);
   }
   
-  private _extend(data: Object): Object
+  private _extendData(data: Object): Object
   {
-    return _.extend({}, this.data, data);
+    return deepExtend({}, this.data, data);
   }
   
   destroy (callback: Function = ()=>{}, tries: number = 0)
