@@ -1,7 +1,7 @@
 Nano Records
 ===
 
-Note: As of the time of this writing this code has not been run a single time, I just wrote it.
+Note: As of the time of this writing this code has not been run in production, I just wrote it. Tests are missing for attachments and views but otherwise this seems to work in its current state.
 
     var NanoRecords = require('nano-records');
     var nano = require('nano')(credentials);
