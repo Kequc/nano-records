@@ -28,6 +28,7 @@ class NanoRecord
       return;
     }
     this._performAttachmentFind(name, function (err: Error, body: any) {
+      // NOTE: This is probably unnecessarily verbose
       if (err)
         callback(err);
       else
@@ -50,7 +51,7 @@ class NanoRecord
     this._performAttachmentAdd(name, data, mimeType, function (err: Error) {
       if (err) {
         if (tries <= maxTries) {
-          this.retrieveLatest(function (err) {
+          this.retrieveLatest(function (err: Error) {
             if (err)
               callback(err);
             else
@@ -90,7 +91,7 @@ class NanoRecord
     this._performAttachmentDestroy(name, function (err: Error) {
       if (err) {
         if (tries <= maxTries) {
-          this.retrieveLatest(function (err) {
+          this.retrieveLatest(function (err: Error) {
             if (err)
               callback(err);
             else
@@ -141,7 +142,7 @@ class NanoRecord
     this._performUpdate(data, function (err: Error, body: Object) {
       if (err) {
         if (tries <= maxTries) {
-          this.retrieveLatest(function (err) {
+          this.retrieveLatest(function (err: Error) {
             if (err)
               callback(err);
             else
@@ -173,7 +174,7 @@ class NanoRecord
     this._performDestroy(function (err: Error) {
       if (err) {
         if (tries <= maxTries) {
-          this.retrieveLatest(function (err) {
+          this.retrieveLatest(function (err: Error) {
             if (err)
               callback(err);
             else
