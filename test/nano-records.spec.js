@@ -74,12 +74,12 @@ describe('nano-records.js', function () {
       forceUpdate(doc, { anotheranother: "Yay!" }, function (err) {
         expect(err).to.be.null;
         expect(doc.data).to.not.have.keys('anotheranother');
-        var oldRev = doc.data['_rev'];
+        var oldRev1 = doc.data['_rev'];
         doc.retrieveLatest(function (err, success) {
           expect(err).to.be.null;
           expect(success).to.be.ok;
           expect(doc.data).to.have.all.keys('second', 'num', '_id', '_rev', 'anotheranother');
-          expect(doc.data['_rev']).to.not.equal(oldRev);
+          expect(doc.data['_rev']).to.not.equal(oldRev1);
           done();
         });
       });
@@ -87,16 +87,19 @@ describe('nano-records.js', function () {
     
     it('recovers from bad update', function (done) {
       var doc = docs[1];
-      forceUpdate(doc, { anotheranother: "changed" }, function (err) {
+      forceUpdate(doc, { anotheranother: "changed" }, function (err, body) {
         expect(err).to.be.null;
-        var oldRev = doc.data['_rev'];
+        var oldRev1 = doc.data['_rev'];
+        var oldRev2 = body['rev'];
+        expect(oldRev1).to.not.equal(oldRev2);
         doc.update({ added: 'attr-again' }, function (err, success) {
           expect(err).to.be.null;
           expect(success).to.be.ok;
           expect(doc.data).to.have.all.keys('second', 'num', '_id', '_rev', 'anotheranother', 'added');
           expect(doc.data['anotheranother']).to.equal('changed');
           expect(doc.data['added']).to.equal('attr-again');
-          expect(doc.data['_rev']).to.not.equal(oldRev);
+          expect(doc.data['_rev']).to.not.equal(oldRev1);
+          expect(doc.data['_rev']).to.not.equal(oldRev2);
           done();
         });
       });
