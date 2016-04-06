@@ -223,8 +223,11 @@ class NanoRecords
       if (err) {
         if (tries <= 1 && err.message === 'no_db_file') {
           // create db
-          this.nano.db.create(this.dbName, function () {
-            this.create(data, callback, tries);
+          this.nano.db.create(this.dbName, function (err: Error) {
+            if (err)
+              callback(err);
+            else
+              this.create(data, callback, tries);
           }.bind(this));
         }
         else
@@ -247,21 +250,21 @@ class NanoRecords
   
   docUpdate (id: string, data: Object, callback: Function = ()=>{})
   {
-    this.docFind(id, function (err: Error, instance: NanoRecord) {
+    this.docFind(id, function (err: Error, doc: NanoRecord) {
       if (err)
         callback(err);
       else
-        instance.update(data, callback); // attempt update
+        doc.update(data, callback); // attempt update
     });
   }
   
   docDestroy (id: string, callback: Function = ()=>{})
   {
-    this.docFind(id, function (err: Error, instance: NanoRecord) {
+    this.docFind(id, function (err: Error, doc: NanoRecord) {
       if (err)
         callback(err);
       else
-        instance.destroy(callback); // attempt destroy
+        doc.destroy(callback); // attempt destroy
     });
   }
   
@@ -272,10 +275,10 @@ class NanoRecords
       if (err) {
         if (tries <= 1) {
           if (err.message === 'missing' || err.message === 'deleted') {
-            // create design document with requested view
-            let designDoc = { _id: '_design/' + this.dbName, views: {} };
-            designDoc.views[name] = this.views[name];
-            this.create(designDoc, function (err) {
+            // create design document
+            let designData = { _id: '_design/' + this.dbName, views: {} };
+            designData.views[name] = this.views[name];
+            this.docCreate(designData, function (err) {
               if (err)
                 callback(err);
               else
@@ -283,10 +286,10 @@ class NanoRecords
             }.bind(this));
           }
           else if (err.message === 'missing_named_view') {
-            // add view to design document
-            let designViews = {};
-            designViews[name] = this.views[name];
-            this.update('_design/' + this.dbName, { views: designViews }, function (err: Error) {
+            // add view
+            let viewData = {};
+            viewData[name] = this.views[name];
+            this.docUpdate('_design/' + this.dbName, { views: viewData }, function (err: Error) {
               if (err)
                 callback(err);
               else
