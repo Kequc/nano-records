@@ -45,11 +45,11 @@ A new instance of NanoRecords takes your running nano, a chosen database name, a
 
     db.doc.create(data, cb[err, doc]);
 
-Create a document with the given data, you may choose to include a custom `_id` attribute here if you wish. This command will create a database if it's missing, then persist a new document, and run the given callback with an error and undefined, or null and a NanoRecords document instance.
+Create a document with the given data, you may choose to include a custom `_id` attribute here if you wish. This command will create a database if it's missing, then persist a new document, and run the given callback with an error and undefined, or null and a NanoRecords document.
 
     db.doc.find(id, cb[err, doc]);
 
-Find a document using the given id if it exists, will run the given callback with an error and undefined, or null and a NanoRecords document instance.
+Find a document using the given id if it exists, will run the given callback with an error and undefined, or null and a NanoRecords document.
 
     db.doc.destroy(id, cb[err, bool]);
 
@@ -61,7 +61,7 @@ This will run one of your provided views and return the result. It will create a
 
     doc.data;
 
-Every NanoRecords document instance maintains a data attribute with last known information.
+Every NanoRecords document maintains a data attribute with last known information.
 
     doc.retrieveLatest(cb[err, bool]);
 
