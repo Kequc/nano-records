@@ -13,7 +13,9 @@ Note: As of the time of this writing this code has not been run a single time, I
     var dbName = "my-database";
     var db = new NanoRecords(nano, dbName, views);
     
-    db.docs.create({ hello: "there" }, function (err, doc) {
+    db.doc.create({ hello: "there" }, function (err, doc) {
+      
+      // doc.data;
       
       // doc.retrieveLatest(callback);
       // doc.update({ doot: "dot" }, callback);
@@ -26,9 +28,9 @@ Note: As of the time of this writing this code has not been run a single time, I
       
     });
     
-    // db.docs.find(id, callback);
-    // db.docs.update(id, data, callback);
-    // db.docs.destroy(id, callback);
+    // db.doc.find(id, callback);
+    // db.doc.update(id, data, callback);
+    // db.doc.destroy(id, callback);
     
     // db.view(name, data, callback);
 
