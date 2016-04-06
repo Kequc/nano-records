@@ -5,7 +5,12 @@ declare class NanoRecord {
     private _parent;
     data: Object;
     constructor(parent: NanoRecords, data?: Object);
-    attachment: Object;
+    attachment: {
+        find: (name: string, callback?: Function) => void;
+        add: (name: string, data: any, mimeType: string, callback?: Function, tries?: number) => void;
+        stream: (name: string, mimetype: string, callback?: Function) => any;
+        destroy: (name: string, callback?: Function, tries?: number) => void;
+    };
     attachmentFind(name: string, callback?: Function): void;
     private _performAttachmentFind(name, callback);
     attachmentAdd(name: string, data: any, mimeType: string, callback?: Function, tries?: number): void;
@@ -26,7 +31,12 @@ declare class NanoRecords {
     views: Object;
     db: any;
     constructor(nano: any, dbName: string, views?: Object);
-    docs: Object;
+    docs: {
+        create: (data: Object, callback?: Function, tries?: number) => void;
+        find: (id: string, callback?: Function) => void;
+        update: (id: string, data: Object, callback?: Function) => void;
+        destroy: (id: string, callback?: Function) => void;
+    };
     docsCreate(data: Object, callback?: Function, tries?: number): void;
     docsFind(id: string, callback?: Function): void;
     docsUpdate(id: string, data: Object, callback?: Function): void;

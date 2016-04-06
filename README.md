@@ -11,7 +11,7 @@ Note: As of the time of this writing this code has not been run a single time, I
       }
     };
     var dbName = "my-database";
-    var db = NanoRecords(nano, dbName, views);
+    var db = new NanoRecords(nano, dbName, views);
     
     db.docs.create({ hello: "there" }, function (err, doc) {
       

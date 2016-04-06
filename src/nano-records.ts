@@ -14,7 +14,7 @@ class NanoRecord
     this.data = data;
   }
   
-  attachment: Object = {
+  attachment = {
     find: this.attachmentFind,
     add: this.attachmentAdd,
     stream: this.attachmentStream,
@@ -209,7 +209,7 @@ class NanoRecords
     this.db = this.nano.use(this.dbName);
   }
   
-  docs: Object = {
+  docs = {
     create: this.docsCreate,
     find: this.docsFind,
     update: this.docsUpdate,
