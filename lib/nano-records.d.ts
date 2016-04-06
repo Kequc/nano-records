@@ -1,7 +1,7 @@
-declare var require: any;
+/// <reference path="../typings/main.d.ts" />
 declare var _: any;
 declare var maxTries: number;
-declare class NanoRecord {
+declare class NanoRecords_Document {
     private _parent;
     data: Object;
     constructor(parent: NanoRecords, data?: Object);
@@ -41,6 +41,5 @@ declare class NanoRecords {
     docFind(id: string, callback?: Function): void;
     docUpdate(id: string, data: Object, callback?: Function): void;
     docDestroy(id: string, callback?: Function): void;
-    view(name: string, data: Object, callback?: Function, tries?: number): void;
+    view(name: string, data: any, callback?: Function, tries?: number): void;
 }
-declare var module: any;

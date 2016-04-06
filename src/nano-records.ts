@@ -1,9 +1,9 @@
-declare var require: any;
-var _ = require('lodash');
+/// <reference path="../typings/main.d.ts" />
 
+var _: _.LoDashStatic = require('lodash');
 var maxTries: number = 5;
 
-class NanoRecord
+class NanoRecords_Document
 {
   private _parent: NanoRecords;
   data: Object;
@@ -153,7 +153,8 @@ class NanoRecord
           callback(err);
       }
       else {
-        this.data = body;
+        this.data = this._extend(data);
+        this.data['_rev'] = body['rev'];
         callback(null, true); // success
       }
     }.bind(this));
@@ -161,7 +162,12 @@ class NanoRecord
   
   private _performUpdate (data: Object, callback: Function)
   {
-    return this._parent.db.insert(_.extend({}, this.data, data), callback);
+    return this._parent.db.insert(this._extend(data), callback);
+  }
+  
+  private _extend(data: Object): Object
+  {
+    return _.extend({}, this.data, data);
   }
   
   destroy (callback: Function = ()=>{}, tries: number = 0)
@@ -235,7 +241,7 @@ class NanoRecords
           callback(err);
       }
       else
-        callback(null, new NanoRecord(this, body)); // created successfully
+        callback(null, new NanoRecords_Document(this, body)); // created successfully
     }.bind(this));
   }
   
@@ -245,13 +251,13 @@ class NanoRecords
       if (err)
         callback(err);
       else
-        callback(null, new NanoRecord(this, body)); // document found!
+        callback(null, new NanoRecords_Document(this, body)); // document found!
     }.bind(this));
   }
   
   docUpdate (id: string, data: Object, callback: Function = ()=>{})
   {
-    this.docFind(id, function (err: Error, doc: NanoRecord) {
+    this.docFind(id, function (err: Error, doc: NanoRecords_Document) {
       if (err)
         callback(err);
       else
@@ -261,7 +267,7 @@ class NanoRecords
   
   docDestroy (id: string, callback: Function = ()=>{})
   {
-    this.docFind(id, function (err: Error, doc: NanoRecord) {
+    this.docFind(id, function (err: Error, doc: NanoRecords_Document) {
       if (err)
         callback(err);
       else
@@ -269,7 +275,7 @@ class NanoRecords
     });
   }
   
-  view (name: string, data: Object, callback: Function = ()=>{}, tries: number = 0)
+  view (name: string, data: any, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
     this.db.view(this.dbName, name, data, function (err, body) {
@@ -309,5 +315,4 @@ class NanoRecords
   }
 }
 
-declare var module: any;
 module.exports = NanoRecords;
