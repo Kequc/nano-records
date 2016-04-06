@@ -6,12 +6,12 @@ declare class NanoRecord {
     data: Object;
     constructor(parent: NanoRecords, data?: Object);
     attachment: Object;
-    private _attachmentFind(name, callback?);
+    attachmentFind(name: string, callback?: Function): void;
     private _performAttachmentFind(name, callback);
-    private _attachmentAdd(name, data, mimeType, callback?, tries?);
-    private _attachmentStream(name, mimetype, callback?);
+    attachmentAdd(name: string, data: any, mimeType: string, callback?: Function, tries?: number): void;
+    attachmentStream(name: string, mimetype: string, callback?: Function): any;
     private _performAttachmentAdd(name, data, mimeType, callback);
-    private _attachmentDestroy(name, callback?, tries?);
+    attachmentDestroy(name: string, callback?: Function, tries?: number): void;
     private _performAttachmentDestroy(name, callback);
     retrieveLatest(callback?: Function): void;
     private _performRetrieveLatest(callback);
@@ -26,10 +26,11 @@ declare class NanoRecords {
     views: Object;
     db: any;
     constructor(nano: any, dbName: string, views?: Object);
-    create(data: Object, callback?: Function, tries?: number): void;
-    find(id: string, callback?: Function): void;
-    update(id: string, data: Object, callback?: Function): void;
-    destroy(id: string, callback?: Function): void;
+    docs: Object;
+    docsCreate(data: Object, callback?: Function, tries?: number): void;
+    docsFind(id: string, callback?: Function): void;
+    docsUpdate(id: string, data: Object, callback?: Function): void;
+    docsDestroy(id: string, callback?: Function): void;
     view(name: string, data: Object, callback?: Function, tries?: number): void;
 }
 declare var module: any;

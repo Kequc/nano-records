@@ -15,13 +15,13 @@ class NanoRecord
   }
   
   attachment: Object = {
-    find: this._attachmentFind,
-    add: this._attachmentAdd,
-    stream: this._attachmentStream,
-    destroy: this._attachmentDestroy
+    find: this.attachmentFind,
+    add: this.attachmentAdd,
+    stream: this.attachmentStream,
+    destroy: this.attachmentDestroy
   };
   
-  private _attachmentFind (name: string, callback: Function = ()=>{})
+  attachmentFind (name: string, callback: Function = ()=>{})
   {
     if (!this.data['_id']) {
       callback(new Error('Document does not exist.'));
@@ -40,7 +40,7 @@ class NanoRecord
     return this._parent.db.attachment.get(this.data['_id'], name, {}, callback);
   }
   
-  private _attachmentAdd (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
+  attachmentAdd (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
   {
     if (!this.data['_id']) {
       callback(new Error('Document does not exist.'));
@@ -54,7 +54,7 @@ class NanoRecord
             if (err)
               callback(err);
             else
-              this._attachmentAdd(name, data, mimeType, callback, tries);
+              this.attachmentAdd(name, data, mimeType, callback, tries);
           }.bind(this));
         }
         else
@@ -65,7 +65,7 @@ class NanoRecord
     }.bind(this));
   }
   
-  private _attachmentStream (name: string, mimetype: string, callback: Function = ()=>{})
+  attachmentStream (name: string, mimetype: string, callback: Function = ()=>{})
   {
     return this._performAttachmentAdd(name, null, mimetype, function (err: Error) {
       if (err)
@@ -80,7 +80,7 @@ class NanoRecord
     return this._parent.db.attachment.insert(this.data['_id'], name, data, mimeType, { rev: this.data['_rev'] }, callback);
   }
   
-  private _attachmentDestroy (name: string, callback: Function = ()=>{}, tries: number = 0)
+  attachmentDestroy (name: string, callback: Function = ()=>{}, tries: number = 0)
   {
     if (!this.data['_id']) {
       callback(new Error('Document does not exist.'));
@@ -94,7 +94,7 @@ class NanoRecord
             if (err)
               callback(err);
             else
-              this._attachmentDestroy(name, callback, tries);
+              this.attachmentDestroy(name, callback, tries);
           }.bind(this));
         }
         else
@@ -209,7 +209,14 @@ class NanoRecords
     this.db = this.nano.use(this.dbName);
   }
   
-  create (data: Object, callback: Function = ()=>{}, tries: number = 0)
+  docs: Object = {
+    create: this.docsCreate,
+    find: this.docsFind,
+    update: this.docsUpdate,
+    destroy: this.docsDestroy
+  };
+  
+  docsCreate (data: Object, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
     this.db.insert(data, function (err: Error, body: Object) {
@@ -228,7 +235,7 @@ class NanoRecords
     }.bind(this));
   }
   
-  find (id: string, callback: Function = ()=>{})
+  docsFind (id: string, callback: Function = ()=>{})
   {
     this.db.get(id, function (err: Error, body: Object) {
       if (err)
@@ -238,9 +245,9 @@ class NanoRecords
     }.bind(this));
   }
   
-  update (id: string, data: Object, callback: Function = ()=>{})
+  docsUpdate (id: string, data: Object, callback: Function = ()=>{})
   {
-    this.find(id, function (err: Error, instance: NanoRecord) {
+    this.docsFind(id, function (err: Error, instance: NanoRecord) {
       if (err)
         callback(err);
       else
@@ -248,9 +255,9 @@ class NanoRecords
     });
   }
   
-  destroy (id: string, callback: Function = ()=>{})
+  docsDestroy (id: string, callback: Function = ()=>{})
   {
-    this.find(id, function (err: Error, instance: NanoRecord) {
+    this.docsFind(id, function (err: Error, instance: NanoRecord) {
       if (err)
         callback(err);
       else
