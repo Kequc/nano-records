@@ -9,6 +9,7 @@ var views = {
   }
 };
 var dbName = 'nano-records-test';
+var docs = [];
 
 var NanoRecords = require('../lib/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
@@ -35,28 +36,40 @@ describe('nano-records.js', function () {
     expect(db.db).to.respondTo('insert'); // is a nano instance
   });
   
-  describe('documents', function () {
-    var docs = [];
-    
-    it('create a database and document', function (done) {
-      db.doc.create({ hello: 'there!' }, function (err, doc) {
-        expect(err).to.be.null;
-        expect(doc).to.be.ok;
-        expect(doc.data).to.have.all.keys('hello', '_id', '_rev');
-        docs.push(doc);
-        done();
-      });
+  it('docCreate a database and document', function (done) {
+    db.doc.create({ hello: 'there!' }, function (err, doc) {
+      expect(err).to.be.null;
+      expect(doc).to.be.ok;
+      expect(doc.data).to.have.all.keys('hello', '_id', '_rev');
+      docs.push(doc); // store for later
+      done();
     });
-    
-    it('create', function (done) {
-      db.doc.create({ second: 'document', num: 666 }, function (err, doc) {
-        expect(err).to.be.null;
-        expect(doc).to.be.ok;
-        expect(doc.data).to.have.all.keys('second', 'num', '_id', '_rev');
-        docs.push(doc);
-        done();
-      });
+  });
+  
+  it('docCreate', function (done) {
+    db.doc.create({ second: 'document', num: 666 }, function (err, doc) {
+      expect(err).to.be.null;
+      expect(doc).to.be.ok;
+      expect(doc.data).to.have.all.keys('second', 'num', '_id', '_rev');
+      docs.push(doc); // store for later
+      done();
     });
+  });
+  
+  it('complex docCreate', function (done) {
+    db.doc.create({ third: 'document', num: 11, deep: { hi: "again.", arr: ["some", "values"] } }, function (err, doc) {
+      expect(err).to.be.null;
+      expect(doc).to.be.ok;
+      expect(doc.data).to.have.all.keys('third', 'num', 'deep', '_id', '_rev');
+      expect(doc.data['deep']).to.have.all.keys('hi', 'arr');
+      expect(doc.data['deep']['arr']).to.eql(["some", "values"]);
+      docs.push(doc); // store for later
+      done();
+    });
+  });
+  
+  describe('document', function () {
+    var destroyedDoc;
     
     it('update', function (done) {
       var doc = docs[0];
@@ -104,5 +117,108 @@ describe('nano-records.js', function () {
         });
       });
     });
+    
+    it('destroy', function (done) {
+      db.doc.create({ temp: 'document', num: 96 }, function (err, doc) {
+        expect(err).to.be.null;
+        expect(doc).to.be.ok;
+        expect(doc.data).to.have.all.keys('temp', 'num', '_id', '_rev');
+        destroyedDoc = doc; // store for later
+        doc.destroy(function (err, success) {
+          expect(err).to.be.null;
+          expect(success).to.be.ok;
+          expect(doc.data).to.eql({});
+          done();
+        });
+      });
+    });
+    
+    it('update destroyed doc should fail', function (done) {
+      destroyedDoc.update({ boo: "oorns" }, function (err, success) {
+        expect(err).to.be.ok;
+        expect(success).to.be.undefined;
+        done();
+      });
+    });
+    
+    it('retrieveLatest destroyed doc should fail', function (done) {
+      destroyedDoc.retrieveLatest(function (err, success) {
+        expect(err).to.be.ok;
+        expect(success).to.be.undefined;
+        done();
+      });
+    });
+    
+    it('destroy destroyed doc should fail', function (done) {
+      destroyedDoc.destroy(function (err, success) {
+        expect(err).to.be.ok;
+        expect(success).to.be.undefined;
+        done();
+      });
+    });
+    
+    // TODO: Attachment tests
   });
+  
+  it('docFind', function (done) {
+    db.doc.find(docs[0].data['_id'], function (err, doc) {
+      expect(err).to.be.null;
+      expect(doc).to.be.ok;
+      expect(doc.data).to.eql(docs[0].data);
+      done();
+    });
+  });
+  
+  it('missing docFind', function (done) {
+    db.doc.find("fake-id-doesnt-exist", function (err, doc) {
+      expect(err).to.be.ok;
+      expect(doc).to.be.undefined;
+      done();
+    });
+  });
+  
+  it('docUpdate', function (done) {
+    var doc = docs[2];
+    db.doc.update(docs[2].data['_id'], { updated: 'changehere' }, function (err, success) {
+      expect(err).to.be.null;
+      expect(success).to.be.ok;
+      doc.retrieveLatest(function (err) {
+        expect(err).to.be.null;
+        expect(doc.data).to.have.all.keys('third', 'num', 'deep', 'updated', '_id', '_rev');
+        expect(doc.data['deep']).to.have.all.keys('hi', 'arr');
+        expect(doc.data['deep']['arr']).to.eql(["some", "values"]);
+        expect(doc.data['updated']).to.equal('changehere');
+        done();
+      });
+    });
+  });
+  
+  it('missing docUpdate', function (done) {
+    db.doc.update("fake-id-doesnt-exist", { blah: 'will fail' }, function (err, doc) {
+      expect(err).to.be.ok;
+      expect(doc).to.be.undefined;
+      done();
+    });
+  });
+  
+  it('docDestroy', function (done) {
+    db.doc.create({ temp: 'document', num: 1011 }, function (err, doc) {
+      expect(err).to.be.null;
+      expect(doc).to.be.ok;
+      db.doc.destroy(doc.data['_id'], function (err, success) {
+        expect(err).to.be.null;
+        expect(success).to.be.ok;
+        done();
+      });
+    });
+  });
+  
+  it('missing docDestroy', function (done) {
+    db.doc.destroy("fake-id-doesnt-exist", function (err, doc) {
+      expect(err).to.be.ok;
+      expect(doc).to.be.undefined;
+      done();
+    });
+  });
+  
 });

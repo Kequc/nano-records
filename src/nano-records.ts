@@ -190,8 +190,10 @@ class NanoRecords_Document
         else
           callback(err);
       }
-      else
+      else {
+        this.data = {};
         callback(null, true); // success
+      }
     }.bind(this));
   }
   
