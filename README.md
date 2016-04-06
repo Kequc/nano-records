@@ -61,7 +61,7 @@ This will run one of your provided views and return the result. It will create a
 
     doc.data;
 
-Every NanoRecords document instances maintain a data attribute with last known document contents.
+Every NanoRecords document instance maintains a data attribute with last known information.
 
     doc.retrieveLatest(cb[err, bool]);
 
