@@ -227,7 +227,7 @@ class NanoRecords
             if (err)
               callback(err);
             else
-              this.create(data, callback, tries);
+              this.docCreate(data, callback, tries);
           }.bind(this));
         }
         else
