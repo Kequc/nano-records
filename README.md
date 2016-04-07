@@ -135,4 +135,4 @@ db.doc.attachment.destroy(id, name, cb[err, bool]);
 
 ### In general
 
-Once you have a NanoRecords document it will be useful while making the fewest requests possible to the database. If it finds that the revision number is out of date it will retrieve the latest version and try again, a maximum of a few times.
+A NanoRecords document is useful making the fewest requests possible to the database and abstracting retries, or other database busy work. If it finds that the current revision is out of date it will retrieve the latest version from the database and try again, a maximum of a few times.
