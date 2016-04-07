@@ -1,6 +1,8 @@
 Nano Records
 ===
 
+A NanoRecords document is useful in making the fewest requests possible to the database and abstracting retries, views, or other database busy work away from you. This is a quick way to get up and running with couchdb. If it finds that the current revision is out of date on any document it will retrieve the latest from the database and try again a maximum of a few times.
+
 Note: As of the time of this writing this code has not been run in production, I just wrote it. Tests are missing for attachments and views but otherwise this seems to work in its current state.
 
 ```javascript
@@ -132,7 +134,3 @@ db.doc.attachment.add(id, name, data, mimeType, cb[err, bool]);
 db.doc.attachment.get(id, name, cb[err, data]);
 db.doc.attachment.destroy(id, name, cb[err, bool]);
 ```
-
-### In general
-
-A NanoRecords document is useful making the fewest requests possible to the database and abstracting retries, or other database busy work. If it finds that the current revision is out of date it will retrieve the latest version from the database and try again, a maximum of a few times.
