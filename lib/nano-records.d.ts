@@ -3,8 +3,8 @@ declare var deepExtend: any;
 declare var maxTries: number;
 declare class NanoRecords_Document {
     private _parent;
-    data: Object;
-    constructor(parent: NanoRecords, data?: Object);
+    body: Object;
+    constructor(parent: NanoRecords, body?: Object);
     attachment: {
         get: any;
         add: any;
@@ -20,9 +20,9 @@ declare class NanoRecords_Document {
     private _performAttachmentDestroy(name, callback);
     retrieveLatest(callback?: Function): void;
     private _performRetrieveLatest(callback);
-    update(data: Object, callback?: Function, tries?: number): void;
-    private _performUpdate(data, callback);
-    private _extendData(data);
+    update(body: Object, callback?: Function, tries?: number): void;
+    private _performUpdate(body, callback);
+    private _extendData(body);
     destroy(callback?: Function, tries?: number): void;
     private _performDestroy(callback);
 }
@@ -46,9 +46,9 @@ declare class NanoRecords {
     docAttachmentAdd(id: string, name: string, data: any, mimeType: string, callback?: Function): void;
     docAttachmentGet(id: string, name: string, callback?: Function): void;
     docAttachmentDestroy(id: string, name: string, callback?: Function): void;
-    docCreate(data: Object, callback?: Function, tries?: number): void;
+    docCreate(body: Object, callback?: Function, tries?: number): void;
     docGet(id: string, callback?: Function): void;
-    docUpdate(id: string, data: Object, callback?: Function): void;
+    docUpdate(id: string, body: Object, callback?: Function): void;
     docDestroy(id: string, callback?: Function): void;
-    view(name: string, data: any, callback?: Function, tries?: number): void;
+    view(name: string, params: any, callback?: Function, tries?: number): void;
 }

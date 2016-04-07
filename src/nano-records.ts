@@ -6,12 +6,12 @@ var maxTries: number = 5;
 class NanoRecords_Document
 {
   private _parent: NanoRecords;
-  data: Object;
+  body: Object;
   
-  constructor (parent: NanoRecords, data: Object = {})
+  constructor (parent: NanoRecords, body: Object = {})
   {
     this._parent = parent;
-    this.data = data;
+    this.body = body;
   }
   
   attachment = {
@@ -23,27 +23,27 @@ class NanoRecords_Document
   
   attachmentGet (name: string, callback: Function = ()=>{})
   {
-    if (!this.data['_id']) {
+    if (!this.body['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performAttachmentGet(name, function (err: Error, body: any) {
+    this._performAttachmentGet(name, function (err: Error, result: any) {
       // NOTE: This is probably unnecessarily verbose
       if (err)
         callback(err);
       else
-        callback(null, body); // attachment found!
+        callback(null, result); // attachment found!
     });
   }
   
   private _performAttachmentGet (name: string, callback: Function)
   {
-    return this._parent.db.attachment.get(this.data['_id'], name, {}, callback);
+    return this._parent.db.attachment.get(this.body['_id'], name, {}, callback);
   }
   
   attachmentAdd (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.data['_id']) {
+    if (!this.body['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -78,12 +78,12 @@ class NanoRecords_Document
   
   private _performAttachmentAdd (name: string, data: any, mimeType: string, callback: Function)
   {
-    return this._parent.db.attachment.insert(this.data['_id'], name, data, mimeType, { rev: this.data['_rev'] }, callback);
+    return this._parent.db.attachment.insert(this.body['_id'], name, data, mimeType, { rev: this.body['_rev'] }, callback);
   }
   
   attachmentDestroy (name: string, callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.data['_id']) {
+    if (!this.body['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -108,20 +108,20 @@ class NanoRecords_Document
   
   private _performAttachmentDestroy (name: string, callback: Function)
   {
-    return this._parent.db.attachment.destroy(this.data['_id'], name, { rev: this.data['_rev'] }, callback);
+    return this._parent.db.attachment.destroy(this.body['_id'], name, { rev: this.body['_rev'] }, callback);
   }
   
   retrieveLatest (callback: Function = ()=>{})
   {
-    if (!this.data['_id']) {
+    if (!this.body['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performRetrieveLatest(function (err: Error, body: Object) {
+    this._performRetrieveLatest(function (err: Error, result: Object) {
       if (err)
         callback(err);
       else {
-        this.data = body;
+        this.body = result;
         callback(null, true); // up to date
       }
     }.bind(this));
@@ -129,50 +129,50 @@ class NanoRecords_Document
   
   private _performRetrieveLatest (callback: Function)
   {
-    return this._parent.db.get(this.data['_id'], callback);
+    return this._parent.db.get(this.body['_id'], callback);
   }
   
-  update (data: Object, callback: Function = ()=>{}, tries: number = 0)
+  update (body: Object, callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.data['_id']) {
+    if (!this.body['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performUpdate(data, function (err: Error, body: Object) {
+    this._performUpdate(body, function (err: Error, result: Object) {
       if (err) {
         if (tries <= maxTries) {
           this.retrieveLatest(function (err: Error) {
             if (err)
               callback(err);
             else
-              this.update(data, callback, tries);
+              this.update(body, callback, tries);
           }.bind(this));
         }
         else
           callback(err);
       }
       else {
-        this.data = this._extendData(data);
-        this.data['_rev'] = body['rev'];
+        this.body = this._extendData(body);
+        this.body['_rev'] = result['rev'];
         callback(null, true); // success
       }
     }.bind(this));
   }
   
-  private _performUpdate (data: Object, callback: Function)
+  private _performUpdate (body: Object, callback: Function)
   {
-    return this._parent.db.insert(this._extendData(data), callback);
+    return this._parent.db.insert(this._extendData(body), callback);
   }
   
-  private _extendData(data: Object): Object
+  private _extendData(body: Object): Object
   {
-    return deepExtend({}, this.data, data);
+    return deepExtend({}, this.body, body);
   }
   
   destroy (callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.data['_id']) {
+    if (!this.body['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -191,7 +191,7 @@ class NanoRecords_Document
           callback(err);
       }
       else {
-        this.data = {};
+        this.body = {};
         callback(null, true); // success
       }
     }.bind(this));
@@ -199,7 +199,7 @@ class NanoRecords_Document
   
   private _performDestroy (callback: Function)
   {
-    return this._parent.db.destroy(this.data['_id'], this.data['_rev'], callback);
+    return this._parent.db.destroy(this.body['_id'], this.body['_rev'], callback);
   }
 }
 
@@ -260,10 +260,10 @@ class NanoRecords
     });
   }
   
-  docCreate (data: Object, callback: Function = ()=>{}, tries: number = 0)
+  docCreate (body: Object, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
-    this.db.insert(data, function (err: Error, body: Object) {
+    this.db.insert(body, function (err: Error, result: Object) {
       if (err) {
         if (tries <= 1 && err.message === 'no_db_file') {
           // create db
@@ -271,37 +271,37 @@ class NanoRecords
             if (err)
               callback(err);
             else
-              this.docCreate(data, callback, tries);
+              this.docCreate(body, callback, tries);
           }.bind(this));
         }
         else
           callback(err);
       }
       else {
-        data['_id'] = body['id'];
-        data['_rev'] = body['rev'];
-        callback(null, new NanoRecords_Document(this, data)); // created successfully
+        body['_id'] = result['id'];
+        body['_rev'] = result['rev'];
+        callback(null, new NanoRecords_Document(this, body)); // created successfully
       }
     }.bind(this));
   }
   
   docGet (id: string, callback: Function = ()=>{})
   {
-    this.db.get(id, function (err: Error, body: Object) {
+    this.db.get(id, function (err: Error, result: Object) {
       if (err)
         callback(err);
       else
-        callback(null, new NanoRecords_Document(this, body)); // document found!
+        callback(null, new NanoRecords_Document(this, result)); // document found!
     }.bind(this));
   }
   
-  docUpdate (id: string, data: Object, callback: Function = ()=>{})
+  docUpdate (id: string, body: Object, callback: Function = ()=>{})
   {
     this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
       if (err)
         callback(err);
       else
-        doc.update(data, callback); // attempt update
+        doc.update(body, callback); // attempt update
     });
   }
   
@@ -315,10 +315,10 @@ class NanoRecords
     });
   }
   
-  view (name: string, data: any, callback: Function = ()=>{}, tries: number = 0)
+  view (name: string, params: any, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
-    this.db.view(this.dbName, name, data, function (err, body) {
+    this.db.view(this.dbName, name, params, function (err, result) {
       if (err) {
         if (tries <= 1) {
           if (err.message === 'missing' || err.message === 'deleted') {
@@ -329,7 +329,7 @@ class NanoRecords
               if (err)
                 callback(err);
               else
-                this.view(name, data, callback, tries);
+                this.view(name, params, callback, tries);
             }.bind(this));
           }
           else if (err.message === 'missing_named_view') {
@@ -340,7 +340,7 @@ class NanoRecords
               if (err)
                 callback(err);
               else
-                this.view(name, data, callback, tries);
+                this.view(name, params, callback, tries);
             }.bind(this));
           }
           else
@@ -350,7 +350,7 @@ class NanoRecords
           callback(err);
       }
       else
-        callback(null, body); // executed successfully
+        callback(null, result); // executed successfully
     }.bind(this));
   }
 }
