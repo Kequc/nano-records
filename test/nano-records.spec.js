@@ -160,8 +160,8 @@ describe('nano-records.js', function () {
     // TODO: Attachment tests
   });
   
-  it('docFind', function (done) {
-    db.doc.find(docs[0].data['_id'], function (err, doc) {
+  it('docGet', function (done) {
+    db.doc.get(docs[0].data['_id'], function (err, doc) {
       expect(err).to.be.null;
       expect(doc).to.be.ok;
       expect(doc.data).to.eql(docs[0].data);
@@ -169,8 +169,8 @@ describe('nano-records.js', function () {
     });
   });
   
-  it('missing docFind', function (done) {
-    db.doc.find("fake-id-doesnt-exist", function (err, doc) {
+  it('missing docGet', function (done) {
+    db.doc.get("fake-id-doesnt-exist", function (err, doc) {
       expect(err).to.be.ok;
       expect(doc).to.be.undefined;
       done();

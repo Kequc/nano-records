@@ -15,19 +15,19 @@ class NanoRecords_Document
   }
   
   attachment = {
-    find: this.attachmentFind.bind(this),
+    get: this.attachmentGet.bind(this),
     add: this.attachmentAdd.bind(this),
     stream: this.attachmentStream.bind(this),
     destroy: this.attachmentDestroy.bind(this)
   };
   
-  attachmentFind (name: string, callback: Function = ()=>{})
+  attachmentGet (name: string, callback: Function = ()=>{})
   {
     if (!this.data['_id']) {
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performAttachmentFind(name, function (err: Error, body: any) {
+    this._performAttachmentGet(name, function (err: Error, body: any) {
       // NOTE: This is probably unnecessarily verbose
       if (err)
         callback(err);
@@ -36,7 +36,7 @@ class NanoRecords_Document
     });
   }
   
-  private _performAttachmentFind (name: string, callback: Function)
+  private _performAttachmentGet (name: string, callback: Function)
   {
     return this._parent.db.attachment.get(this.data['_id'], name, {}, callback);
   }
@@ -220,10 +220,45 @@ class NanoRecords
   
   doc = {
     create: this.docCreate.bind(this),
-    find: this.docFind.bind(this),
+    get: this.docGet.bind(this),
     update: this.docUpdate.bind(this),
-    destroy: this.docDestroy.bind(this)
+    destroy: this.docDestroy.bind(this),
+    attachment: {
+      add: this.docAttachmentAdd.bind(this),
+      get: this.docAttachmentGet.bind(this),
+      destroy: this.docAttachmentDestroy.bind(this),
+    }
   };
+  
+  docAttachmentAdd (id: string, name: string, data: any, mimeType: string, callback: Function = ()=>{})
+  {
+    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
+      if (err)
+        callback(err);
+      else
+        doc.attachmentAdd(name, data, mimeType, callback); // attempt attachment
+    });
+  }
+  
+  docAttachmentGet (id: string, name: string, callback: Function = ()=>{})
+  {
+    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
+      if (err)
+        callback(err);
+      else
+        doc.attachmentGet(name, callback); // attempt get
+    });
+  }
+  
+  docAttachmentDestroy (id: string, name: string, callback: Function = ()=>{})
+  {
+    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
+      if (err)
+        callback(err);
+      else
+        doc.attachmentDestroy(name, callback); // attempt destroy
+    });
+  }
   
   docCreate (data: Object, callback: Function = ()=>{}, tries: number = 0)
   {
@@ -250,7 +285,7 @@ class NanoRecords
     }.bind(this));
   }
   
-  docFind (id: string, callback: Function = ()=>{})
+  docGet (id: string, callback: Function = ()=>{})
   {
     this.db.get(id, function (err: Error, body: Object) {
       if (err)
@@ -262,7 +297,7 @@ class NanoRecords
   
   docUpdate (id: string, data: Object, callback: Function = ()=>{})
   {
-    this.docFind(id, function (err: Error, doc: NanoRecords_Document) {
+    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
       if (err)
         callback(err);
       else
@@ -272,7 +307,7 @@ class NanoRecords
   
   docDestroy (id: string, callback: Function = ()=>{})
   {
-    this.docFind(id, function (err: Error, doc: NanoRecords_Document) {
+    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
       if (err)
         callback(err);
       else
