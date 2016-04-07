@@ -57,13 +57,13 @@ A new instance of NanoRecords takes your running nano, a chosen database name, a
 db.doc.create(body, cb[err, doc]);
 ```
 
-Create a document with the given body, you may choose to include a custom `_id` attribute here if you wish. This command will create a database if it's missing, then persist a new document, and run the given callback with an error and undefined, or null and a NanoRecords document.
+Create a document you may choose to include a custom `_id` attribute here if you wish. This command will create a database if it's missing, then persist a new document, then run the given callback with an error and undefined, or null and a NanoRecords document.
 
 ```javascript
 db.doc.get(id, cb[err, doc]);
 ```
 
-Find a document it will run the given callback with an error and undefined, or null and a NanoRecords document.
+Find a document, callback will return an error and undefined, or null and a NanoRecords document.
 
 ### NanoRecords document
 
