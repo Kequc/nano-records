@@ -77,13 +77,13 @@ Each maintains a body attribute with last known version from the database.
 doc.retrieveLatest(cb[err, bool]);
 ```
 
-Get the latest version from the database, callback will return an error and undefined, or null and true.
+Get the latest from the database, callback will return an error and undefined, or null and true.
 
 ```javascript
 doc.update(body, cb[err, bool]);
 ```
 
-Update document by merging the given body. Will attempt to use available body to perform the operation but will retrieve the latest version from the database if needed before persisting. Callback returns an error and undefined, or null and true.
+Update document by merging the given body. Will attempt to use available body however will retrieve the latest version from the database if needed. Callback returns an error and undefined, or null and true.
 
 ```javascript
 doc.destroy(cb[err, bool);
