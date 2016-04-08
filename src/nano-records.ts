@@ -23,7 +23,7 @@ class NanoRecords_Document
   
   attachmentGet (name: string, callback: Function = ()=>{})
   {
-    if (!this.body['_id']) {
+    if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -38,12 +38,12 @@ class NanoRecords_Document
   
   private _performAttachmentGet (name: string, callback: Function)
   {
-    return this._parent.db.attachment.get(this.body['_id'], name, {}, callback);
+    return this._parent.db.attachment.get(this.getId(), name, {}, callback);
   }
   
   attachmentAdd (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.body['_id']) {
+    if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -78,12 +78,12 @@ class NanoRecords_Document
   
   private _performAttachmentAdd (name: string, data: any, mimeType: string, callback: Function)
   {
-    return this._parent.db.attachment.insert(this.body['_id'], name, data, mimeType, { rev: this.body['_rev'] }, callback);
+    return this._parent.db.attachment.insert(this.getId(), name, data, mimeType, { rev: this.getRev() }, callback);
   }
   
   attachmentDestroy (name: string, callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.body['_id']) {
+    if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -108,12 +108,27 @@ class NanoRecords_Document
   
   private _performAttachmentDestroy (name: string, callback: Function)
   {
-    return this._parent.db.attachment.destroy(this.body['_id'], name, { rev: this.body['_rev'] }, callback);
+    return this._parent.db.attachment.destroy(this.getId(), name, { rev: this.getRev() }, callback);
+  }
+  
+  getId (): string
+  {
+    return this.body['_id'] || null;
+  }
+  
+  getRev (): string
+  {
+    return this.body['_rev'] || null;
+  }
+  
+  hasAttachment(name: string): boolean
+  {
+    return !!(this.body['_attachments'] && this.body['_attachments'][name]);
   }
   
   retrieveLatest (callback: Function = ()=>{})
   {
-    if (!this.body['_id']) {
+    if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -129,12 +144,12 @@ class NanoRecords_Document
   
   private _performRetrieveLatest (callback: Function)
   {
-    return this._parent.db.get(this.body['_id'], callback);
+    return this._parent.db.get(this.getId(), callback);
   }
   
   update (body: Object, callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.body['_id']) {
+    if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -172,7 +187,7 @@ class NanoRecords_Document
   
   destroy (callback: Function = ()=>{}, tries: number = 0)
   {
-    if (!this.body['_id']) {
+    if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
@@ -199,7 +214,7 @@ class NanoRecords_Document
   
   private _performDestroy (callback: Function)
   {
-    return this._parent.db.destroy(this.body['_id'], this.body['_rev'], callback);
+    return this._parent.db.destroy(this.getId(), this.getRev(), callback);
   }
 }
 

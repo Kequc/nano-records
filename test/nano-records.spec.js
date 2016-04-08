@@ -71,6 +71,22 @@ describe('nano-records.js', function () {
   describe('document', function () {
     var destroyedDoc;
     
+    it('getId', function () {
+      var doc = docs[0];
+      expect(doc.body['_id']).to.be.ok;
+      expect(doc.getId()).to.equal(doc.body['_id']);
+    });
+    
+    it('getRev', function () {
+      var doc = docs[0];
+      expect(doc.body['_rev']).to.be.ok;
+      expect(doc.getRev()).to.equal(doc.body['_rev']);
+    });
+    
+    it('hasAttachment', function () {
+      // TODO
+    });
+    
     it('update', function (done) {
       var doc = docs[0];
       doc.update({ more: 'attributes' }, function (err, success) {

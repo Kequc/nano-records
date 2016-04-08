@@ -18,6 +18,9 @@ declare class NanoRecords_Document {
     private _performAttachmentAdd(name, data, mimeType, callback);
     attachmentDestroy(name: string, callback?: Function, tries?: number): void;
     private _performAttachmentDestroy(name, callback);
+    getId(): string;
+    getRev(): string;
+    hasAttachment(name: string): boolean;
     retrieveLatest(callback?: Function): void;
     private _performRetrieveLatest(callback);
     update(body: Object, callback?: Function, tries?: number): void;
