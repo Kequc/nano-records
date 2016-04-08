@@ -3,9 +3,21 @@ var expect = require('chai').expect;
 var assert = require('chai').assert;
 var deepExtend = require('deep-extend');
 
-var views = {
-  "foo" : {
-    "map" : "function(doc){ emit(doc._id, doc._rev)}"
+var designs = {
+  "foo": {
+    "views": {
+      "comments": {
+        "map": "function (doc) { ... };",
+        "reduce": "function (keys, values, rereduce) { ... };"
+      }
+    },
+    "shows": {
+      "post": "function (doc, req) { ... };"
+    }
+  },
+  "bar": {
+    "language": "javascript",
+    "views": {}
   }
 };
 var dbName = 'nano-records-test';
@@ -14,7 +26,7 @@ var docs = [];
 var NanoRecords = require('../lib/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var forced = nano.use(dbName);
-var db = new NanoRecords(nano, dbName, views);
+var db = new NanoRecords(nano, dbName, designs);
 
 function forceUpdate (doc, data, callback) {
   forced.get(doc.body['_id'], function (err, body) {
@@ -32,7 +44,9 @@ describe('nano-records.js', function () {
   it('exists', function () {
     expect(db.nano).to.equal(nano);
     expect(db.dbName).to.equal(dbName);
-    expect(db.views).to.eql(views);
+    expect(db.designs).to.have.all.keys("foo", "bar");
+    expect(db.designs["foo"]).to.have.all.keys("language", "views", "shows");
+    expect(db.designs["bar"]).to.have.all.keys("language", "views", "shows");
     expect(db.db).to.respondTo('insert'); // is a nano instance
   });
   
@@ -237,4 +251,5 @@ describe('nano-records.js', function () {
     });
   });
   
+  // TODO: Views and shows tests
 });

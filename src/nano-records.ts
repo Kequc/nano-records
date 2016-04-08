@@ -218,18 +218,32 @@ class NanoRecords_Document
   }
 }
 
+interface iDesignInput {
+  language?: string,
+  shows?: { [index: string]: string };
+  views?: { [index: string]: { map: string, reduce: string }};
+}
+
 class NanoRecords
 {
   nano: any;
   dbName: string;
-  views: Object;
+  designs: { [index: string]: iDesignInput };
   db: any;
   
-  constructor (nano: any, dbName: string, views?: Object)
+  constructor (nano: any, dbName: string, designs?: { [index: string]: iDesignInput })
   {
     this.nano = nano;
     this.dbName = dbName;
-    this.views = views || {};
+    this.designs = {};
+    for (let key in designs) {
+      let design = designs[key] || {};
+      this.designs[key] = {
+        language: design.language || "javascript",
+        shows: design.shows || {},
+        views: design.views || {}
+      };
+    }
     this.db = this.nano.use(this.dbName);
   }
   
@@ -237,7 +251,12 @@ class NanoRecords
     create: this.docCreate.bind(this),
     get: this.docGet.bind(this),
     update: this.docUpdate.bind(this),
+    updateOrCreate: this.docUpdateOrCreate.bind(this),
     destroy: this.docDestroy.bind(this),
+    design: {
+      show: this.designShow.bind(this),
+      view: this.designView.bind(this)
+    },
     attachment: {
       add: this.docAttachmentAdd.bind(this),
       get: this.docAttachmentGet.bind(this),
@@ -320,6 +339,18 @@ class NanoRecords
     });
   }
   
+  docUpdateOrCreate (id: string, body: Object, callback: Function = ()=>{})
+  {
+    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
+      if (err) {
+        body['_id'] = id;
+        this.docCreate(body, callback); // attempt create
+      }
+      else
+        doc.update(body, callback); // attempt update
+    }.bind(this));
+  }
+  
   docDestroy (id: string, callback: Function = ()=>{})
   {
     this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
@@ -330,36 +361,33 @@ class NanoRecords
     });
   }
   
-  view (name: string, params: any, callback: Function = ()=>{}, tries: number = 0)
+  designShow (id: string, name: string, params: any, callback: Function = ()=>{}, tries: number = 0)
+  {
+    // TODO
+  }
+  
+  designView (id: string, name: string, params: any, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
-    this.db.view(this.dbName, name, params, function (err, result) {
+    this.db.view(id, name, params, function (err, result) {
       if (err) {
-        if (tries <= 1) {
-          if (err.message === 'missing' || err.message === 'deleted') {
-            // create design document
-            let designData = { _id: '_design/' + this.dbName, views: {} };
-            designData.views[name] = this.views[name];
-            this.docCreate(designData, function (err) {
+        if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.message) > -1)) {
+          let design = this.designs[id];
+          if (!design)
+            callback(new Error("No design specified for: " + id));
+          else {
+            // setup design document changes
+            let body = { views: {} };
+            body['views'][name] = design.views[name];
+            if (design.language)
+              body['language'] = design.language;
+            this.docUpdateOrCreate('_design/' + id, body, function (err) {
               if (err)
                 callback(err);
               else
-                this.view(name, params, callback, tries);
+                this.designView(id, name, params, callback, tries);
             }.bind(this));
           }
-          else if (err.message === 'missing_named_view') {
-            // add view
-            let viewData = {};
-            viewData[name] = this.views[name];
-            this.docUpdate('_design/' + this.dbName, { views: viewData }, function (err: Error) {
-              if (err)
-                callback(err);
-              else
-                this.view(name, params, callback, tries);
-            }.bind(this));
-          }
-          else
-            callback(err);
         }
         else
           callback(err);

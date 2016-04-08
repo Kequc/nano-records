@@ -10,13 +10,25 @@ var NanoRecords = require('nano-records');
 
 var nano = require('nano')("localhost");
 var dbName = "my-database";
-var views = {
-  "foo" : {
-    "map" : "function(doc){ emit(doc._id, doc._rev)}"
+var designs = {
+  "foo": {
+    "views": {
+      "comments": {
+        "map": "function (doc) { ... };",
+        "reduce": "function (keys, values, rereduce) { ... };"
+      }
+    },
+    "shows": {
+      "post": "function (doc, req) { ... };"
+    }
+  },
+  "bar": {
+    "language": "javascript",
+    "views": {}
   }
 };
 
-var db = new NanoRecords(nano, dbName, views);
+var db = new NanoRecords(nano, dbName, designs);
 
 db.doc.create({ hello: "there" }, function (err, doc) {
   
@@ -36,13 +48,15 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 
 // db.doc.get(id, callback);
 // db.doc.update(id, { doot: "dot" }, callback);
+// db.doc.updateOrCreate(id, { doot: "dot" }, callback);
 // db.doc.destroy(id, callback);
 
 // db.doc.attachment.add(id, name, data, mimeType, callback);
 // db.doc.attachment.get(id, name, callback);
 // db.doc.attachment.destroy(id, name, callback);
 
-// db.view(name, params, callback);
+// db.design.view(id, name, params, callback);
+// db.design.show(id, name, params, callback);
 ```
 
 ### Usage
@@ -88,6 +102,12 @@ doc.update(body, cb[err, bool]);
 Update document by merging the given body. Will attempt to use available body however will retrieve the latest version from the database if needed. Callback returns an error and undefined, or null and true.
 
 ```javascript
+doc.updateOrCreate(id, body, cb[err, bool]);
+```
+
+Attempts to update the specified document but will create it if it doesn't exist. Callback returns an error and undefined, or null and true.
+
+```javascript
 doc.destroy(cb[err, bool);
 ```
 
@@ -117,11 +137,14 @@ doc.attachment.destroy(name, cb[err, bool]);
 
 Destroy an attachment it will run the given callback with an error and undefined, or null and true.
 
+### Views
+
 ```javascript
-db.view(name, params, cb[err, data]);
+db.design.view(id, name, params, cb[err, data]);
+db.design.show(id, name, params, cb[err, data]);
 ```
 
-This will run one of your provided views and return the result. It will create a design document if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.
+This will run one of your provided design views or shows and return the result. It will create a design document with the provided if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.
 
 ### Shorthand
 

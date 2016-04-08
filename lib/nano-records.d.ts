@@ -29,17 +29,38 @@ declare class NanoRecords_Document {
     destroy(callback?: Function, tries?: number): void;
     private _performDestroy(callback);
 }
+interface iDesignInput {
+    language?: string;
+    shows?: {
+        [index: string]: string;
+    };
+    views?: {
+        [index: string]: {
+            map: string;
+            reduce: string;
+        };
+    };
+}
 declare class NanoRecords {
     nano: any;
     dbName: string;
-    views: Object;
+    designs: {
+        [index: string]: iDesignInput;
+    };
     db: any;
-    constructor(nano: any, dbName: string, views?: Object);
+    constructor(nano: any, dbName: string, designs?: {
+        [index: string]: iDesignInput;
+    });
     doc: {
         create: any;
         get: any;
         update: any;
+        updateOrCreate: any;
         destroy: any;
+        design: {
+            show: any;
+            view: any;
+        };
         attachment: {
             add: any;
             get: any;
@@ -52,6 +73,8 @@ declare class NanoRecords {
     docCreate(body: Object, callback?: Function, tries?: number): void;
     docGet(id: string, callback?: Function): void;
     docUpdate(id: string, body: Object, callback?: Function): void;
+    docUpdateOrCreate(id: string, body: Object, callback?: Function): void;
     docDestroy(id: string, callback?: Function): void;
-    view(name: string, params: any, callback?: Function, tries?: number): void;
+    designShow(id: string, name: string, params: any, callback?: Function, tries?: number): void;
+    designView(id: string, name: string, params: any, callback?: Function, tries?: number): void;
 }
