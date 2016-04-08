@@ -62,7 +62,7 @@ class NanoRecords_Document
           callback(err);
       }
       else
-        callback(null, true); // attachment added
+        callback(null); // attachment added
     }.bind(this));
   }
   
@@ -72,7 +72,7 @@ class NanoRecords_Document
       if (err)
         callback(err);
       else
-        callback(null, true); // attachment streamed
+        callback(null); // attachment streamed
     });
   }
   
@@ -102,7 +102,7 @@ class NanoRecords_Document
           callback(err);
       }
       else
-        callback(null, true); // attachment removed
+        callback(null); // attachment removed
     }.bind(this));
   }
   
@@ -137,7 +137,7 @@ class NanoRecords_Document
         callback(err);
       else {
         this.body = result;
-        callback(null, true); // up to date
+        callback(null); // up to date
       }
     }.bind(this));
   }
@@ -170,7 +170,7 @@ class NanoRecords_Document
       else {
         this.body = this._extendData(body);
         this.body['_rev'] = result['rev'];
-        callback(null, true); // success
+        callback(null); // success
       }
     }.bind(this));
   }
@@ -207,7 +207,7 @@ class NanoRecords_Document
       }
       else {
         this.body = {};
-        callback(null, true); // success
+        callback(null); // success
       }
     }.bind(this));
   }

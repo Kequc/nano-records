@@ -90,40 +90,40 @@ doc.body;
 Each maintains a body attribute with last known version from the database.
 
 ```javascript
-doc.retrieveLatest(cb[err, bool]);
+doc.retrieveLatest(cb[err]);
 ```
 
-Get the latest from the database, callback will return an error and undefined, or null and true.
+Get the latest from the database, callback will return an error or null.
 
 ```javascript
-doc.update(body, cb[err, bool]);
+doc.update(body, cb[err]);
 ```
 
-Update document by merging the given body. Will attempt to use available body however will retrieve the latest version from the database if needed. Callback returns an error and undefined, or null and true.
+Update document by merging the given body. Will attempt to use available body however will retrieve the latest version from the database if needed. Callback returns an error or null.
 
 ```javascript
-doc.updateOrCreate(id, body, cb[err, bool]);
+doc.updateOrCreate(id, body, cb[err]);
 ```
 
-Attempts to update the specified document but will create it if it doesn't exist. Callback returns an error and undefined, or null and true.
+Attempts to update the specified document but will create it if it doesn't exist. Callback returns an error or null.
 
 ```javascript
-doc.destroy(cb[err, bool);
+doc.destroy(cb[err]);
 ```
 
-Destroy document it will run the given callback with an error and undefined, or null and true.
+Destroy document it will run the given callback with an error or null.
 
 ```javascript
-doc.attachment.add(name, data, mimeType, cb[err, bool]);
+doc.attachment.add(name, data, mimeType, cb[err]);
 ```
 
-Add an attachment with the given name using the provided data and mimeType, it will run the given callback with an error and undefined, or null and true.
+Add an attachment with the given name using the provided data and mimeType, it will run the given callback with an error or null.
 
 ```javascript
-stream.pipe(doc.attachment.stream(name, mimeType, cb[err, bool]));
+stream.pipe(doc.attachment.stream(name, mimeType, cb[err]));
 ```
 
-You may choose to add an attachment to the document using a stream, however in this case retries will not be attempted. In case of an error you will have to manage piping a new stream yourself, callback returns an error and undefined, or null and true.
+You may choose to add an attachment to the document using a stream, however in this case retries will not be attempted. In case of an error you will have to manage piping a new stream yourself, callback returns an error or null.
 
 ```javascript
 doc.attachment.get(name, cb[err, data]);
@@ -132,10 +132,10 @@ doc.attachment.get(name, cb[err, data]);
 Get an attachment from the database if it exists on this document, it will run the given callback with an error and undefined, or null and your attachment.
 
 ```javascript
-doc.attachment.destroy(name, cb[err, bool]);
+doc.attachment.destroy(name, cb[err]);
 ```
 
-Destroy an attachment it will run the given callback with an error and undefined, or null and true.
+Destroy an attachment it will run the given callback with an error or null.
 
 ### Views
 

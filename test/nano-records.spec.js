@@ -103,9 +103,8 @@ describe('nano-records.js', function () {
     
     it('update', function (done) {
       var doc = docs[0];
-      doc.update({ more: 'attributes' }, function (err, success) {
+      doc.update({ more: 'attributes' }, function (err) {
         expect(err).to.be.null;
-        expect(success).to.be.ok;
         expect(doc.body).to.have.all.keys('hello', 'more', '_id', '_rev');
         expect(doc.body['more']).to.equal('attributes');
         done();
@@ -118,9 +117,8 @@ describe('nano-records.js', function () {
         expect(err).to.be.null;
         expect(doc.body).to.not.have.keys('anotheranother');
         var oldRev1 = doc.body['_rev'];
-        doc.retrieveLatest(function (err, success) {
+        doc.retrieveLatest(function (err) {
           expect(err).to.be.null;
-          expect(success).to.be.ok;
           expect(doc.body).to.have.all.keys('second', 'num', '_id', '_rev', 'anotheranother');
           expect(doc.body['_rev']).to.not.equal(oldRev1);
           done();
@@ -135,9 +133,8 @@ describe('nano-records.js', function () {
         var oldRev1 = doc.body['_rev'];
         var oldRev2 = body['rev'];
         expect(oldRev1).to.not.equal(oldRev2);
-        doc.update({ added: 'attr-again' }, function (err, success) {
+        doc.update({ added: 'attr-again' }, function (err) {
           expect(err).to.be.null;
-          expect(success).to.be.ok;
           expect(doc.body).to.have.all.keys('second', 'num', '_id', '_rev', 'anotheranother', 'added');
           expect(doc.body['anotheranother']).to.equal('changed');
           expect(doc.body['added']).to.equal('attr-again');
@@ -154,9 +151,8 @@ describe('nano-records.js', function () {
         expect(doc).to.be.ok;
         expect(doc.body).to.have.all.keys('temp', 'num', '_id', '_rev');
         destroyedDoc = doc; // store for later
-        doc.destroy(function (err, success) {
+        doc.destroy(function (err) {
           expect(err).to.be.null;
-          expect(success).to.be.ok;
           expect(doc.body).to.eql({});
           done();
         });
@@ -164,25 +160,22 @@ describe('nano-records.js', function () {
     });
     
     it('update destroyed doc should fail', function (done) {
-      destroyedDoc.update({ boo: "oorns" }, function (err, success) {
+      destroyedDoc.update({ boo: "oorns" }, function (err) {
         expect(err).to.be.ok;
-        expect(success).to.be.undefined;
         done();
       });
     });
     
     it('retrieveLatest destroyed doc should fail', function (done) {
-      destroyedDoc.retrieveLatest(function (err, success) {
+      destroyedDoc.retrieveLatest(function (err) {
         expect(err).to.be.ok;
-        expect(success).to.be.undefined;
         done();
       });
     });
     
     it('destroy destroyed doc should fail', function (done) {
-      destroyedDoc.destroy(function (err, success) {
+      destroyedDoc.destroy(function (err) {
         expect(err).to.be.ok;
-        expect(success).to.be.undefined;
         done();
       });
     });
@@ -209,9 +202,8 @@ describe('nano-records.js', function () {
   
   it('docUpdate', function (done) {
     var doc = docs[2];
-    db.doc.update(docs[2].body['_id'], { updated: 'changehere' }, function (err, success) {
+    db.doc.update(docs[2].body['_id'], { updated: 'changehere' }, function (err) {
       expect(err).to.be.null;
-      expect(success).to.be.ok;
       doc.retrieveLatest(function (err) {
         expect(err).to.be.null;
         expect(doc.body).to.have.all.keys('third', 'num', 'deep', 'updated', '_id', '_rev');
@@ -235,9 +227,8 @@ describe('nano-records.js', function () {
     db.doc.create({ temp: 'document', num: 1011 }, function (err, doc) {
       expect(err).to.be.null;
       expect(doc).to.be.ok;
-      db.doc.destroy(doc.body['_id'], function (err, success) {
+      db.doc.destroy(doc.body['_id'], function (err) {
         expect(err).to.be.null;
-        expect(success).to.be.ok;
         done();
       });
     });
