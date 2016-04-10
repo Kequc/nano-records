@@ -137,6 +137,18 @@ doc.attachment.destroy(name, cb[err]);
 
 Destroy an attachment it will run the given callback with an error or null.
 
+### Shorthand
+
+These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before.
+
+```javascript
+db.doc.update(id, body, cb[err]);
+db.doc.destroy(id, cb[err]);
+db.doc.attachment.add(id, name, data, mimeType, cb[err]);
+db.doc.attachment.get(id, name, cb[err, data]);
+db.doc.attachment.destroy(id, name, cb[err]);
+```
+
 ### Views
 
 ```javascript
@@ -144,16 +156,4 @@ db.design.view(id, name, params, cb[err, data]);
 db.design.show(id, name, params, cb[err, data]);
 ```
 
-This will run one of your provided design views or shows and return the result. It will create a design document with the provided if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.
-
-### Shorthand
-
-These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before.
-
-```javascript
-db.doc.update(id, body, cb[err, bool]);
-db.doc.destroy(id, cb[err, bool]);
-db.doc.attachment.add(id, name, data, mimeType, cb[err, bool]);
-db.doc.attachment.get(id, name, cb[err, data]);
-db.doc.attachment.destroy(id, name, cb[err, bool]);
-```
+This will run one of your provided design views or shows and return the result. It will create a design document with the provided id if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.

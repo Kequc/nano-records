@@ -253,15 +253,15 @@ class NanoRecords
     update: this.docUpdate.bind(this),
     updateOrCreate: this.docUpdateOrCreate.bind(this),
     destroy: this.docDestroy.bind(this),
-    design: {
-      show: this.designShow.bind(this),
-      view: this.designView.bind(this)
-    },
     attachment: {
       add: this.docAttachmentAdd.bind(this),
       get: this.docAttachmentGet.bind(this),
       destroy: this.docAttachmentDestroy.bind(this),
     }
+  };
+  design = {
+    show: this.designShow.bind(this),
+    view: this.designView.bind(this)
   };
   
   docAttachmentAdd (id: string, name: string, data: any, mimeType: string, callback: Function = ()=>{})

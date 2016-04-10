@@ -57,15 +57,15 @@ declare class NanoRecords {
         update: any;
         updateOrCreate: any;
         destroy: any;
-        design: {
-            show: any;
-            view: any;
-        };
         attachment: {
             add: any;
             get: any;
             destroy: any;
         };
+    };
+    design: {
+        show: any;
+        view: any;
     };
     docAttachmentAdd(id: string, name: string, data: any, mimeType: string, callback?: Function): void;
     docAttachmentGet(id: string, name: string, callback?: Function): void;
