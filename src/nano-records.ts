@@ -255,7 +255,6 @@ class NanoRecords
     destroy: this.docDestroy.bind(this),
     attachment: {
       add: this.docAttachmentAdd.bind(this),
-      get: this.docAttachmentGet.bind(this),
       destroy: this.docAttachmentDestroy.bind(this),
     }
   };
@@ -270,17 +269,12 @@ class NanoRecords
       if (err)
         callback(err);
       else
-        doc.attachmentAdd(name, data, mimeType, callback); // attempt attachment
-    });
-  }
-  
-  docAttachmentGet (id: string, name: string, callback: Function = ()=>{})
-  {
-    this.docGet(id, function (err: Error, doc: NanoRecords_Document) {
-      if (err)
-        callback(err);
-      else
-        doc.attachmentGet(name, callback); // attempt get
+        doc.attachmentAdd(name, data, mimeType, function (err) {
+          if (err)
+            callback(err);
+          else
+            callback(null, doc);
+        }); // attempt attachment
     });
   }
   
@@ -290,7 +284,12 @@ class NanoRecords
       if (err)
         callback(err);
       else
-        doc.attachmentDestroy(name, callback); // attempt destroy
+        doc.attachmentDestroy(name, function (err) {
+          if (err)
+            callback(err);
+          else
+            callback(null, doc);
+        }); // attempt destroy
     });
   }
   
@@ -335,7 +334,12 @@ class NanoRecords
       if (err)
         callback(err);
       else
-        doc.update(body, callback); // attempt update
+        doc.update(body, function (err) {
+          if (err)
+            callback(err);
+          else
+            callback(null, doc);
+        }); // attempt update
     });
   }
   
@@ -347,7 +351,12 @@ class NanoRecords
         this.docCreate(body, callback); // attempt create
       }
       else
-        doc.update(body, callback); // attempt update
+        doc.update(body, function (err) {
+          if (err)
+            callback(err);
+          else
+            callback(null, doc);
+        }); // attempt update
     }.bind(this));
   }
   

@@ -79,7 +79,13 @@ Create a document you may choose to include a custom `_id` attribute here if you
 db.doc.get(id, cb[err, doc]);
 ```
 
-Find a document, callback will return an error and undefined, or null and a NanoRecords document.
+Find a document, callback returns an error and undefined, or null and a NanoRecords document.
+
+```javascript
+db.doc.updateOrCreate(id, body, cb[err, doc]);
+```
+
+This method is special. It attempts to update the specified document but will create it if it doesn't already exist. Callback returns an error and undefined, or null and a NanoRecords document.
 
 ### NanoRecords document
 
@@ -100,12 +106,6 @@ doc.update(body, cb[err]);
 ```
 
 Update document by merging the given body. Will attempt to use available body however will retrieve the latest version from the database if needed. Callback returns an error or null.
-
-```javascript
-doc.updateOrCreate(id, body, cb[err]);
-```
-
-Attempts to update the specified document but will create it if it doesn't exist. Callback returns an error or null.
 
 ```javascript
 doc.destroy(cb[err]);
@@ -139,14 +139,13 @@ Destroy an attachment it will run the given callback with an error or null.
 
 ### Shorthand
 
-These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before.
+These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and returns an error and undefined or null and a NanoRecord document.
 
 ```javascript
-db.doc.update(id, body, cb[err]);
-db.doc.destroy(id, cb[err]);
-db.doc.attachment.add(id, name, data, mimeType, cb[err]);
-db.doc.attachment.get(id, name, cb[err, data]);
-db.doc.attachment.destroy(id, name, cb[err]);
+db.doc.update(id, body, cb[err, doc]);
+db.doc.destroy(id, cb[err, doc]);
+db.doc.attachment.add(id, name, data, mimeType, cb[err, doc]);
+db.doc.attachment.destroy(id, name, cb[err, doc]);
 ```
 
 ### Views
