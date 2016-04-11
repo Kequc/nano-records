@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "build": "tsc -d --outDir ./lib ./src/nano-records.ts",
-    "build:watch": "tsc -w -d --outDir ./lib ./src/nano-records.ts"
+    "build:watch": "tsc -w -d --outDir ./lib ./src/nano-records.ts",
+    "publish": "npm publish ./"
   },
   "repository": {
     "type": "git",
