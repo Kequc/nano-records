@@ -1,6 +1,6 @@
 {
   "name": "nano-records",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Utility returns objects for interacting with couchdb.",
   "main": "lib/nano-records.js",
   "scripts": {
