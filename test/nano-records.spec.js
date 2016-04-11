@@ -48,8 +48,8 @@ describe('nano-records.js', function () {
     expect(db.nano).to.equal(nano);
     expect(db.dbName).to.equal(dbName);
     expect(db.designs).to.have.all.keys("foo", "bar");
-    expect(db.designs["foo"]).to.have.all.keys("language", "views", "shows", "lists");
-    expect(db.designs["bar"]).to.have.all.keys("language", "views", "shows", "lists");
+    expect(db.designs["foo"]).to.have.all.keys("language", "views", "shows");
+    expect(db.designs["bar"]).to.have.all.keys("language", "views", "shows");
     expect(db.db).to.respondTo('insert'); // is a nano instance
   });
   
@@ -184,31 +184,31 @@ describe('nano-records.js', function () {
     });
     
     it('addAttachment', function (done) {
-      
+      done();
     });
     
     it('getAttachment', function (done) {
-      
+      done();
     });
     
     it('destroyAttachment', function (done) {
-      
+      done();
     });
     
     it('get destroyed attachment should fail', function (done) {
-      
+      done();
     });
     
     it('addAttachment to destroyed doc should fail', function (done) {
-      
+      done();
     });
     
     it('getAttachment from destroyed doc should fail', function (done) {
-      
+      done();
     });
     
     it('destroyAttachment to destroyed doc should fail', function (done) {
-      
+      done();
     });
   });
   
@@ -272,38 +272,30 @@ describe('nano-records.js', function () {
   });
   
   it('designView create a design document with a view', function (done) {
-    
+      done();
   });
   
   it('designView', function (done) {
-    
+      done();
   });
   
   it('designShow create a design document with a show', function (done) {
-    
+      done();
   });
   
   it('designShow', function (done) {
-    
-  });
-  
-  it('designList create a design document with a view and a list', function (done) {
-    
+      done();
   });
   
   it('designList', function (done) {
-    
+      done();
   });
   
   it('designView missing view should fail', function (done) {
-    
+      done();
   });
   
   it('designShow missing show should fail', function (done) {
-    
-  });
-  
-  it('designList missing list should fail', function (done) {
-    
+      done();
   });
 });

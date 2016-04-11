@@ -222,7 +222,6 @@ interface iDesignInput {
   language?: string,
   shows?: { [index: string]: string };
   views?: { [index: string]: { map: string, reduce: string }};
-  lists?: { [index: string]: string };
 }
 
 class NanoRecords
@@ -242,8 +241,7 @@ class NanoRecords
       this.designs[key] = {
         language: design.language || "javascript",
         shows: design.shows || {},
-        views: design.views || {},
-        lists: design.lists || {}
+        views: design.views || {}
       };
     }
     this.db = this.nano.use(this.dbName);
@@ -404,27 +402,6 @@ class NanoRecords
               callback(err);
             else
               this.designView(designId, viewName, params, callback, tries);
-          });
-        }
-        else
-          callback(err);
-      }
-      else
-        callback(null, result); // executed successfully
-    }.bind(this));
-  }
-  
-  designList (designId: string, listName: string, viewName: string, callback: Function = ()=>{}, tries: number = 0)
-  {
-    tries++;
-    this.db.view(designId, listName, viewName, function (err, result) {
-      if (err) {
-        if (tries <= 1 && (['missing', 'deleted', 'missing_named_list'].indexOf(err.message) > -1)) {
-          this._persistDesignDoc(designId, 'lists', listName, function (err) {
-            if (err)
-              callback(err);
-            else
-              this.designList(designId, listName, viewName, callback, tries);
           });
         }
         else

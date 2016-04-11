@@ -20,9 +20,6 @@ var designs = {
     },
     "shows": {
       "post": "function (doc, req) { ... };"
-    },
-    "lists": {
-      "by_title": "function (head, req) { ... };"
     }
   },
   "bar": {
@@ -60,7 +57,6 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 
 // db.design.view(designId, viewName, params, callback);
 // db.design.show(designId, showName, id, callback);
-// db.design.list(designId, listName, viewName, callback);
 ```
 
 ### Usage
@@ -152,7 +148,6 @@ db.doc.attachment.destroy(id, name, cb[err, doc]);
 ```javascript
 db.design.view(designId, viewName, params, cb[err, data]);
 db.design.show(designId, showName, id, cb[err, data]);
-db.design.list(designId, listName, viewName, cb[err, data]);
 ```
 
 This will run one of your provided design views or shows and return the result. It will create a design document with the provided designId if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.
