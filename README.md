@@ -133,14 +133,15 @@ Destroy an attachment it will run the given callback with an error or null.
 
 ### Shorthand
 
-These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and returns an error and undefined or null and a NanoRecord document.
+These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and returns appropriate callback parameters.
 
 ```javascript
-db.doc.update(id, body, cb[err, doc]);
+db.doc.update(id, body, cb[err]);
 db.doc.updateOrCreate(id, body, cb[err, doc]);
-db.doc.destroy(id, cb[err, doc]);
-db.doc.attachment.add(id, name, data, mimeType, cb[err, doc]);
-db.doc.attachment.destroy(id, name, cb[err, doc]);
+db.doc.destroy(id, cb[err]);
+db.doc.attachment.add(id, name, data, mimeType, cb[err]);
+db.doc.attachment.get(id, name, cb[err, data]);
+db.doc.attachment.destroy(id, name, cb[err]);
 ```
 
 ### Views

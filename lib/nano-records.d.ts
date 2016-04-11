@@ -59,6 +59,7 @@ declare class NanoRecords {
         destroy: any;
         attachment: {
             add: any;
+            get: any;
             destroy: any;
         };
     };
@@ -67,6 +68,7 @@ declare class NanoRecords {
         view: any;
     };
     docAttachmentAdd(id: string, name: string, data: any, mimeType: string, callback?: Function): void;
+    docAttachmentGet(id: string, name: string, callback?: Function): void;
     docAttachmentDestroy(id: string, name: string, callback?: Function): void;
     docCreate(body: Object, callback?: Function, tries?: number): void;
     docGet(id: string, callback?: Function): void;
