@@ -20,6 +20,9 @@ var designs = {
     },
     "shows": {
       "post": "function (doc, req) { ... };"
+    },
+    "lists": {
+      "by_title": "function (head, req) { ... };"
     }
   },
   "bar": {
@@ -55,8 +58,9 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 // db.doc.attachment.get(id, name, callback);
 // db.doc.attachment.destroy(id, name, callback);
 
-// db.design.view(id, name, params, callback);
-// db.design.show(id, name, params, callback);
+// db.design.view(designId, viewName, params, callback);
+// db.design.show(designId, showName, id, callback);
+// db.design.list(designId, listName, viewName, callback);
 ```
 
 ### Usage
@@ -80,12 +84,6 @@ db.doc.get(id, cb[err, doc]);
 ```
 
 Find a document, callback returns an error and undefined, or null and a NanoRecords document.
-
-```javascript
-db.doc.updateOrCreate(id, body, cb[err, doc]);
-```
-
-This method is special. It attempts to update the specified document but will create it if it doesn't already exist. Callback returns an error and undefined, or null and a NanoRecords document.
 
 ### NanoRecords document
 
@@ -143,6 +141,7 @@ These methods are the same as their counterparts above but assumes fetching from
 
 ```javascript
 db.doc.update(id, body, cb[err, doc]);
+db.doc.updateOrCreate(id, body, cb[err, doc]);
 db.doc.destroy(id, cb[err, doc]);
 db.doc.attachment.add(id, name, data, mimeType, cb[err, doc]);
 db.doc.attachment.destroy(id, name, cb[err, doc]);
@@ -151,8 +150,9 @@ db.doc.attachment.destroy(id, name, cb[err, doc]);
 ### Views
 
 ```javascript
-db.design.view(id, name, params, cb[err, data]);
-db.design.show(id, name, params, cb[err, data]);
+db.design.view(designId, viewName, params, cb[err, data]);
+db.design.show(designId, showName, id, cb[err, data]);
+db.design.list(designId, listName, viewName, cb[err, data]);
 ```
 
-This will run one of your provided design views or shows and return the result. It will create a design document with the provided id if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.
+This will run one of your provided design views or shows and return the result. It will create a design document with the provided designId if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.

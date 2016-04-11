@@ -40,6 +40,9 @@ interface iDesignInput {
             reduce: string;
         };
     };
+    lists?: {
+        [index: string]: string;
+    };
 }
 declare class NanoRecords {
     nano: any;
@@ -73,6 +76,8 @@ declare class NanoRecords {
     docUpdate(id: string, body: Object, callback?: Function): void;
     docUpdateOrCreate(id: string, body: Object, callback?: Function): void;
     docDestroy(id: string, callback?: Function): void;
-    designShow(id: string, name: string, params: any, callback?: Function, tries?: number): void;
-    designView(id: string, name: string, params: any, callback?: Function, tries?: number): void;
+    designShow(designId: string, showName: string, id: string, callback?: Function, tries?: number): void;
+    designView(designId: string, viewName: string, params: Object, callback?: Function, tries?: number): void;
+    designList(designId: string, listName: string, viewName: string, callback?: Function, tries?: number): void;
+    private _persistDesignDoc(designId, kind, name, callback);
 }

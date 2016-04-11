@@ -222,6 +222,7 @@ interface iDesignInput {
   language?: string,
   shows?: { [index: string]: string };
   views?: { [index: string]: { map: string, reduce: string }};
+  lists?: { [index: string]: string };
 }
 
 class NanoRecords
@@ -241,7 +242,8 @@ class NanoRecords
       this.designs[key] = {
         language: design.language || "javascript",
         shows: design.shows || {},
-        views: design.views || {}
+        views: design.views || {},
+        lists: design.lists || {}
       };
     }
     this.db = this.nano.use(this.dbName);
@@ -370,33 +372,18 @@ class NanoRecords
     });
   }
   
-  designShow (id: string, name: string, params: any, callback: Function = ()=>{}, tries: number = 0)
-  {
-    // TODO
-  }
-  
-  designView (id: string, name: string, params: any, callback: Function = ()=>{}, tries: number = 0)
+  designShow (designId: string, showName: string, id: string, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
-    this.db.view(id, name, params, function (err, result) {
+    this.db.show(designId, showName, id, function (err, result) {
       if (err) {
-        if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.message) > -1)) {
-          let design = this.designs[id];
-          if (!design)
-            callback(new Error("No design specified for: " + id));
-          else {
-            // setup design document changes
-            let body = { views: {} };
-            body['views'][name] = design.views[name];
-            if (design.language)
-              body['language'] = design.language;
-            this.docUpdateOrCreate('_design/' + id, body, function (err) {
-              if (err)
-                callback(err);
-              else
-                this.designView(id, name, params, callback, tries);
-            }.bind(this));
-          }
+        if (tries <= 1 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.message) > -1)) {
+          this._persistDesignDoc(designId, 'shows', showName, function (err) {
+            if (err)
+              callback(err);
+            else
+              this.designShow(designId, showName, id, callback, tries);
+          }.bind(this));
         }
         else
           callback(err);
@@ -404,6 +391,64 @@ class NanoRecords
       else
         callback(null, result); // executed successfully
     }.bind(this));
+  }
+  
+  designView (designId: string, viewName: string, params: Object, callback: Function = ()=>{}, tries: number = 0)
+  {
+    tries++;
+    this.db.view(designId, viewName, params, function (err, result) {
+      if (err) {
+        if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.message) > -1)) {
+          this._persistDesignDoc(designId, 'views', viewName, function (err) {
+            if (err)
+              callback(err);
+            else
+              this.designView(designId, viewName, params, callback, tries);
+          });
+        }
+        else
+          callback(err);
+      }
+      else
+        callback(null, result); // executed successfully
+    }.bind(this));
+  }
+  
+  designList (designId: string, listName: string, viewName: string, callback: Function = ()=>{}, tries: number = 0)
+  {
+    tries++;
+    this.db.view(designId, listName, viewName, function (err, result) {
+      if (err) {
+        if (tries <= 1 && (['missing', 'deleted', 'missing_named_list'].indexOf(err.message) > -1)) {
+          this._persistDesignDoc(designId, 'lists', listName, function (err) {
+            if (err)
+              callback(err);
+            else
+              this.designList(designId, listName, viewName, callback, tries);
+          });
+        }
+        else
+          callback(err);
+      }
+      else
+        callback(null, result); // executed successfully
+    }.bind(this));
+  }
+  
+  private _persistDesignDoc (designId: string, kind: string, name: string, callback: Function)
+  {
+    let design = this.designs[designId];
+    if (!design)
+      callback(new Error("No design specified for: " + designId));
+    else if (!design[kind])
+      callback(new Error("Invalid design type: " + kind));
+    else {
+      // setup design document changes
+      let body = { language: design.language };
+      body[kind] = {};
+      body[kind][name] = design[kind][name];
+      this.docUpdateOrCreate('_design/' + designId, body, callback);
+    }
   }
 }
 
