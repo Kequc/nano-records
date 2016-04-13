@@ -20,6 +20,7 @@ var DocAttachment = (function () {
         return this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
     };
     DocAttachment.prototype.add = function (name, data, mimeType, callback, tries) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.doc.getId()) {
@@ -29,13 +30,13 @@ var DocAttachment = (function () {
         tries++;
         this._performAdd(name, data, mimeType, function (err, result) {
             if (err) {
-                if (tries <= this.doc.db.maxTries) {
-                    this.doc.retrieveLatest(function (err) {
+                if (tries <= _this.doc.db.maxTries) {
+                    _this.doc.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            this.add(name, data, mimeType, callback, tries);
-                    }.bind(this));
+                            _this.add(name, data, mimeType, callback, tries);
+                    });
                 }
                 else
                     callback(err);
@@ -43,14 +44,15 @@ var DocAttachment = (function () {
             else {
                 // attachment added
                 // TODO: Is there more information available here?
-                this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
-                this.doc.body['_attachments'][name] = {};
-                this.doc.body['_rev'] = result['rev'];
+                _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
+                _this.doc.body['_attachments'][name] = {};
+                _this.doc.body['_rev'] = result['rev'];
                 callback(null);
             }
-        }.bind(this));
+        });
     };
     DocAttachment.prototype.stream = function (name, mimetype, callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         return this._performAdd(name, null, mimetype, function (err, result) {
             if (err)
@@ -58,17 +60,18 @@ var DocAttachment = (function () {
             else {
                 // attachment streamed
                 // TODO: Is there more information available here?
-                this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
-                this.doc.body['_attachments'][name] = {};
-                this.doc.body['_rev'] = result['rev'];
+                _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
+                _this.doc.body['_attachments'][name] = {};
+                _this.doc.body['_rev'] = result['rev'];
                 callback(null);
             }
-        }.bind(this));
+        });
     };
     DocAttachment.prototype._performAdd = function (name, data, mimeType, callback) {
         return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, callback);
     };
     DocAttachment.prototype.destroy = function (name, callback, tries) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.doc.getId()) {
@@ -78,25 +81,25 @@ var DocAttachment = (function () {
         tries++;
         this._performDestroy(name, function (err, result) {
             if (err) {
-                if (tries <= this.doc.db.maxTries) {
-                    this.doc.retrieveLatest(function (err) {
+                if (tries <= _this.doc.db.maxTries) {
+                    _this.doc.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            this.destroy(name, callback, tries);
-                    }.bind(this));
+                            _this.destroy(name, callback, tries);
+                    });
                 }
                 else
                     callback(err);
             }
             else {
                 // attachment removed
-                if (this.doc.body['_attachments'])
-                    delete this.doc.body['_attachments'][name];
-                this.doc.body['_rev'] = result['rev'];
+                if (_this.doc.body['_attachments'])
+                    delete _this.doc.body['_attachments'][name];
+                _this.doc.body['_rev'] = result['rev'];
                 callback(null);
             }
-        }.bind(this));
+        });
     };
     DocAttachment.prototype._performDestroy = function (name, callback) {
         return this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);

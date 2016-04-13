@@ -6,6 +6,7 @@ var DbDoc = (function () {
         this.attachment = new attachment_1.default(this);
     }
     DbDoc.prototype.create = function (body, callback, tries) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         tries++;
@@ -13,12 +14,12 @@ var DbDoc = (function () {
             if (err) {
                 if (tries <= 1 && err.message === 'no_db_file') {
                     // create db
-                    this.db.nano.db.create(this.db.dbName, function (err) {
+                    _this.db.nano.db.create(_this.db.dbName, function (err) {
                         if (err)
                             callback(err);
                         else
-                            this.create(body, callback, tries);
-                    }.bind(this));
+                            _this.create(body, callback, tries);
+                    });
                 }
                 else
                     callback(err);
@@ -26,18 +27,19 @@ var DbDoc = (function () {
             else {
                 body['_id'] = result['id'];
                 body['_rev'] = result['rev'];
-                callback(null, new doc_1.default(this.db, body)); // created successfully
+                callback(null, new doc_1.default(_this.db, body)); // created successfully
             }
-        }.bind(this));
+        });
     };
     DbDoc.prototype.get = function (id, callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         this.db.raw.get(id, function (err, result) {
             if (err)
                 callback(err);
             else
-                callback(null, new doc_1.default(this.db, result)); // document found!
-        }.bind(this));
+                callback(null, new doc_1.default(_this.db, result)); // document found!
+        });
     };
     DbDoc.prototype.update = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -49,11 +51,12 @@ var DbDoc = (function () {
         });
     };
     DbDoc.prototype.updateOrCreate = function (id, body, callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
             if (err) {
                 body['_id'] = id;
-                this.create(body, callback); // attempt create
+                _this.create(body, callback); // attempt create
             }
             else
                 doc.update(body, function (err) {
@@ -62,7 +65,7 @@ var DbDoc = (function () {
                     else
                         callback(null, doc);
                 }); // attempt update
-        }.bind(this));
+        });
     };
     DbDoc.prototype.destroy = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }

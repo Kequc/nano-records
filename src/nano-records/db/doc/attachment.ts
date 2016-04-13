@@ -12,7 +12,7 @@ export default class DbDocAttachment
   
   add (id: string, name: string, data: any, mimeType: string, callback: Function = ()=>{})
   {
-    this.dbDoc.get(id, function (err: Error, doc: Doc) {
+    this.dbDoc.get(id, (err: Error, doc: Doc) => {
       if (err)
         callback(err);
       else
@@ -22,7 +22,7 @@ export default class DbDocAttachment
   
   get (id: string, name: string, callback: Function = ()=>{})
   {
-    this.dbDoc.get(id, function (err: Error, doc: Doc) {
+    this.dbDoc.get(id, (err: Error, doc: Doc) => {
       if (err)
         callback(err);
       else
@@ -32,7 +32,7 @@ export default class DbDocAttachment
   
   destroy (id: string, name: string, callback: Function = ()=>{})
   {
-    this.dbDoc.get(id, function (err: Error, doc: Doc) {
+    this.dbDoc.get(id, (err: Error, doc: Doc) => {
       if (err)
         callback(err);
       else

@@ -37,14 +37,14 @@ export default class Doc
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performRetrieveLatest(function (err: Error, result: Object) {
+    this._performRetrieveLatest((err: Error, result: Object) => {
       if (err)
         callback(err);
       else {
         this.body = result;
         callback(null); // up to date
       }
-    }.bind(this));
+    });
   }
   
   private _performRetrieveLatest (callback: Function)
@@ -59,15 +59,15 @@ export default class Doc
       return;
     }
     tries++;
-    this._performUpdate(body, function (err: Error, result: { [index: string]: any }) {
+    this._performUpdate(body, (err: Error, result: { [index: string]: any }) => {
       if (err) {
         if (tries <= this.db.maxTries) {
-          this.retrieveLatest(function (err: Error) {
+          this.retrieveLatest((err: Error) => {
             if (err)
               callback(err);
             else
               this.update(body, callback, tries);
-          }.bind(this));
+          });
         }
         else
           callback(err);
@@ -77,7 +77,7 @@ export default class Doc
         this.body['_rev'] = result['rev'];
         callback(null); // success
       }
-    }.bind(this));
+    });
   }
   
   private _performUpdate (body: Object, callback: Function)
@@ -97,15 +97,15 @@ export default class Doc
       return;
     }
     tries++;
-    this._performDestroy(function (err: Error) {
+    this._performDestroy((err: Error) => {
       if (err) {
         if (tries <= this.db.maxTries) {
-          this.retrieveLatest(function (err: Error) {
+          this.retrieveLatest((err: Error) => {
             if (err)
               callback(err);
             else
               this.destroy(callback, tries);
-          }.bind(this));
+          });
         }
         else
           callback(err);
@@ -114,7 +114,7 @@ export default class Doc
         this.body = {};
         callback(null); // success
       }
-    }.bind(this));
+    });
   }
   
   private _performDestroy (callback: Function)

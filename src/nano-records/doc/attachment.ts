@@ -15,7 +15,7 @@ export default class DocAttachment
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performGet(name, function (err: Error, result: any) {
+    this._performGet(name, (err: Error, result: any) => {
       // NOTE: This is probably unnecessarily verbose
       if (err)
         callback(err);
@@ -36,15 +36,15 @@ export default class DocAttachment
       return;
     }
     tries++;
-    this._performAdd(name, data, mimeType, function (err: Error, result: { [index: string]: string }) {
+    this._performAdd(name, data, mimeType, (err: Error, result: { [index: string]: string }) => {
       if (err) {
         if (tries <= this.doc.db.maxTries) {
-          this.doc.retrieveLatest(function (err: Error) {
+          this.doc.retrieveLatest((err: Error) => {
             if (err)
               callback(err);
             else
               this.add(name, data, mimeType, callback, tries);
-          }.bind(this));
+          });
         }
         else
           callback(err);
@@ -57,12 +57,12 @@ export default class DocAttachment
         this.doc.body['_rev'] = result['rev'];
         callback(null);
       }
-    }.bind(this));
+    });
   }
   
   stream (name: string, mimetype: string, callback: Function = ()=>{})
   {
-    return this._performAdd(name, null, mimetype, function (err: Error, result: { [index: string]: string }) {
+    return this._performAdd(name, null, mimetype, (err: Error, result: { [index: string]: string }) => {
       if (err)
         callback(err);
       else {
@@ -73,7 +73,7 @@ export default class DocAttachment
         this.doc.body['_rev'] = result['rev'];
         callback(null);
       }
-    }.bind(this));
+    });
   }
   
   private _performAdd (name: string, data: any, mimeType: string, callback: Function)
@@ -88,15 +88,15 @@ export default class DocAttachment
       return;
     }
     tries++;
-    this._performDestroy(name, function (err: Error, result: { [index: string]: string }) {
+    this._performDestroy(name, (err: Error, result: { [index: string]: string }) => {
       if (err) {
         if (tries <= this.doc.db.maxTries) {
-          this.doc.retrieveLatest(function (err: Error) {
+          this.doc.retrieveLatest((err: Error) => {
             if (err)
               callback(err);
             else
               this.destroy(name, callback, tries);
-          }.bind(this));
+          });
         }
         else
           callback(err);
@@ -108,7 +108,7 @@ export default class DocAttachment
         this.doc.body['_rev'] = result['rev'];
         callback(null);
       }
-    }.bind(this));
+    });
   }
   
   private _performDestroy (name: string, callback: Function)

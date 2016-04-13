@@ -17,6 +17,7 @@ var Doc = (function () {
         return !!(this.body['_attachments'] && this.body['_attachments'][name]);
     };
     Doc.prototype.retrieveLatest = function (callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (!this.getId()) {
             callback(new Error('Document does not exist.'));
@@ -26,15 +27,16 @@ var Doc = (function () {
             if (err)
                 callback(err);
             else {
-                this.body = result;
+                _this.body = result;
                 callback(null); // up to date
             }
-        }.bind(this));
+        });
     };
     Doc.prototype._performRetrieveLatest = function (callback) {
         return this.db.raw.get(this.getId(), callback);
     };
     Doc.prototype.update = function (body, callback, tries) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.getId()) {
@@ -44,23 +46,23 @@ var Doc = (function () {
         tries++;
         this._performUpdate(body, function (err, result) {
             if (err) {
-                if (tries <= this.db.maxTries) {
-                    this.retrieveLatest(function (err) {
+                if (tries <= _this.db.maxTries) {
+                    _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            this.update(body, callback, tries);
-                    }.bind(this));
+                            _this.update(body, callback, tries);
+                    });
                 }
                 else
                     callback(err);
             }
             else {
-                this.body = this._extendBody(body);
-                this.body['_rev'] = result['rev'];
+                _this.body = _this._extendBody(body);
+                _this.body['_rev'] = result['rev'];
                 callback(null); // success
             }
-        }.bind(this));
+        });
     };
     Doc.prototype._performUpdate = function (body, callback) {
         return this.db.raw.insert(this._extendBody(body), callback);
@@ -69,6 +71,7 @@ var Doc = (function () {
         return deepExtend({}, this.body, body);
     };
     Doc.prototype.destroy = function (callback, tries) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.getId()) {
@@ -78,22 +81,22 @@ var Doc = (function () {
         tries++;
         this._performDestroy(function (err) {
             if (err) {
-                if (tries <= this.db.maxTries) {
-                    this.retrieveLatest(function (err) {
+                if (tries <= _this.db.maxTries) {
+                    _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            this.destroy(callback, tries);
-                    }.bind(this));
+                            _this.destroy(callback, tries);
+                    });
                 }
                 else
                     callback(err);
             }
             else {
-                this.body = {};
+                _this.body = {};
                 callback(null); // success
             }
-        }.bind(this));
+        });
     };
     Doc.prototype._performDestroy = function (callback) {
         return this.db.raw.destroy(this.getId(), this.getRev(), callback);
