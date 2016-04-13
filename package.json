@@ -2,26 +2,27 @@
   "name": "nano-records",
   "version": "1.0.4",
   "description": "Utility returns objects for interacting with couchdb.",
-  "main": "lib/nano-records.js",
+  "author": "mr.kequc@gmail.com",
+  "license": "ISC",
   "scripts": {
-    "test": "mocha",
-    "build": "tsc -d --outDir ./lib ./src/nano-records.ts",
-    "build:watch": "tsc -w -d --outDir ./lib ./src/nano-records.ts",
-    "publish": "npm publish ./"
+    "test": "mocha"
   },
+  "files": [
+    "dist/"
+  ],
+  "main": "./dist/nano-records.js",
+  "typings": "./dist/nano-records.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kequc/nano-records.git"
   },
-  "keywords": [
-    "nano"
-  ],
-  "author": "Kequc",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Kequc/nano-records/issues"
   },
   "homepage": "https://github.com/Kequc/nano-records#readme",
+  "keywords": [
+    "nano"
+  ],
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
@@ -30,12 +31,5 @@
   },
   "dependencies": {
     "deep-extend": "^0.4.1"
-  },
-  "directories": {
-    "lib": "./lib/",
-    "test": "./test/"
-  },
-  "files": [
-    "lib/nano-records.js"
-  ]
+  }
 }

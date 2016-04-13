@@ -26,7 +26,7 @@ var designs = {
 var dbName = 'nano-records-test';
 var docs = [];
 
-var NanoRecords = require('../lib/nano-records');
+var NanoRecords = require('../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var forced = nano.use(dbName);
 var db = new NanoRecords(nano, dbName, designs);
@@ -50,7 +50,7 @@ describe('nano-records.js', function () {
     expect(db.designs).to.have.all.keys("foo", "bar");
     expect(db.designs["foo"]).to.have.all.keys("language", "views", "shows");
     expect(db.designs["bar"]).to.have.all.keys("language", "views", "shows");
-    expect(db.db).to.respondTo('insert'); // is a nano instance
+    expect(db.raw).to.respondTo('insert'); // is a nano instance
   });
   
   it('docCreate a database and document', function (done) {
