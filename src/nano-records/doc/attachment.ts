@@ -9,11 +9,6 @@ export default class DocAttachment
     this.doc = doc;
   }
   
-  exists (name: string): boolean
-  {
-    return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
-  }
-  
   get (name: string, callback: Function = ()=>{})
   {
     if (!this.doc.getId()) {

@@ -3,16 +3,16 @@ import {default as DbDoc} from '../doc';
 
 export default class DbDocAttachment
 {
-  doc: DbDoc;
+  dbDoc: DbDoc;
   
-  constructor (doc: DbDoc)
+  constructor (dbDoc: DbDoc)
   {
-    this.doc = doc;
+    this.dbDoc = dbDoc;
   }
   
   add (id: string, name: string, data: any, mimeType: string, callback: Function = ()=>{})
   {
-    this.doc.get(id, function (err: Error, doc: Doc) {
+    this.dbDoc.get(id, function (err: Error, doc: Doc) {
       if (err)
         callback(err);
       else
@@ -22,7 +22,7 @@ export default class DbDocAttachment
   
   get (id: string, name: string, callback: Function = ()=>{})
   {
-    this.doc.get(id, function (err: Error, doc: Doc) {
+    this.dbDoc.get(id, function (err: Error, doc: Doc) {
       if (err)
         callback(err);
       else
@@ -32,7 +32,7 @@ export default class DbDocAttachment
   
   destroy (id: string, name: string, callback: Function = ()=>{})
   {
-    this.doc.get(id, function (err: Error, doc: Doc) {
+    this.dbDoc.get(id, function (err: Error, doc: Doc) {
       if (err)
         callback(err);
       else

@@ -26,6 +26,11 @@ export default class Doc
     return this.body['_rev'] || null;
   }
   
+  hasAttachment (name: string): boolean
+  {
+    return !!(this.body['_attachments'] && this.body['_attachments'][name]);
+  }
+  
   retrieveLatest (callback: Function = ()=>{})
   {
     if (!this.getId()) {

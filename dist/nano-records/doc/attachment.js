@@ -2,9 +2,6 @@ var DocAttachment = (function () {
     function DocAttachment(doc) {
         this.doc = doc;
     }
-    DocAttachment.prototype.exists = function (name) {
-        return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
-    };
     DocAttachment.prototype.get = function (name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!this.doc.getId()) {

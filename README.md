@@ -34,6 +34,10 @@ db.doc.create({ hello: "there" }, function (err, doc) {
   
   // doc.body;
   
+  // doc.getId();
+  // doc.getRev();
+  // doc.hasAttachment();
+  
   // doc.retrieveLatest(callback);
   // doc.update({ doot: "dot" }, callback);
   // doc.destroy(callback);
@@ -62,10 +66,10 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 ### Usage
 
 ```javascript
-var db = new NanoRecords(nano, dbName, views);
+var db = new NanoRecords(nano, dbName, designs);
 ```
 
-A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of views. This command will do nothing on its own just construct an instance, no database is created, no views are saved, anything like that.
+A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of designs. This command will do nothing on its own just construct an instance, no database is created, no design documents are persisted, or anything like that.
 
 ### Create / get
 
@@ -88,6 +92,24 @@ doc.body;
 ```
 
 Each maintains a body attribute with last known version from the database.
+
+```javascript
+doc.getId();
+```
+
+Returns the document's `_id` attribute if one exists or null.
+
+```javascript
+doc.getRev();
+```
+
+Returns the document's `_rev` attribute if one exists or null.
+
+```javascript
+doc.hasAttachment(name);
+```
+
+Returns true if the document has an attachment with the given name or false.
 
 ```javascript
 doc.retrieveLatest(cb[err]);

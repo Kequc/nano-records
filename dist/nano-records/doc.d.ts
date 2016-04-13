@@ -9,6 +9,7 @@ export default class Doc {
     constructor(db: Db, body?: Object);
     getId(): string;
     getRev(): string;
+    hasAttachment(name: string): boolean;
     retrieveLatest(callback?: Function): void;
     private _performRetrieveLatest(callback);
     update(body: Object, callback?: Function, tries?: number): void;

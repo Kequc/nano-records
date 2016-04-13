@@ -13,6 +13,9 @@ var Doc = (function () {
     Doc.prototype.getRev = function () {
         return this.body['_rev'] || null;
     };
+    Doc.prototype.hasAttachment = function (name) {
+        return !!(this.body['_attachments'] && this.body['_attachments'][name]);
+    };
     Doc.prototype.retrieveLatest = function (callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!this.getId()) {
