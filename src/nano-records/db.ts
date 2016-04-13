@@ -23,14 +23,14 @@ export default class Db
   {
     this.nano = nano;
     this.dbName = dbName;
-    this._updateDesigns(designs);
+    this._setupDesigns(designs);
     this.raw = this.nano.use(this.dbName);
     
     this.doc = new DbDoc(this);
     this.design = new DbDesign(this);
   }
   
-  private _updateDesigns (designs: { [index: string]: iDesignInput } = {})
+  private _setupDesigns (designs: { [index: string]: iDesignInput } = {})
   {
     for (let key in designs) {
       let design = designs[key] || {};

@@ -1,10 +1,10 @@
 var DbDocAttachment = (function () {
-    function DbDocAttachment(dbDoc) {
-        this.dbDoc = dbDoc;
+    function DbDocAttachment(doc) {
+        this.doc = doc;
     }
     DbDocAttachment.prototype.add = function (id, name, data, mimeType, callback) {
         if (callback === void 0) { callback = function () { }; }
-        this.dbDoc.get(id, function (err, doc) {
+        this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
@@ -13,7 +13,7 @@ var DbDocAttachment = (function () {
     };
     DbDocAttachment.prototype.get = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
-        this.dbDoc.get(id, function (err, doc) {
+        this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
@@ -22,7 +22,7 @@ var DbDocAttachment = (function () {
     };
     DbDocAttachment.prototype.destroy = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
-        this.dbDoc.get(id, function (err, doc) {
+        this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else

@@ -33,7 +33,7 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performRetrieveLatest = function (callback) {
-        return this.db.raw.get(this.getId(), callback);
+        this.db.raw.get(this.getId(), callback);
     };
     Doc.prototype.update = function (body, callback, tries) {
         var _this = this;
@@ -65,7 +65,7 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performUpdate = function (body, callback) {
-        return this.db.raw.insert(this._extendBody(body), callback);
+        this.db.raw.insert(this._extendBody(body), callback);
     };
     Doc.prototype._extendBody = function (body) {
         return deepExtend({}, this.body, body);
@@ -99,7 +99,7 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performDestroy = function (callback) {
-        return this.db.raw.destroy(this.getId(), this.getRev(), callback);
+        this.db.raw.destroy(this.getId(), this.getRev(), callback);
     };
     return Doc;
 })();

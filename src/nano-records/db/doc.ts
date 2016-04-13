@@ -16,11 +16,11 @@ export default class DbDoc
   create (body: { [index: string]: any }, callback: Function = ()=>{}, tries: number = 0)
   {
     tries++;
-    this.db.raw.insert(body, (err: Error, result: { [index: string]: any }) => {
+    this._performCreate(body, (err: Error, result: { [index: string]: any }) => {
       if (err) {
         if (tries <= 1 && err.message === 'no_db_file') {
           // create db
-          this.db.nano.db.create(this.db.dbName, (err: Error) => {
+          this._performDbCreate((err: Error) => {
             if (err)
               callback(err);
             else
@@ -38,14 +38,29 @@ export default class DbDoc
     });
   }
   
+  private _performCreate (body: { [index: string]: any }, callback: Function)
+  {
+    this.db.raw.insert(body, callback);
+  }
+  
+  private _performDbCreate (callback: Function)
+  {
+    this.db.nano.db.create(this.db.dbName, callback);
+  }
+  
   get (id: string, callback: Function = ()=>{})
   {
-    this.db.raw.get(id, (err: Error, result: Object) => {
+    this._performGet(id, (err: Error, result: Object) => {
       if (err)
         callback(err);
       else
         callback(null, new Doc(this.db, result)); // document found!
     });
+  }
+  
+  private _performGet (id: string, callback: Function)
+  {
+    this.db.raw.get(id, callback);
   }
   
   update (id: string, body: { [index: string]: any }, callback: Function = ()=>{})

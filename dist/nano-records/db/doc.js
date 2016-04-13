@@ -10,11 +10,11 @@ var DbDoc = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         tries++;
-        this.db.raw.insert(body, function (err, result) {
+        this._performCreate(body, function (err, result) {
             if (err) {
                 if (tries <= 1 && err.message === 'no_db_file') {
                     // create db
-                    _this.db.nano.db.create(_this.db.dbName, function (err) {
+                    _this._performDbCreate(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -31,15 +31,24 @@ var DbDoc = (function () {
             }
         });
     };
+    DbDoc.prototype._performCreate = function (body, callback) {
+        this.db.raw.insert(body, callback);
+    };
+    DbDoc.prototype._performDbCreate = function (callback) {
+        this.db.nano.db.create(this.db.dbName, callback);
+    };
     DbDoc.prototype.get = function (id, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        this.db.raw.get(id, function (err, result) {
+        this._performGet(id, function (err, result) {
             if (err)
                 callback(err);
             else
                 callback(null, new doc_1.default(_this.db, result)); // document found!
         });
+    };
+    DbDoc.prototype._performGet = function (id, callback) {
+        this.db.raw.get(id, callback);
     };
     DbDoc.prototype.update = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }

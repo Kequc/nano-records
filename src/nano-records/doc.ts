@@ -49,7 +49,7 @@ export default class Doc
   
   private _performRetrieveLatest (callback: Function)
   {
-    return this.db.raw.get(this.getId(), callback);
+    this.db.raw.get(this.getId(), callback);
   }
   
   update (body: Object, callback: Function = ()=>{}, tries: number = 0)
@@ -82,7 +82,7 @@ export default class Doc
   
   private _performUpdate (body: Object, callback: Function)
   {
-    return this.db.raw.insert(this._extendBody(body), callback);
+    this.db.raw.insert(this._extendBody(body), callback);
   }
   
   private _extendBody(body: Object): Object
@@ -119,6 +119,6 @@ export default class Doc
   
   private _performDestroy (callback: Function)
   {
-    return this.db.raw.destroy(this.getId(), this.getRev(), callback);
+    this.db.raw.destroy(this.getId(), this.getRev(), callback);
   }
 }

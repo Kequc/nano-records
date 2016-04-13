@@ -6,12 +6,12 @@ var Db = (function () {
         this.designs = {};
         this.nano = nano;
         this.dbName = dbName;
-        this._updateDesigns(designs);
+        this._setupDesigns(designs);
         this.raw = this.nano.use(this.dbName);
         this.doc = new doc_1.default(this);
         this.design = new design_1.default(this);
     }
-    Db.prototype._updateDesigns = function (designs) {
+    Db.prototype._setupDesigns = function (designs) {
         if (designs === void 0) { designs = {}; }
         for (var key in designs) {
             var design = designs[key] || {};

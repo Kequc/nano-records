@@ -2,23 +2,6 @@ var DocAttachment = (function () {
     function DocAttachment(doc) {
         this.doc = doc;
     }
-    DocAttachment.prototype.get = function (name, callback) {
-        if (callback === void 0) { callback = function () { }; }
-        if (!this.doc.getId()) {
-            callback(new Error('Document does not exist.'));
-            return;
-        }
-        this._performGet(name, function (err, result) {
-            // NOTE: This is probably unnecessarily verbose
-            if (err)
-                callback(err);
-            else
-                callback(null, result); // attachment found!
-        });
-    };
-    DocAttachment.prototype._performGet = function (name, callback) {
-        return this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
-    };
     DocAttachment.prototype.add = function (name, data, mimeType, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
@@ -70,6 +53,23 @@ var DocAttachment = (function () {
     DocAttachment.prototype._performAdd = function (name, data, mimeType, callback) {
         return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, callback);
     };
+    DocAttachment.prototype.get = function (name, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        if (!this.doc.getId()) {
+            callback(new Error('Document does not exist.'));
+            return;
+        }
+        this._performGet(name, function (err, result) {
+            // NOTE: This is probably unnecessarily verbose
+            if (err)
+                callback(err);
+            else
+                callback(null, result); // attachment found!
+        });
+    };
+    DocAttachment.prototype._performGet = function (name, callback) {
+        this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
+    };
     DocAttachment.prototype.destroy = function (name, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
@@ -102,7 +102,7 @@ var DocAttachment = (function () {
         });
     };
     DocAttachment.prototype._performDestroy = function (name, callback) {
-        return this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
+        this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
     };
     return DocAttachment;
 })();

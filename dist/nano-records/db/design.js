@@ -10,19 +10,12 @@ var DbDesign = (function () {
         this.db.raw.show(designId, showName, id, function (err, result) {
             if (err) {
                 if (tries <= 1 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.message) > -1)) {
-                    var design = _this.db.designs[designId];
-                    if (!design)
-                        callback(new Error("No design specified for: " + designId));
-                    else {
-                        var shows = {};
-                        shows[showName] = design.shows[showName];
-                        _this.db.doc.updateOrCreate('_design/' + designId, { language: design.language, shows: shows }, function (err) {
-                            if (err)
-                                callback(err);
-                            else
-                                _this.show(designId, showName, id, callback, tries);
-                        });
-                    }
+                    _this._persistDesign(designId, 'shows', showName, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.show(designId, showName, id, callback, tries);
+                    });
                 }
                 else
                     callback(err);
@@ -39,19 +32,12 @@ var DbDesign = (function () {
         this.db.raw.view(designId, viewName, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.message) > -1)) {
-                    var design = _this.db.designs[designId];
-                    if (!design)
-                        callback(new Error("No design specified for: " + designId));
-                    else {
-                        var views = {};
-                        views[viewName] = design.views[viewName];
-                        _this.db.doc.updateOrCreate('_design/' + designId, { language: design.language, views: views }, function (err) {
-                            if (err)
-                                callback(err);
-                            else
-                                _this.view(designId, viewName, params, callback, tries);
-                        });
-                    }
+                    _this._persistDesign(designId, 'views', viewName, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.view(designId, viewName, params, callback, tries);
+                    });
                 }
                 else
                     callback(err);
@@ -59,6 +45,26 @@ var DbDesign = (function () {
             else
                 callback(null, result); // executed successfully
         });
+    };
+    DbDesign.prototype._persistDesign = function (designId, kind, name, callback) {
+        var design = this.db.designs[designId];
+        if (!design) {
+            callback(new Error("No design specified for: " + designId));
+            return;
+        }
+        // persist document
+        var body = { language: design.language };
+        switch (kind) {
+            case 'shows':
+                body.shows = {};
+                body.shows[name] = design.shows[name] || null;
+                break;
+            case 'views':
+                body.views = {};
+                body.views[name] = design.views[name] || null;
+                break;
+        }
+        this.db.doc.updateOrCreate('_design/' + designId, body, callback);
     };
     return DbDesign;
 })();

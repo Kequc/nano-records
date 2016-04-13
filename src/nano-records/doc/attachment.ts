@@ -9,26 +9,6 @@ export default class DocAttachment
     this.doc = doc;
   }
   
-  get (name: string, callback: Function = ()=>{})
-  {
-    if (!this.doc.getId()) {
-      callback(new Error('Document does not exist.'));
-      return;
-    }
-    this._performGet(name, (err: Error, result: any) => {
-      // NOTE: This is probably unnecessarily verbose
-      if (err)
-        callback(err);
-      else
-        callback(null, result); // attachment found!
-    });
-  }
-  
-  private _performGet (name: string, callback: Function)
-  {
-    return this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
-  }
-  
   add (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
@@ -81,6 +61,26 @@ export default class DocAttachment
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, callback);
   }
   
+  get (name: string, callback: Function = ()=>{})
+  {
+    if (!this.doc.getId()) {
+      callback(new Error('Document does not exist.'));
+      return;
+    }
+    this._performGet(name, (err: Error, result: any) => {
+      // NOTE: This is probably unnecessarily verbose
+      if (err)
+        callback(err);
+      else
+        callback(null, result); // attachment found!
+    });
+  }
+  
+  private _performGet (name: string, callback: Function)
+  {
+    this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
+  }
+  
   destroy (name: string, callback: Function = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
@@ -113,6 +113,6 @@ export default class DocAttachment
   
   private _performDestroy (name: string, callback: Function)
   {
-    return this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
+    this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
   }
 }
