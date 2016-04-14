@@ -9,7 +9,7 @@ export default class Doc
   db: Db;
   attachment: DocAttachment;
   
-  constructor (db: Db, body: Object = {})
+  constructor (db: Db, body: { [index: string]: any } = {})
   {
     this.db = db;
     this.body = body;
@@ -26,18 +26,13 @@ export default class Doc
     return this.body['_rev'] || null;
   }
   
-  hasAttachment (name: string): boolean
-  {
-    return !!(this.body['_attachments'] && this.body['_attachments'][name]);
-  }
-  
-  retrieveLatest (callback: Function = ()=>{})
+  retrieveLatest (callback: (err?: Error)=>any = ()=>{})
   {
     if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performRetrieveLatest((err: Error, result: Object) => {
+    this._performRetrieveLatest((err, result) => {
       if (err)
         callback(err);
       else {
@@ -47,22 +42,22 @@ export default class Doc
     });
   }
   
-  private _performRetrieveLatest (callback: Function)
+  private _performRetrieveLatest (callback: (err: Error, result: { [index: string]: any })=>any)
   {
     this.db.raw.get(this.getId(), callback);
   }
   
-  update (body: Object, callback: Function = ()=>{}, tries: number = 0)
+  update (body: Object, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performUpdate(body, (err: Error, result: { [index: string]: any }) => {
+    this._performUpdate(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries) {
-          this.retrieveLatest((err: Error) => {
+          this.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
@@ -80,27 +75,27 @@ export default class Doc
     });
   }
   
-  private _performUpdate (body: Object, callback: Function)
+  private _performUpdate (body: { [index: string]: any }, callback: (err: Error, result: { [index: string]: any })=>any)
   {
     this.db.raw.insert(this._extendBody(body), callback);
   }
   
-  private _extendBody(body: Object): Object
+  private _extendBody(body: { [index: string]: any }): { [index: string]: any }
   {
     return deepExtend({}, this.body, body);
   }
   
-  destroy (callback: Function = ()=>{}, tries: number = 0)
+  destroy (callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performDestroy((err: Error) => {
+    this._performDestroy((err) => {
       if (err) {
         if (tries <= this.db.maxTries) {
-          this.retrieveLatest((err: Error) => {
+          this.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
@@ -117,7 +112,7 @@ export default class Doc
     });
   }
   
-  private _performDestroy (callback: Function)
+  private _performDestroy (callback: (err: Error)=>any)
   {
     this.db.raw.destroy(this.getId(), this.getRev(), callback);
   }

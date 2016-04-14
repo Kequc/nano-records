@@ -2,6 +2,9 @@ var DocAttachment = (function () {
     function DocAttachment(doc) {
         this.doc = doc;
     }
+    DocAttachment.prototype.exists = function (name) {
+        return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
+    };
     DocAttachment.prototype.add = function (name, data, mimeType, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
@@ -34,7 +37,7 @@ var DocAttachment = (function () {
             }
         });
     };
-    DocAttachment.prototype.stream = function (name, mimetype, callback) {
+    DocAttachment.prototype.write = function (name, mimetype, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         return this._performAdd(name, null, mimetype, function (err, result) {
@@ -59,16 +62,13 @@ var DocAttachment = (function () {
             callback(new Error('Document does not exist.'));
             return;
         }
-        this._performGet(name, function (err, result) {
-            // NOTE: This is probably unnecessarily verbose
-            if (err)
-                callback(err);
-            else
-                callback(null, result); // attachment found!
-        });
+        // we have a method already available for this on the db object
+        this.doc.db.doc.attachment.get(this.doc.getId(), name, callback);
     };
-    DocAttachment.prototype._performGet = function (name, callback) {
-        this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
+    DocAttachment.prototype.read = function (name, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        // we have a method already available for this on the db object
+        return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
     };
     DocAttachment.prototype.destroy = function (name, callback, tries) {
         var _this = this;

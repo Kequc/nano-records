@@ -13,14 +13,14 @@ export default class DbDoc
     this.attachment = new DbDocAttachment(this);
   }
   
-  create (body: { [index: string]: any }, callback: Function = ()=>{}, tries: number = 0)
+  create (body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{}, tries: number = 0)
   {
     tries++;
-    this._performCreate(body, (err: Error, result: { [index: string]: any }) => {
+    this._performCreate(body, (err, result) => {
       if (err) {
         if (tries <= 1 && err.message === 'no_db_file') {
           // create db
-          this._performDbCreate((err: Error) => {
+          this._performDbCreate((err) => {
             if (err)
               callback(err);
             else
@@ -38,19 +38,19 @@ export default class DbDoc
     });
   }
   
-  private _performCreate (body: { [index: string]: any }, callback: Function)
+  private _performCreate (body: { [index: string]: any }, callback: (err: Error, result: { [index: string]: any })=>any)
   {
     this.db.raw.insert(body, callback);
   }
   
-  private _performDbCreate (callback: Function)
+  private _performDbCreate (callback: (err: Error)=>any)
   {
     this.db.nano.db.create(this.db.dbName, callback);
   }
   
-  get (id: string, callback: Function = ()=>{})
+  get (id: string, callback: (err?: Error, doc?: Doc)=>any = ()=>{})
   {
-    this._performGet(id, (err: Error, result: Object) => {
+    this._performGet(id, (err, result) => {
       if (err)
         callback(err);
       else
@@ -58,14 +58,14 @@ export default class DbDoc
     });
   }
   
-  private _performGet (id: string, callback: Function)
+  private _performGet (id: string, callback: (err: Error, result: Object)=>any)
   {
     this.db.raw.get(id, callback);
   }
   
-  update (id: string, body: { [index: string]: any }, callback: Function = ()=>{})
+  update (id: string, body: { [index: string]: any }, callback: (err?: Error)=>any = ()=>{})
   {
-    this.get(id, (err: Error, doc: Doc) => {
+    this.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
@@ -73,15 +73,15 @@ export default class DbDoc
     });
   }
   
-  updateOrCreate (id: string, body: { [index: string]: any }, callback: Function = ()=>{})
+  updateOrCreate (id: string, body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{})
   {
-    this.get(id, (err: Error, doc: Doc) => {
+    this.get(id, (err, doc) => {
       if (err) {
         body['_id'] = id;
         this.create(body, callback); // attempt create
       }
       else
-        doc.update(body, (err: Error) => {
+        doc.update(body, (err) => {
           if (err)
             callback(err);
           else
@@ -90,9 +90,9 @@ export default class DbDoc
     });
   }
   
-  destroy (id: string, callback: Function = ()=>{})
+  destroy (id: string, callback: (err?: Error)=>any = ()=>{})
   {
-    this.get(id, (err: Error, doc: Doc) => {
+    this.get(id, (err, doc) => {
       if (err)
         callback(err);
       else

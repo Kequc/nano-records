@@ -36,28 +36,32 @@ db.doc.create({ hello: "there" }, function (err, doc) {
   
   // doc.getId();
   // doc.getRev();
-  // doc.hasAttachment();
   
   // doc.retrieveLatest(callback);
   // doc.update({ doot: "dot" }, callback);
   // doc.destroy(callback);
   
+  // doc.attachment.exists(name);
   // doc.attachment.add(name, data, mimeType, callback);
   // doc.attachment.get(name, callback);
   // doc.attachment.destroy(name, callback);
 
-  // stream.pipe(doc.attachment.stream(name, mimeType, callback));
+  // stream.pipe(doc.attachment.write(name, mimeType, callback));
+  // doc.attachment.read(name, callback).pipe(stream);
   
 });
 
-// db.doc.get(id, callback);
 // db.doc.update(id, { doot: "dot" }, callback);
-// db.doc.updateOrCreate(id, { doot: "dot" }, callback);
 // db.doc.destroy(id, callback);
+
+// db.doc.get(id, callback);
+// db.doc.updateOrCreate(id, { doot: "dot" }, callback);
 
 // db.doc.attachment.add(id, name, data, mimeType, callback);
 // db.doc.attachment.get(id, name, callback);
 // db.doc.attachment.destroy(id, name, callback);
+
+// db.doc.attachment.read(id, name).pipe(stream);
 
 // db.design.view(designId, viewName, params, callback);
 // db.design.show(designId, showName, id, callback);
@@ -65,112 +69,126 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 
 ### Usage
 
+```typescript
+constructor (nano: NanoInstance, dbName: string, designs?: DesignSet);
+```
 ```javascript
 var db = new NanoRecords(nano, dbName, designs);
 ```
 
 A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of designs. This command will do nothing on its own just construct an instance, no database is created, no design documents are persisted, or anything like that.
 
-### Create / get
+### create / get / updateOrCreate
 
-```javascript
-db.doc.create(body, cb[err, doc]);
+```typescript
+db.doc.create(body: Object, callback?: (err?: Error, doc?: Doc) => any);
 ```
 
 Create a document you may choose to include a custom `_id` attribute here if you wish. This command will create a database if it's missing, then persist a new document, then run the given callback with an error and undefined, or null and a NanoRecords document.
 
-```javascript
-db.doc.get(id, cb[err, doc]);
+```typescript
+db.doc.get(id: string, callback?: (err?: Error, doc?: Doc) => any);
 ```
 
 Find a document, callback returns an error and undefined, or null and a NanoRecords document.
 
+```typescript
+db.doc.updateOrCreate(id: string, body: Object, callback?: (err?: Error, doc?: Doc) => any);
+```
+
+Find a document if it exists and update it, if the document doesn't exist then create it. Callback will run with an error and undefined, or null and the NanoRecords document.
+
 ### NanoRecords document
 
-```javascript
+```typescript
 doc.body;
 ```
 
-Each maintains a body attribute with last known version from the database.
+Each maintains a body Object with last known version from the database.
 
-```javascript
-doc.getId();
+```typescript
+doc.getId(): string;
+doc.getRev(): string;
 ```
 
-Returns the document's `_id` attribute if one exists or null.
+Returns the document's `_id` or `_rev` attribute if it exists or null.
 
-```javascript
-doc.getRev();
-```
-
-Returns the document's `_rev` attribute if one exists or null.
-
-```javascript
-doc.hasAttachment(name);
-```
-
-Returns true if the document has an attachment with the given name or false.
-
-```javascript
-doc.retrieveLatest(cb[err]);
+```typescript
+doc.retrieveLatest(callback?: (err?: Error) => any);
 ```
 
 Get the latest from the database, callback will return an error or null.
 
-```javascript
-doc.update(body, cb[err]);
+```typescript
+doc.update(body: Object, callback?: (err?: Error) => any);
 ```
 
-Update document by merging the given body. Will attempt to use available body however will retrieve the latest version from the database if needed. Callback returns an error or null.
+Update document by merging the given body. Will attempt to use the document's available body Object however retrieves the latest version from the database if needed. Callback returns an error or null.
 
-```javascript
-doc.destroy(cb[err]);
+```typescript
+doc.destroy(callback?: (err?: Error) => any);
 ```
 
 Destroy document it will run the given callback with an error or null.
 
-```javascript
-doc.attachment.add(name, data, mimeType, cb[err]);
+```typescript
+doc.attachment.exists(name: string): boolean;
+```
+
+Returns whether the document has an attachment with the given name.
+
+```typescript
+doc.attachment.add(name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
 ```
 
 Add an attachment with the given name using the provided data and mimeType, it will run the given callback with an error or null.
 
-```javascript
-stream.pipe(doc.attachment.stream(name, mimeType, cb[err]));
-```
-
-You may choose to add an attachment to the document using a stream, however in this case retries will not be attempted. In case of an error you will have to manage piping a new stream yourself, callback returns an error or null.
-
-```javascript
-doc.attachment.get(name, cb[err, data]);
+```typescript
+doc.attachment.get(name: string, callback?: (err?: Error, data?: any) => any);
 ```
 
 Get an attachment from the database if it exists on this document, it will run the given callback with an error and undefined, or null and your attachment.
 
-```javascript
-doc.attachment.destroy(name, cb[err]);
+```typescript
+doc.attachment.destroy(name: string, callback?: (err?: Error) => any);
 ```
 
 Destroy an attachment it will run the given callback with an error or null.
+
+### Streams
+
+```typescript
+stream.pipe(doc.attachment.write(name: string, mimeType: string));
+```
+
+You may choose to add an attachment to the document using streams, however in this case retries will not be attempted. In case of an error you will have to manage piping a new stream yourself.
+
+```typescript
+doc.attachment.read(name: string).pipe(stream);
+```
+
+You may choose to get an attachment from the document using streams.
 
 ### Shorthand
 
 These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and returns appropriate callback parameters.
 
-```javascript
-db.doc.update(id, body, cb[err]);
-db.doc.updateOrCreate(id, body, cb[err, doc]);
-db.doc.destroy(id, cb[err]);
-db.doc.attachment.add(id, name, data, mimeType, cb[err]);
-db.doc.attachment.get(id, name, cb[err, data]);
-db.doc.attachment.destroy(id, name, cb[err]);
+```typescript
+db.doc.update(id: string, body: Object, callback?: (err?: Error) => any);
+db.doc.destroy(id: string, callback?: (err?: Error) => any);
+
+db.doc.attachment.add(id: string, name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
+db.doc.attachment.get(id: string, name: string, callback?: (err?: Error, data: any) => any);
+db.doc.attachment.destroy(id: string, name: string, callback?: (err?: Error) => any);
+
+db.doc.attachment.read(id: string, name: string).pipe(stream);
 ```
 
 ### Views
 
-```javascript
-db.design.view(designId, viewName, params, cb[err, data]);
-db.design.show(designId, showName, id, cb[err, data]);
+```typescript
+db.design.view(designId: string, viewName: string, params: Object, callback?: (err?: Error, data: Object) => any);
+db.design.show(designId: string, showName: string, id: string, callback?: (err?: Error, data: Object) => any);
 ```
 
 This will run one of your provided design views or shows and return the result. It will create a design document with the provided designId if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.

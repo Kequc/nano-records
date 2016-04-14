@@ -10,9 +10,9 @@ export default class DbDocAttachment
     this.doc = doc;
   }
   
-  add (id: string, name: string, data: any, mimeType: string, callback: Function = ()=>{})
+  add (id: string, name: string, data: any, mimeType: string, callback: (err: Error)=>any = ()=>{})
   {
-    this.doc.get(id, (err: Error, doc: Doc) => {
+    this.doc.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
@@ -20,19 +20,35 @@ export default class DbDocAttachment
     });
   }
   
-  get (id: string, name: string, callback: Function = ()=>{})
+  get (id: string, name: string, callback: (err?: Error, data?: any)=>any = ()=>{})
   {
-    this.doc.get(id, (err: Error, doc: Doc) => {
+    // doesn't need _rev
+    // so we can skip doc.get
+    this._performGet(id, name, (err, data) => {
+      // NOTE: This is probably unnecessarily verbose
       if (err)
         callback(err);
       else
-        doc.attachment.get(name, callback); // attempt attachment get
+        callback(null, data); // attachment found!
     });
   }
   
-  destroy (id: string, name: string, callback: Function = ()=>{})
+  read (id: string, name: string, callback: (err?: Error)=>any = ()=>{})
   {
-    this.doc.get(id, (err: Error, doc: Doc) => {
+    return this._performGet(id, name, function (err) {
+      // NOTE: Yeah yeah this is maybe too verbose too
+      callback(err || null);
+    });
+  }
+  
+  private _performGet (id: string, name: string, callback: (err: Error, data?: any)=>any)
+  {
+    return this.doc.db.raw.attachment.get(id, name, {}, callback);
+  }
+  
+  destroy (id: string, name: string, callback: (err: Error)=>any = ()=>{})
+  {
+    this.doc.get(id, (err, doc) => {
       if (err)
         callback(err);
       else

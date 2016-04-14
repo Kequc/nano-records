@@ -6,15 +6,16 @@ export default class Doc {
     };
     db: Db;
     attachment: DocAttachment;
-    constructor(db: Db, body?: Object);
+    constructor(db: Db, body?: {
+        [index: string]: any;
+    });
     getId(): string;
     getRev(): string;
-    hasAttachment(name: string): boolean;
-    retrieveLatest(callback?: Function): void;
+    retrieveLatest(callback?: (err?: Error) => any): void;
     private _performRetrieveLatest(callback);
-    update(body: Object, callback?: Function, tries?: number): void;
+    update(body: Object, callback?: (err?: Error) => any, tries?: number): void;
     private _performUpdate(body, callback);
     private _extendBody(body);
-    destroy(callback?: Function, tries?: number): void;
+    destroy(callback?: (err?: Error) => any, tries?: number): void;
     private _performDestroy(callback);
 }

@@ -9,17 +9,22 @@ export default class DocAttachment
     this.doc = doc;
   }
   
-  add (name: string, data: any, mimeType: string, callback: Function = ()=>{}, tries: number = 0)
+  exists (name: string): boolean
+  {
+    return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
+  }
+  
+  add (name: string, data: any, mimeType: string, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performAdd(name, data, mimeType, (err: Error, result: { [index: string]: string }) => {
+    this._performAdd(name, data, mimeType, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries) {
-          this.doc.retrieveLatest((err: Error) => {
+          this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
@@ -40,9 +45,9 @@ export default class DocAttachment
     });
   }
   
-  stream (name: string, mimetype: string, callback: Function = ()=>{})
+  write (name: string, mimetype: string, callback: (err?: Error)=>any = ()=>{})
   {
-    return this._performAdd(name, null, mimetype, (err: Error, result: { [index: string]: string }) => {
+    return this._performAdd(name, null, mimetype, (err, result) => {
       if (err)
         callback(err);
       else {
@@ -56,42 +61,38 @@ export default class DocAttachment
     });
   }
   
-  private _performAdd (name: string, data: any, mimeType: string, callback: Function)
+  private _performAdd (name: string, data: any, mimeType: string, callback: (err: Error, result: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, callback);
   }
   
-  get (name: string, callback: Function = ()=>{})
+  get (name: string, callback: (err?: Error, data?: any)=>any = ()=>{})
   {
     if (!this.doc.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
-    this._performGet(name, (err: Error, result: any) => {
-      // NOTE: This is probably unnecessarily verbose
-      if (err)
-        callback(err);
-      else
-        callback(null, result); // attachment found!
-    });
+    // we have a method already available for this on the db object
+    this.doc.db.doc.attachment.get(this.doc.getId(), name, callback);
   }
   
-  private _performGet (name: string, callback: Function)
+  read (name: string, callback: (err?: Error)=>any = ()=>{})
   {
-    this.doc.db.raw.attachment.get(this.doc.getId(), name, {}, callback);
+    // we have a method already available for this on the db object
+    return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  destroy (name: string, callback: Function = ()=>{}, tries: number = 0)
+  destroy (name: string, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performDestroy(name, (err: Error, result: { [index: string]: string }) => {
+    this._performDestroy(name, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries) {
-          this.doc.retrieveLatest((err: Error) => {
+          this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
@@ -111,7 +112,7 @@ export default class DocAttachment
     });
   }
   
-  private _performDestroy (name: string, callback: Function)
+  private _performDestroy (name: string, callback: (err: Error, result: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
   }

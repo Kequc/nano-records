@@ -25,5 +25,5 @@ export default class Db {
     constructor(nano: any, dbName: string, designs?: {
         [index: string]: iDesignInput;
     });
-    private _setupDesigns(designs?);
+    private _setupDesigns(designs);
 }
