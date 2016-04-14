@@ -186,8 +186,9 @@ db.doc.attachment.read(id: string, name: string).pipe(stream);
 ### Views
 
 ```typescript
-db.design.view(designId: string, viewName: string, params: Object, callback?: (err?: Error, data: Object) => any);
-db.design.show(designId: string, showName: string, id: string, callback?: (err?: Error, data: Object) => any);
+var callback = (err?: Error, data: Object) => any;
+db.design.view(designId: string, viewName: string, params: Object, callback?: callback);
+db.design.show(designId: string, showName: string, id: string, callback?: callback);
 ```
 
 This will run one of your provided design views or shows and return the result. It will create a design document with the provided designId if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.

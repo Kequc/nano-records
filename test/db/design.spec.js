@@ -11,14 +11,7 @@ var designs = {
     },
     "shows": {
       "post": "function (doc, req) { ... };"
-    },
-    "lists": {
-      "by_title": "function (head, req) { ... };"
     }
-  },
-  "bar": {
-    "language": "javascript",
-    "views": {}
   }
 };
 var dbName = 'nano-records-db-design-test';
