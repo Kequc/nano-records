@@ -101,7 +101,7 @@ Find a document if it exists and update it, if the document doesn't exist then c
 ### NanoRecords document
 
 ```typescript
-doc.body;
+doc.body: Object;
 ```
 
 Each maintains a body Object with last known version from the database.
@@ -130,6 +130,8 @@ doc.destroy(callback?: (err?: Error) => any);
 ```
 
 Destroy document it will run the given callback with an error or null.
+
+### Attachments
 
 ```typescript
 doc.attachment.exists(name: string): boolean;
@@ -171,7 +173,7 @@ You may choose to get an attachment from the document using streams.
 
 ### Shorthand
 
-These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and returns appropriate callback parameters.
+These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and return appropriate callback parameters.
 
 ```typescript
 db.doc.update(id: string, body: Object, callback?: (err?: Error) => any);
