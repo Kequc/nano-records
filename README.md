@@ -173,7 +173,7 @@ You may choose to get an attachment from the document using streams.
 
 ### Shorthand
 
-These methods are the same as their counterparts above but assumes fetching from the database without having to run `db.doc.get` before and return appropriate callback parameters.
+These methods are the same as their counterparts above but allow you to provide an id directly rather than running `db.doc.get` first.
 
 ```typescript
 db.doc.update(id: string, body: Object, callback?: (err?: Error) => any);
