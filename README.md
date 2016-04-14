@@ -177,7 +177,7 @@ db.doc.update(id: string, body: Object, callback?: (err?: Error) => any);
 db.doc.destroy(id: string, callback?: (err?: Error) => any);
 
 db.doc.attachment.add(id: string, name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
-db.doc.attachment.get(id: string, name: string, callback?: (err?: Error, data: any) => any);
+db.doc.attachment.get(id: string, name: string, callback?: (err?: Error, data?: any) => any);
 db.doc.attachment.destroy(id: string, name: string, callback?: (err?: Error) => any);
 
 db.doc.attachment.read(id: string, name: string).pipe(stream);
@@ -186,7 +186,7 @@ db.doc.attachment.read(id: string, name: string).pipe(stream);
 ### Views
 
 ```typescript
-var callback = (err?: Error, data: Object) => any;
+var callback = (err?: Error, data?: Object) => any;
 db.design.view(designId: string, viewName: string, params: Object, callback?: callback);
 db.design.show(designId: string, showName: string, id: string, callback?: callback);
 ```
