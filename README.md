@@ -70,10 +70,7 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 ### Usage
 
 ```typescript
-constructor (nano: NanoInstance, dbName: string, designs?: DesignSet);
-```
-```javascript
-var db = new NanoRecords(nano, dbName, designs);
+var db = new NanoRecords(nano: NanoInstance, dbName: string, designs?: DesignSet);
 ```
 
 A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of designs. This command will do nothing on its own just construct an instance, no database is created, no design documents are persisted, or anything like that.
