@@ -1,3 +1,4 @@
+"use strict";
 var mocha  = require('mocha');
 var expect = require('chai').expect;
 
@@ -26,16 +27,16 @@ var nano = require('nano')("http://127.0.0.1:5984/");
 
 describe('db', function () {
   
-  it('creates a new db object', function () {
-    var db = new NanoRecords(nano, dbName);
+  it('creates a new db object', () => {
+    let db = new NanoRecords(nano, dbName);
     expect(db.nano).to.equal(nano);
     expect(db.dbName).to.equal(dbName);
     expect(db.designs).to.eql({});
     expect(db.raw).to.respondTo('insert'); // is a nano instance
   });
   
-  it('creates a new db object with designs', function () {
-    var db = new NanoRecords(nano, dbName, designs);
+  it('creates a new db object with designs', () => {
+    let db = new NanoRecords(nano, dbName, designs);
     expect(db.nano).to.equal(nano);
     expect(db.dbName).to.equal(dbName);
     expect(db.designs).to.have.all.keys("foo", "bar");

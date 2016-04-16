@@ -1,3 +1,4 @@
+"use strict";
 var mocha  = require('mocha');
 var expect = require('chai').expect;
 
@@ -7,7 +8,7 @@ var NanoRecords = require('../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
-describe('doc-attachment', function () {
+describe('doc-attachment', () => {
   it('exists');
   it('exists no such attachment should fail')
   it('exists does not exist should fail');

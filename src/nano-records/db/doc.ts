@@ -1,6 +1,7 @@
 import {default as Db} from '../db';
 import {default as Doc} from '../doc';
 import {default as DbDocAttachment} from './doc/attachment';
+import deepExtend = require('deep-extend');
 
 export default class DbDoc
 {
@@ -31,9 +32,10 @@ export default class DbDoc
           callback(err);
       }
       else {
-        body['_id'] = result['id'];
-        body['_rev'] = result['rev'];
-        callback(null, new Doc(this.db, body)); // created successfully
+        let doc = new Doc(this.db, body); 
+        doc.body['_id'] = result['id'];
+        doc.body['_rev'] = result['rev'];
+        callback(null, doc); // created successfully
       }
     });
   }
@@ -76,17 +78,16 @@ export default class DbDoc
   updateOrCreate (id: string, body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{})
   {
     this.get(id, (err, doc) => {
-      if (err) {
-        body['_id'] = id;
-        this.create(body, callback); // attempt create
-      }
-      else
+      if (err)
+        this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
+      else {
         doc.update(body, (err) => {
           if (err)
             callback(err);
           else
             callback(null, doc);
         }); // attempt update
+      }
     });
   }
   

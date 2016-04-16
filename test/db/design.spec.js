@@ -1,3 +1,4 @@
+"use strict";
 var mocha  = require('mocha');
 var expect = require('chai').expect;
 
@@ -22,13 +23,13 @@ var forced = nano.use(dbName);
 var db = new NanoRecords(nano, dbName, designs);
 
 function forceUpdate (doc, data, callback) {
-  forced.get(doc.body['_id'], function (err, body) {
+  forced.get(doc.body['_id'], (err, body) => {
     deepExtend(body, data);
     forced.insert(body, callback);
   });
 }
 
-describe('db-design', function () {
+describe('db-design', () => {
   it('view creates a new design document');
   it('view adds new');
   it('view');

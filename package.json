@@ -5,6 +5,8 @@
   "author": "mr.kequc@gmail.com",
   "license": "ISC",
   "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
     "test": "mocha --recursive"
   },
   "files": [

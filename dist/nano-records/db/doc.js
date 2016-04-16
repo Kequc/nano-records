@@ -1,5 +1,6 @@
 var doc_1 = require('../doc');
 var attachment_1 = require('./doc/attachment');
+var deepExtend = require('deep-extend');
 var DbDoc = (function () {
     function DbDoc(db) {
         this.db = db;
@@ -25,9 +26,10 @@ var DbDoc = (function () {
                     callback(err);
             }
             else {
-                body['_id'] = result['id'];
-                body['_rev'] = result['rev'];
-                callback(null, new doc_1.default(_this.db, body)); // created successfully
+                var doc = new doc_1.default(_this.db, body);
+                doc.body['_id'] = result['id'];
+                doc.body['_rev'] = result['rev'];
+                callback(null, doc); // created successfully
             }
         });
     };
@@ -63,17 +65,16 @@ var DbDoc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
-            if (err) {
-                body['_id'] = id;
-                _this.create(body, callback); // attempt create
-            }
-            else
+            if (err)
+                _this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
+            else {
                 doc.update(body, function (err) {
                     if (err)
                         callback(err);
                     else
                         callback(null, doc);
                 }); // attempt update
+            }
         });
     };
     DbDoc.prototype.destroy = function (id, callback) {

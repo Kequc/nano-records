@@ -1,3 +1,4 @@
+"use strict";
 var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
@@ -10,26 +11,26 @@ var forced = nano.use(dbName);
 var db = new NanoRecords(nano, dbName);
 
 function forceUpdate (doc, data, callback) {
-  forced.get(doc.body['_id'], function (err, body) {
+  forced.get(doc.body['_id'], (err, body) => {
     deepExtend(body, data);
     forced.insert(body, callback);
   });
 }
 
-describe('doc', function () {
+describe('doc', () => {
   it('creates a new doc object');
   it('creates a new doc object with parameters');
-  it('creates a new doc object with a id', function () {
+  it('creates a new doc object with a id', () => {
     // var doc = docs[0];
     // expect(doc.body['_id']).to.be.ok;
     // expect(doc.getId()).to.equal(doc.body['_id']);
   });
-  it('creates a new doc object with a revision', function () {
+  it('creates a new doc object with a revision', () => {
     // var doc = docs[0];
     // expect(doc.body['_rev']).to.be.ok;
     // expect(doc.getRev()).to.equal(doc.body['_rev']);
   });
-  it('retrieveLatest', function () {
+  it('retrieveLatest', () => {
     // var doc = docs[1];
     // forceUpdate(doc, { anotheranother: "Yay!" }, function (err) {
     //   expect(err).to.be.null;
@@ -43,13 +44,13 @@ describe('doc', function () {
     //   });
     // });
   });
-  it('retrieveLatest does not exist should fail', function () {
+  it('retrieveLatest does not exist should fail', () => {
     // destroyedDoc.retrieveLatest(function (err) {
     //   expect(err).to.be.ok;
     //   done();
     // });
   });
-  it('update', function () {
+  it('update', () => {
     // var doc = docs[0];
     // doc.update({ more: 'attributes' }, function (err) {
     //   expect(err).to.be.null;
@@ -58,7 +59,7 @@ describe('doc', function () {
     //   done();
     // });
   });
-  it('update retries', function () {
+  it('update retries', () => {
     // var doc = docs[1];
     // forceUpdate(doc, { anotheranother: "changed" }, function (err, body) {
     //   expect(err).to.be.null;
@@ -77,13 +78,13 @@ describe('doc', function () {
     // });
   });
   it('update more than maxTimes should fail');
-  it('update does not exist should fail', function () {
+  it('update does not exist should fail', () => {
     // destroyedDoc.update({ boo: "oorns" }, function (err) {
     //   expect(err).to.be.ok;
     //   done();
     // });
   });
-  it('destroy', function () {
+  it('destroy', () => {
     // db.doc.create({ temp: 'document', num: 96 }, function (err, doc) {
     //   expect(err).to.be.null;
     //   expect(doc).to.be.ok;
@@ -98,7 +99,7 @@ describe('doc', function () {
   });
   it('destroy retries');
   it('destroy more than maxTries should fail');
-  it('destroy does not exist should fail', function () {
+  it('destroy does not exist should fail', () => {
     // destroyedDoc.destroy(function (err) {
     //   expect(err).to.be.ok;
     //   done();

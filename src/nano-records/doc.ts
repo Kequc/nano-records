@@ -12,7 +12,7 @@ export default class Doc
   constructor (db: Db, body: { [index: string]: any } = {})
   {
     this.db = db;
-    this.body = body;
+    this.body = deepExtend({}, body);
     this.attachment = new DocAttachment(this);
   }
   

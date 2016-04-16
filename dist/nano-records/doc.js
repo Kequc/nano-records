@@ -4,7 +4,7 @@ var Doc = (function () {
     function Doc(db, body) {
         if (body === void 0) { body = {}; }
         this.db = db;
-        this.body = body;
+        this.body = deepExtend({}, body);
         this.attachment = new attachment_1.default(this);
     }
     Doc.prototype.getId = function () {
