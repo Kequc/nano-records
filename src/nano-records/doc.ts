@@ -80,7 +80,7 @@ export default class Doc
     this.db.raw.insert(this._extendBody(body), callback);
   }
   
-  private _extendBody(body: { [index: string]: any }): { [index: string]: any }
+  private _extendBody (body: { [index: string]: any }): { [index: string]: any }
   {
     return deepExtend({}, this.body, body);
   }
