@@ -27,7 +27,11 @@ var DbDocAttachment = (function () {
         if (callback === void 0) { callback = function () { }; }
         return this._performGet(id, name, function (err) {
             // NOTE: Yeah yeah this is maybe too verbose too
-            callback(err || null);
+            // FIXME: This doesn't actually return an error if the document doesn't exist
+            if (err)
+                callback(err);
+            else
+                callback(null); // found it!
         });
     };
     DbDocAttachment.prototype._performGet = function (id, name, callback) {

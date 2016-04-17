@@ -1,30 +1,271 @@
 "use strict";
 var mocha  = require('mocha');
 var expect = require('chai').expect;
+var deepExtend = require('deep-extend');
+var fs = require('fs');
 
 var dbName = 'nano-records-doc-attachment-test';
 
 var NanoRecords = require('../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
+var forced = nano.use(dbName);
 var db = new NanoRecords(nano, dbName);
 
+var fileName = "attachment-doesnt-exist.txt";
+
+function forceUpdate (doc, data, callback) {
+  forced.get(doc.getId(), (err, body) => {
+    deepExtend(body, data);
+    forced.insert(body, (err, body) => {
+      var oldRev = doc.getRev();
+      expect(oldRev).to.be.ok;
+      expect(body['rev']).to.be.ok;
+      expect(oldRev).to.not.equal(body['rev']);
+      callback();
+    });
+  });
+}
+
+function streamToString (stream, callback) {
+  var chunks = [];
+  stream.on('data', (chunk) => {
+    chunks.push(chunk);
+  });
+  stream.on('end', () => {
+    if (callback)
+      callback(chunks.join(''));
+  });
+}
+
 describe('doc-attachment', () => {
-  it('exists');
-  it('exists no such attachment should fail')
-  it('exists does not exist should fail');
-  it('add');
-  it('add retries');
-  it('add more than maxTimes should fail');
-  it('add does not exist should fail');
-  it('write');
-  it('write does not retry should fail');
-  it('write does not exist should fail');
-  it('get');
-  it('get does not exist should fail');
-  it('read');
-  it('read does not exist should fail');
-  it('destroy');
-  it('destroy retries');
-  it('destroy more than maxTimes should fail');
-  it('destroy does not exist should fail');
+  
+  describe('document does not exist', () => {
+    var _doc;
+    before((done) => {
+      _doc = undefined;
+      db.doc.create({ hi: "there" }, (err, doc) => {
+        _doc = doc;
+        _doc.attachment.add(fileName, "Oops!", "text/plain", () => {
+          _doc.destroy(() => { done(); })
+        });
+      });
+    });
+    
+    it('exists', () => {
+      // should fail
+      expect(_doc.attachment.exists(fileName)).to.be.false;
+    });
+    it('add', (done) => {
+      // should fail
+      _doc.attachment.add(fileName, "Cannot add here.", "text/plain", (err) => {
+        expect(err).to.be.ok;
+        expect(_doc.attachment.exists(fileName)).to.be.false;
+        expect(_doc.getId()).to.be.null;
+        done();
+      });
+    });
+    it('write', (done) => {
+      // should fail
+      fs.createReadStream('./test/attachment.txt').pipe(_doc.attachment.write(fileName, "text/plain", (err) => {
+        expect(err).to.be.ok;
+        expect(_doc.attachment.exists(fileName)).to.be.false;
+        expect(_doc.getId()).to.be.null;
+        done();
+      }));
+    });
+    it('get', (done) => {
+      // should fail
+      _doc.attachment.get(fileName, (err, data) => {
+        expect(err).to.be.ok;
+        expect(data).to.be.undefined;
+        expect(_doc.getId()).to.be.null;
+        done();
+      });
+    });
+    it('read', () => {
+      // should fail
+      // FIXME: This doesn't actually return an error if the document doesn't exist
+      // streamToString(_doc.attachment.read(fileName, (err) => {
+      //   expect(err).to.be.ok;
+      //   done();
+      // }));
+    });
+    it('destroy', (done) => {
+      // should fail
+      _doc.attachment.destroy(fileName, (err) => {
+        expect(err).to.be.ok;
+        expect(_doc.attachment.exists(fileName)).to.be.false;
+        expect(_doc.getId()).to.be.null;
+        done();
+      });
+    });
+  });
+  
+  describe('document exists', () => {
+    var _doc;
+    before((done) => {
+      _doc = undefined;
+      db.doc.create({ hi: "there" }, (err, doc) => {
+        _doc = doc;
+        done();
+      });
+    });
+    
+    describe('attachment does not exist', () => {
+      beforeEach((done) => {
+        _doc.attachment.destroy(fileName, () => { done(); });
+      });
+      
+      it('exists', () => {
+        // should fail
+        expect(_doc.attachment.exists(fileName)).to.be.false;
+      });
+      it('add', (done) => {
+        // should be successful
+        _doc.attachment.add(fileName, "Can add here.", "text/plain", (err) => {
+          expect(err).to.be.null;
+          expect(_doc.attachment.exists(fileName)).to.be.true;
+          expect(_doc.getId()).to.be.ok;
+          _doc.retrieveLatest((err) => {
+            expect(_doc.attachment.exists(fileName)).to.be.true;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          });
+        });
+      });
+      it('add retries', (done) => {
+        // should be successful
+        forceUpdate(_doc, { changed: "bootboot" }, (err, body) => {
+          _doc.attachment.add(fileName, "Can add here too.", "text/plain", (err) => {
+            expect(err).to.be.null;
+            expect(_doc.attachment.exists(fileName)).to.be.true;
+            expect(_doc.getId()).to.be.ok;
+            _doc.retrieveLatest((err) => {
+              expect(_doc.attachment.exists(fileName)).to.be.true;
+              expect(_doc.getId()).to.be.ok;
+              done();
+            });
+          });
+        });
+      });
+      it('add more than maxTimes should fail');
+      it('write', (done) => {
+        // should be successful
+        fs.createReadStream('./test/attachment.txt').pipe(_doc.attachment.write(fileName, "text/plain", (err) => {
+          expect(err).to.be.null;
+          expect(_doc.attachment.exists(fileName)).to.be.true;
+          expect(_doc.getId()).to.be.ok;
+          _doc.retrieveLatest((err) => {
+            expect(_doc.attachment.exists(fileName)).to.be.true;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          });
+        }));
+      });
+      it('get', (done) => {
+        // should fail
+        _doc.attachment.get(fileName, (err, data) => {
+          expect(err).to.be.ok;
+          expect(data).to.be.undefined;
+          expect(_doc.getId()).to.be.ok;
+          done();
+        });
+      });
+      it('read', (done) => {
+        // should fail
+        streamToString(_doc.attachment.read(fileName, (err) => {
+          expect(err).to.be.ok;
+          done();
+        }));
+      });
+      it('destroy', (done) => {
+        // should be successful
+        _doc.attachment.destroy(fileName, (err) => {
+          expect(err).to.be.null;
+          expect(_doc.attachment.exists(fileName)).to.be.false;
+          expect(_doc.getId()).to.be.ok;
+          done();
+        });
+      });
+    });
+    
+    describe('attachment exists', () => {
+      beforeEach((done) => {
+        _doc.attachment.destroy(fileName, () => {
+          _doc.attachment.add(fileName, "This is an example attachment.", "text/plain", (err) => { done(); });
+        });
+      });
+      
+      it('exists', () => {
+        // should be successful
+        expect(_doc.attachment.exists(fileName)).to.be.true;
+      });
+      it('add', (done) => {
+        // should be successful
+        _doc.attachment.add(fileName, "Can add here also.", "text/plain", (err) => {
+          expect(err).to.be.null;
+          expect(_doc.attachment.exists(fileName)).to.be.true;
+          expect(_doc.getId()).to.be.ok;
+          _doc.retrieveLatest((err) => {
+            expect(_doc.attachment.exists(fileName)).to.be.true;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          });
+        });
+      });
+      it('write', (done) => {
+        // should be successful
+        fs.createReadStream('./test/attachment.txt').pipe(_doc.attachment.write(fileName, "text/plain", (err) => {
+          expect(err).to.be.null;
+          expect(_doc.attachment.exists(fileName)).to.be.true;
+          expect(_doc.getId()).to.be.ok;
+          _doc.retrieveLatest((err) => {
+            expect(_doc.attachment.exists(fileName)).to.be.true;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          });
+        }));
+      });
+      it('get', (done) => {
+        // should be successful
+        _doc.attachment.get(fileName, (err, data) => {
+          expect(err).to.be.null;
+          expect(data).to.be.ok;
+          expect(_doc.getId()).to.be.ok;
+          done();
+        });
+      });
+      it('read', (done) => {
+        // should be successful
+        streamToString(_doc.attachment.read(fileName, (err) => {
+          expect(err).to.be.null;
+          done();
+        }), (result) => {
+          expect(result).to.equal('This is an example attachment.');
+        });
+      });
+      it('destroy', (done) => {
+        // should be successful
+        _doc.attachment.destroy(fileName, (err) => {
+          expect(err).to.be.null;
+          expect(_doc.attachment.exists(fileName)).to.be.false;
+          expect(_doc.getId()).to.be.ok;
+          done();
+        });
+      });
+      it('destroy retries', (done) => {
+        // should be successful
+        forceUpdate(_doc, { changed: "batty" }, (err, body) => {
+          _doc.attachment.destroy(fileName, (err) => {
+            expect(err).to.be.null;
+            expect(_doc.attachment.exists(fileName)).to.be.false;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          });
+        });
+      });
+      it('destroy more than maxTimes should fail');
+    });
+    
+  });
 });

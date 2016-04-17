@@ -75,14 +75,17 @@ describe('doc', () => {
     });
     
     it('getId', () => {
+      // should be successful
       expect(_doc.body['_id']).to.be.ok;
       expect(_doc.getId()).to.equal(_doc.body['_id']);
     });
     it('getRev', () => {
+      // should be successful
       expect(_doc.body['_rev']).to.be.ok;
       expect(_doc.getRev()).to.equal(_doc.body['_rev']);
     });
     it('retrieveLatest', (done) => {
+      // should be successful
       forceUpdate(_doc, { anotheranother: "Yay!", complex: "cats and dogs" }, (err) => {
         expect(err).to.be.null;
         expect(_doc.body).to.not.have.keys('anotheranother');
@@ -100,6 +103,7 @@ describe('doc', () => {
       });
     });
     it('update', (done) => {
+      // should be successful
       var oldRev = _doc.getRev();
       expect(oldRev).to.be.ok;
       _doc.update({ more: 'attributes', complex: "Samsonite" }, (err) => {
@@ -113,6 +117,7 @@ describe('doc', () => {
       });
     });
     it('update retries', (done) => {
+      // should be successful
       forceUpdate(_doc, { anotheranother: "changed" }, (err, body) => {
         expect(err).to.be.null;
         var oldRev_1 = _doc.getRev();
@@ -135,6 +140,7 @@ describe('doc', () => {
     });
     it('update more than maxTimes should fail');
     it('destroy', (done) => {
+      // should be successful
       _doc.destroy(function (err) {
         expect(err).to.be.null;
         expect(_doc.body).to.eql({});
@@ -142,6 +148,7 @@ describe('doc', () => {
       });
     });
     it('destroy retries', (done) => {
+      // should be successful
       forceUpdate(_doc, { deleteMe: true }, (err, body) => {
         var oldRev = _doc.getRev();
         expect(oldRev).to.be.ok;
