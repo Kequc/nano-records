@@ -157,7 +157,15 @@ describe('doc', () => {
         });
       });
     });
-    it('update more than maxTimes should fail');
+    it('update more than maxTimes should fail', (done) => {
+      // should fail
+      forceUpdate(_doc, { a: 'change' }, () => {
+        _doc.update({ boo: "oorns" }, (err) => {
+          expect(err).to.be.ok;
+          done();
+        }, db.maxTries); // tried x times
+      });
+    });
     it('destroy', (done) => {
       // should be successful
       assertDestroy(_doc, done);
@@ -168,7 +176,15 @@ describe('doc', () => {
         assertDestroy(_doc, done);
       });
     });
-    it('destroy more than maxTries should fail');
+    it('destroy more than maxTries should fail', (done) => {
+      // should fail
+      forceUpdate(_doc, { a: 'change' }, () => {
+        _doc.destroy((err) => {
+          expect(err).to.be.ok;
+          done();
+        }, db.maxTries); // tried x times
+      });
+    });
   });
 
 });

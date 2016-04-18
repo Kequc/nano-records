@@ -201,7 +201,17 @@ describe('doc-attachment', () => {
           assertPersist(_doc, done);
         });
       });
-      it('persist more than maxTimes should fail');
+      it('persist more than maxTimes should fail', (done) => {
+        // should fail
+        forceUpdate(_doc, { a: 'change' }, () => {
+          _doc.attachment.persist(fileName, "Too many tries.", "text/plain", (err) => {
+            expect(err).to.be.ok;
+            expect(_doc.attachment.exists(fileName)).to.be.false;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          }, db.maxTries); // tried x times
+        });
+      });
       it('write', (done) => {
         // should be successful
         assertWrite(_doc, done);
@@ -266,7 +276,17 @@ describe('doc-attachment', () => {
           assertDestroy(_doc, done);
         });
       });
-      it('destroy more than maxTimes should fail');
+      it('destroy more than maxTimes should fail', (done) => {
+        // should fail
+        forceUpdate(_doc, { a: 'change' }, () => {
+          _doc.attachment.destroy(fileName, (err) => {
+            expect(err).to.be.ok;
+            expect(_doc.attachment.exists(fileName)).to.be.true;
+            expect(_doc.getId()).to.be.ok;
+            done();
+          }, db.maxTries); // tried x times
+        });
+      });
     });
     
   });
