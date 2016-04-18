@@ -2,13 +2,13 @@ var DbDocAttachment = (function () {
     function DbDocAttachment(doc) {
         this.doc = doc;
     }
-    DbDocAttachment.prototype.add = function (id, name, data, mimeType, callback) {
+    DbDocAttachment.prototype.persist = function (id, name, data, mimeType, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
-                doc.attachment.add(name, data, mimeType, callback); // attempt attachment
+                doc.attachment.persist(name, data, mimeType, callback); // attempt attachment
         });
     };
     DbDocAttachment.prototype.get = function (id, name, callback) {

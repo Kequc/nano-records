@@ -15,28 +15,28 @@ export default class DocAttachment
     return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
   }
   
-  add (name: string, data: any, mimeType: string, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
+  persist (name: string, data: any, mimeType: string, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performAdd(name, data, mimeType, (err, result) => {
+    this._performPersist(name, data, mimeType, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.statusCode == 409) {
           this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.add(name, data, mimeType, callback, tries);
+              this.persist(name, data, mimeType, callback, tries);
           });
         }
         else
           callback(err);
       }
       else {
-        // attachment added
+        // attachment persisted
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
@@ -48,11 +48,11 @@ export default class DocAttachment
   
   write (name: string, mimetype: string, callback: (err?: Error)=>any = ()=>{})
   {
-    return this._performAdd(name, null, mimetype, (err, result) => {
+    return this._performPersist(name, null, mimetype, (err, result) => {
       if (err)
         callback(err);
       else {
-        // attachment streamed
+        // attachment persisted
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
@@ -62,7 +62,7 @@ export default class DocAttachment
     });
   }
   
-  private _performAdd (name: string, data: any, mimeType: string, callback: (err: iNanoError, result: { [index: string]: string })=>any)
+  private _performPersist (name: string, data: any, mimeType: string, callback: (err: iNanoError, result: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, callback);
   }

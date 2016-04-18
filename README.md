@@ -42,7 +42,7 @@ db.doc.create({ hello: "there" }, function (err, doc) {
   // doc.destroy(callback);
   
   // doc.attachment.exists(name);
-  // doc.attachment.add(name, data, mimeType, callback);
+  // doc.attachment.persist(name, data, mimeType, callback);
   // doc.attachment.get(name, callback);
   // doc.attachment.destroy(name, callback);
 
@@ -57,7 +57,7 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 // db.doc.get(id, callback);
 // db.doc.updateOrCreate(id, { doot: "dot" }, callback);
 
-// db.doc.attachment.add(id, name, data, mimeType, callback);
+// db.doc.attachment.persist(id, name, data, mimeType, callback);
 // db.doc.attachment.get(id, name, callback);
 // db.doc.attachment.destroy(id, name, callback);
 
@@ -137,10 +137,10 @@ doc.attachment.exists(name: string): boolean;
 Returns whether the document has an attachment with the given name.
 
 ```typescript
-doc.attachment.add(name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
+doc.attachment.persist(name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
 ```
 
-Add an attachment with the given name using the provided data and mimeType, it will run the given callback with an error or null.
+Persist an attachment with the given name using the provided data and mimeType, it will run the given callback with an error or null.
 
 ```typescript
 doc.attachment.get(name: string, callback?: (err?: Error, data?: any) => any);
@@ -176,7 +176,7 @@ These methods are the same as their counterparts above but allow you to provide 
 db.doc.update(id: string, body: Object, callback?: (err?: Error) => any);
 db.doc.destroy(id: string, callback?: (err?: Error) => any);
 
-db.doc.attachment.add(id: string, name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
+db.doc.attachment.persist(id: string, name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
 db.doc.attachment.get(id: string, name: string, callback?: (err?: Error, data?: any) => any);
 db.doc.attachment.destroy(id: string, name: string, callback?: (err?: Error) => any);
 

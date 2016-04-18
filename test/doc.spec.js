@@ -40,6 +40,20 @@ function assertBody (doc, asserts, done) {
   });
 }
 
+function assertDestroy (doc, done) {
+  let id = doc.getId();
+  doc.destroy(function (err) {
+    expect(err).to.be.null;
+    expect(doc.body).to.eql({});
+    db.doc.get(id, (err, gotDoc) => {
+      expect(err).to.be.ok;
+      expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+      expect(gotDoc).to.be.undefined;
+      done();
+    });
+  });
+}
+
 describe('doc', () => {
   
   describe('document does not exist', () => {
@@ -108,8 +122,8 @@ describe('doc', () => {
     it('retrieveLatest', (done) => {
       // should be successful
       let changes = { anotheranother: "Yay!", complex: "cats and dogs" };
+      let asserts = deepExtend({}, _doc.body, changes);
       forceUpdate(_doc, changes, () => {
-        let asserts = deepExtend({}, _doc.body, changes);
         expect(_doc.body).to.not.have.keys('anotheranother');
         _doc.retrieveLatest((err) => {
           expect(err).to.be.null;
@@ -133,8 +147,8 @@ describe('doc', () => {
       // should be successful
       let changes1 = { anotheranother: "changed" };
       let changes2 = { added: "attr-again", num: 20 };
+      let asserts = deepExtend({}, _doc.body, changes1, changes2);
       forceUpdate(_doc, changes1, () => {
-        let asserts = deepExtend({}, _doc.body, changes1, changes2);
         expect(_doc.body).to.not.have.keys('anotheranother', 'added');
         _doc.update(changes2, (err) => {
           expect(err).to.be.null;
@@ -146,32 +160,12 @@ describe('doc', () => {
     it('update more than maxTimes should fail');
     it('destroy', (done) => {
       // should be successful
-      let id = _doc.getId();
-      _doc.destroy(function (err) {
-        expect(err).to.be.null;
-        expect(_doc.body).to.eql({});
-        db.doc.get(id, (err, gotDoc) => {
-          expect(err).to.be.ok;
-          expect(err.reason).to.be.oneOf(['missing', 'deleted']);
-          expect(gotDoc).to.be.undefined;
-          done();
-        });
-      });
+      assertDestroy(_doc, done);
     });
     it('destroy retries', (done) => {
       // should be successful
       forceUpdate(_doc, { deleteMe: true }, () => {
-        let id = _doc.getId();
-        _doc.destroy((err) => {
-          expect(err).to.be.null;
-          expect(_doc.body).to.eql({});
-          db.doc.get(id, (err, gotDoc) => {
-            expect(err).to.be.ok;
-            expect(err.reason).to.be.oneOf(['missing', 'deleted']);
-            expect(gotDoc).to.be.undefined;
-            done();
-          });
-        });
+        assertDestroy(_doc, done);
       });
     });
     it('destroy more than maxTries should fail');

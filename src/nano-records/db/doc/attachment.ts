@@ -11,13 +11,13 @@ export default class DbDocAttachment
     this.doc = doc;
   }
   
-  add (id: string, name: string, data: any, mimeType: string, callback: (err: Error)=>any = ()=>{})
+  persist (id: string, name: string, data: any, mimeType: string, callback: (err: Error)=>any = ()=>{})
   {
     this.doc.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
-        doc.attachment.add(name, data, mimeType, callback); // attempt attachment
+        doc.attachment.persist(name, data, mimeType, callback); // attempt attachment
     });
   }
   

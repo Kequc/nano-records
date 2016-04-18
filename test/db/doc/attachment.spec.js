@@ -15,7 +15,7 @@ describe('db-doc-attachment', () => {
       nano.db.destroy(dbName, () => { done(); });
     });
     
-    it('add');
+    it('persist');
     it('get');
     it('read');
     it('destroy');
@@ -31,7 +31,7 @@ describe('db-doc-attachment', () => {
     
     describe('document does not exist', () => {
       
-      it('add');
+      it('persist');
       it('get');
       it('read');
       it('destroy');
@@ -40,9 +40,9 @@ describe('db-doc-attachment', () => {
     
     describe('document exists', () => {
       
-      it('add');
-      it('add retries');
-      it('add more than maxTimes should fail');
+      it('persist');
+      it('persist retries');
+      it('persist more than maxTimes should fail');
       it('get');
       it('read');
       it('destroy');
