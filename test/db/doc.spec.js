@@ -37,6 +37,20 @@ function assertGet (doc, done) {
   });
 }
 
+function assertBody (doc, asserts, done) {
+  for (let key in asserts) {
+    if (key != "_rev")
+      expect(doc.body[key]).to.eql(asserts[key]);
+  }
+  expect(asserts['_rev']).to.not.equal(doc.getRev());
+  db.doc.get(doc.getId(), (err, gotDoc) => {
+    expect(err).to.be.null;
+    expect(gotDoc).to.be.ok;
+    expect(gotDoc.body).to.eql(doc.body);
+    done();
+  });
+}
+
 function assertUpdateOrCreate (id, done, asserts) {
   let changes = { another: 'one', complex: 'changed' };
   asserts = deepExtend({}, asserts || {}, changes);
@@ -45,17 +59,7 @@ function assertUpdateOrCreate (id, done, asserts) {
     expect(doc).to.be.ok;
     expect(doc.body).to.include.keys('another', 'complex', '_id', '_rev');
     expect(doc.getId()).to.equal(id);
-    for (let key in asserts) {
-      if (key != "_rev")
-        expect(doc.body[key]).to.eql(asserts[key]);
-    }
-    expect(asserts['_rev']).to.not.equal(doc.getRev());
-    db.doc.get(id, (err, gotDoc) => {
-      expect(err).to.be.null;
-      expect(gotDoc).to.be.ok;
-      expect(gotDoc.body).to.eql(doc.body);
-      done();
-    });
+    assertBody(doc, asserts, done);
   });
 }
 
@@ -67,17 +71,7 @@ function assertUpdate (doc, done) {
     doc.retrieveLatest((err) => {
       expect(err).to.be.null;
       expect(doc.body).to.include.keys('complex', 'updated', '_id', '_rev');
-      for (let key in asserts) {
-        if (key != "_rev")
-          expect(doc.body[key]).to.eql(asserts[key]);
-      }
-      expect(asserts['_rev']).to.not.equal(doc.getRev());
-      db.doc.get(doc.getId(), (err, gotDoc) => {
-        expect(err).to.be.null;
-        expect(gotDoc).to.be.ok;
-        expect(gotDoc.body).to.eql(doc.body);
-        done();
-      });
+      assertBody(doc, asserts, done);
     });
   });
 }

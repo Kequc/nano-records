@@ -26,6 +26,20 @@ function forceUpdate (doc, data, callback) {
   });
 }
 
+function assertBody (doc, asserts, done) {
+  for (let key in asserts) {
+    if (key != "_rev")
+      expect(doc.body[key]).to.eql(asserts[key]);
+  }
+  expect(asserts['_rev']).to.not.equal(doc.getRev());
+  db.doc.get(doc.getId(), (err, gotDoc) => {
+    expect(err).to.be.null;
+    expect(gotDoc).to.be.ok;
+    expect(gotDoc.body).to.eql(doc.body);
+    done();
+  });
+}
+
 describe('doc', () => {
   
   describe('document does not exist', () => {
@@ -93,71 +107,70 @@ describe('doc', () => {
     });
     it('retrieveLatest', (done) => {
       // should be successful
-      forceUpdate(_doc, { anotheranother: "Yay!", complex: "cats and dogs" }, (err) => {
+      let changes = { anotheranother: "Yay!", complex: "cats and dogs" };
+      forceUpdate(_doc, changes, () => {
+        let asserts = deepExtend({}, _doc.body, changes);
         expect(_doc.body).to.not.have.keys('anotheranother');
-        var oldRev = _doc.getRev();
         _doc.retrieveLatest((err) => {
           expect(err).to.be.null;
-          expect(_doc.body).to.have.all.keys('complex', 'deep', 'num', '_id', '_rev', 'anotheranother');
-          expect(_doc.body['anotheranother']).to.equal("Yay!");
-          expect(_doc.body['complex']).to.equal("cats and dogs");
-          expect(_doc.getRev()).to.be.ok;
-          expect(_doc.getRev()).to.not.equal(oldRev);
-          done();
+          expect(_doc.body).to.include.keys('complex', 'anotheranother', '_id', '_rev');
+          assertBody(_doc, asserts, done);
         });
       });
     });
     it('update', (done) => {
       // should be successful
-      var oldRev = _doc.getRev();
-      expect(oldRev).to.be.ok;
-      _doc.update({ more: 'attributes', complex: "Samsonite" }, (err) => {
+      let changes = { more: "attributes", complex: "Samsonite" };
+      let asserts = deepExtend({}, _doc.body, changes);
+      expect(_doc.body).to.not.have.keys('more');
+      _doc.update(changes, (err) => {
         expect(err).to.be.null;
-        expect(_doc.body).to.have.all.keys('complex', 'deep', 'num', '_id', '_rev', 'more');
-        expect(_doc.body['more']).to.equal('attributes');
-        expect(_doc.body['complex']).to.equal('Samsonite');
-        expect(_doc.getRev()).to.be.ok;
-        expect(_doc.getRev()).to.not.equal(oldRev);
-        done();
+        expect(_doc.body).to.include.keys('complex', 'more', '_id', '_rev');
+        assertBody(_doc, asserts, done);
       });
     });
     it('update retries', (done) => {
       // should be successful
-      forceUpdate(_doc, { anotheranother: "changed" }, (err, body) => {
-        var oldRev_1 = _doc.getRev();
-        var oldRev_2 = body['rev'];
-        expect(oldRev_1).to.be.ok;
-        expect(oldRev_2).to.be.ok;
-        expect(oldRev_1).to.not.equal(oldRev_2);
-        _doc.update({ added: 'attr-again', num: 20 }, (err) => {
+      let changes1 = { anotheranother: "changed" };
+      let changes2 = { added: "attr-again", num: 20 };
+      forceUpdate(_doc, changes1, () => {
+        let asserts = deepExtend({}, _doc.body, changes1, changes2);
+        expect(_doc.body).to.not.have.keys('anotheranother', 'added');
+        _doc.update(changes2, (err) => {
           expect(err).to.be.null;
-          expect(_doc.body).to.have.all.keys('complex', 'deep', 'num', '_id', '_rev', 'added', 'anotheranother');
-          expect(_doc.body['anotheranother']).to.equal('changed');
-          expect(_doc.body['added']).to.equal('attr-again');
-          expect(_doc.body['num']).to.equal(20);
-          expect(_doc.getRev()).to.be.ok;
-          expect(_doc.getRev()).to.not.equal(oldRev_1);
-          expect(_doc.getRev()).to.not.equal(oldRev_2);
-          done();
+          expect(_doc.body).to.include.keys('added', 'anotheranother', 'num', '_id', '_rev');
+          assertBody(_doc, asserts, done);
         });
       });
     });
     it('update more than maxTimes should fail');
     it('destroy', (done) => {
       // should be successful
+      let id = _doc.getId();
       _doc.destroy(function (err) {
         expect(err).to.be.null;
         expect(_doc.body).to.eql({});
-        done();
+        db.doc.get(id, (err, gotDoc) => {
+          expect(err).to.be.ok;
+          expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+          expect(gotDoc).to.be.undefined;
+          done();
+        });
       });
     });
     it('destroy retries', (done) => {
       // should be successful
-      forceUpdate(_doc, { deleteMe: true }, (err, body) => {
+      forceUpdate(_doc, { deleteMe: true }, () => {
+        let id = _doc.getId();
         _doc.destroy((err) => {
           expect(err).to.be.null;
           expect(_doc.body).to.eql({});
-          done();
+          db.doc.get(id, (err, gotDoc) => {
+            expect(err).to.be.ok;
+            expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+            expect(gotDoc).to.be.undefined;
+            done();
+          });
         });
       });
     });

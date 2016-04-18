@@ -46,16 +46,16 @@ describe('db-design', () => {
     it('view', (done) => {
       // should be successful
       db.design.view("foo", "comments", {}, (err, data) => {
-        console.log(err);
-        console.log(data);
+        // console.log(err);
+        // console.log(data);
         done();
       });
     });
     it('show', (done) => {
       // should be successful
       db.design.show("foo", "post", "fake-id-doesnt-exist", (err, data) => {
-        console.log(err);
-        console.log(data);
+        // console.log(err);
+        // console.log(data);
         done();
       });
     });
