@@ -9,8 +9,7 @@ export default class DbDoc {
         [index: string]: any;
     }, callback?: (err?: Error, doc?: Doc) => any, tries?: number): void;
     private _performCreate(body, callback);
-    private _performDbCreate(callback);
-    get(id: string, callback?: (err?: Error, doc?: Doc) => any): void;
+    get(id: string, callback?: (err?: Error, doc?: Doc) => any, tries?: number): void;
     private _performGet(id, callback);
     update(id: string, body: {
         [index: string]: any;

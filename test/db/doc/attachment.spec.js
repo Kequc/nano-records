@@ -9,16 +9,46 @@ var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
 describe('db-doc-attachment', () => {
-  it('add');
-  it('add retries');
-  it('add more than maxTimes should fail');
-  it('add does not exist should fail');
-  it('get');
-  it('get does not exist should fail');
-  it('read');
-  it('read does not exist should fail');
-  it('destroy');
-  it('destroy retries');
-  it('destroy more than maxTimes should fail');
-  it('destroy does not exist should fail');
+
+  describe('database does not exist', () => {
+    beforeEach((done) => {
+      nano.db.destroy(dbName, () => { done(); });
+    });
+    
+    it('add');
+    it('get');
+    it('read');
+    it('destroy');
+    
+  });
+  
+  describe('database exists', () => {
+    before((done) => {
+      nano.db.destroy(dbName, () => {
+        nano.db.create(dbName, () => { done(); });
+      });
+    });
+    
+    describe('document does not exist', () => {
+      
+      it('add');
+      it('get');
+      it('read');
+      it('destroy');
+      
+    });
+    
+    describe('document exists', () => {
+      
+      it('add');
+      it('add retries');
+      it('add more than maxTimes should fail');
+      it('get');
+      it('read');
+      it('destroy');
+      it('destroy retries');
+      it('destroy more than maxTimes should fail');
+      
+    });
+  });
 });

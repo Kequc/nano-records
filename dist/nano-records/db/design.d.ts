@@ -5,5 +5,5 @@ export default class DbDesign {
     show(designId: string, showName: string, id: string, callback?: (err?: Error, data?: any) => any, tries?: number): void;
     view(designId: string, viewName: string, params: Object, callback?: (err?: Error, data?: any) => any, tries?: number): void;
     private _performRetrieveLatest(designId, callback);
-    private _persistDesign(designId, kind, name, callback);
+    private _persistDesign(designId, kinds, callback);
 }

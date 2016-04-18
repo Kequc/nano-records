@@ -1,6 +1,7 @@
 "use strict";
 var mocha  = require('mocha');
 var expect = require('chai').expect;
+var deepExtend = require('deep-extend');
 
 var designs = {
   "foo": {
@@ -44,11 +45,19 @@ describe('db-design', () => {
     
     it('view', (done) => {
       // should be successful
-      done();
+      db.design.view("foo", "comments", {}, (err, data) => {
+        console.log(err);
+        console.log(data);
+        done();
+      });
     });
     it('show', (done) => {
       // should be successful
-      done();
+      db.design.show("foo", "post", "fake-id-doesnt-exist", (err, data) => {
+        console.log(err);
+        console.log(data);
+        done();
+      });
     });
   });
   
@@ -85,20 +94,10 @@ describe('db-design', () => {
           // should be successful
           done();
         });
-        it('view retries', (done) => {
-          // should be successful
-          done();
-        });
-        it('view more than maxTimes should fail');
         it('show', (done) => {
           // should be successful
           done();
         });
-        it('show retries', (done) => {
-          // should be successful
-          done();
-        });
-        it('show more than maxTimes should fail');
       });
     });
     

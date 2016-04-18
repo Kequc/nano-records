@@ -15,7 +15,7 @@ var DbDoc = (function () {
             if (err) {
                 if (tries <= 1 && err.reason === 'no_db_file') {
                     // create db
-                    _this._performDbCreate(function (err) {
+                    _this.db.persist(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -36,15 +36,24 @@ var DbDoc = (function () {
     DbDoc.prototype._performCreate = function (body, callback) {
         this.db.raw.insert(body, callback);
     };
-    DbDoc.prototype._performDbCreate = function (callback) {
-        this.db.nano.db.create(this.db.dbName, callback);
-    };
-    DbDoc.prototype.get = function (id, callback) {
+    DbDoc.prototype.get = function (id, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
+        if (tries === void 0) { tries = 0; }
+        tries++;
         this._performGet(id, function (err, result) {
             if (err)
-                callback(err);
+                if (tries <= 1 && err.reason === 'no_db_file') {
+                    // create db
+                    _this.db.persist(function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.get(id, callback, tries);
+                    });
+                }
+                else
+                    callback(err);
             else
                 callback(null, new doc_1.default(_this.db, result)); // document found!
         });

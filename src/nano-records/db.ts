@@ -1,6 +1,7 @@
 import {default as Doc} from './doc';
 import {default as DbDoc} from './db/doc';
 import {default as DbDesign} from './db/design';
+import deepExtend = require('deep-extend');
 
 export interface iDesignInput {
   language?: string,
@@ -32,28 +33,37 @@ export default class Db
   doc: DbDoc;
   design: DbDesign;
   
-  constructor (nano: any, dbName: string, designs?: { [index: string]: iDesignInput })
+  constructor (nano: any, dbName: string, designs: { [index: string]: iDesignInput } = {})
   {
     this.nano = nano;
     this.dbName = dbName;
     this.raw = this.nano.use(this.dbName);
     
-    if (designs)
-      this._setupDesigns(designs);
+    for (let key in designs) {
+      this.designs[key] = {
+        language: "javascript",
+        shows: {},
+        views: {}
+      };
+    }
+    deepExtend(this.designs, designs);
     
     this.doc = new DbDoc(this);
     this.design = new DbDesign(this);
   }
   
-  private _setupDesigns (designs: { [index: string]: iDesignInput })
+  persist (callback: (err: Error)=>any = ()=>{})
   {
-    for (let key in designs) {
-      let design = designs[key] || {};
-      this.designs[key] = {
-        language: design.language || "javascript",
-        shows: design.shows || {},
-        views: design.views || {}
-      };
-    }
+    this._performPersist((err) => {
+      if (err)
+        callback(err);
+      else
+        callback(null);
+    });
+  }
+  
+  private _performPersist (callback: (err: iNanoError)=>any)
+  {
+    this.nano.db.create(this.dbName, callback);
   }
 }

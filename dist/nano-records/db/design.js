@@ -9,22 +9,18 @@ var DbDesign = (function () {
         tries++;
         this.db.raw.show(designId, showName, id, function (err, result) {
             if (err) {
-                if (tries <= 1 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.reason) > -1)) {
-                    _this._persistDesign(designId, 'shows', showName, function (err) {
-                        if (err)
-                            callback(err);
-                        else
-                            _this.show(designId, showName, id, callback, tries);
-                    });
-                }
-                else if (tries <= _this.db.maxTries && err.name === 'conflict') {
-                    _this._performRetrieveLatest(designId, function (err) {
-                        if (err)
-                            callback(err);
-                        else
-                            _this.show(designId, showName, id, callback, tries);
-                    });
-                }
+                var _afterResolve = function (err) {
+                    if (err)
+                        callback(err);
+                    else
+                        _this.show(designId, showName, id, callback, tries);
+                };
+                if (tries <= 1 && err.reason === 'no_db_file')
+                    _this.db.persist(_afterResolve);
+                else if (tries <= 2 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.reason) > -1))
+                    _this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
+                else if (tries <= _this.db.maxTries && err.name === 'conflict')
+                    _this._performRetrieveLatest(designId, _afterResolve);
                 else
                     callback(err);
             }
@@ -39,22 +35,18 @@ var DbDesign = (function () {
         tries++;
         this.db.raw.view(designId, viewName, params, function (err, result) {
             if (err) {
-                if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.reason) > -1)) {
-                    _this._persistDesign(designId, 'views', viewName, function (err) {
-                        if (err)
-                            callback(err);
-                        else
-                            _this.view(designId, viewName, params, callback, tries);
-                    });
-                }
-                else if (tries <= _this.db.maxTries && err.name === 'conflict') {
-                    _this._performRetrieveLatest(designId, function (err) {
-                        if (err)
-                            callback(err);
-                        else
-                            _this.view(designId, viewName, params, callback, tries);
-                    });
-                }
+                var _afterResolve = function (err) {
+                    if (err)
+                        callback(err);
+                    else
+                        _this.view(designId, viewName, params, callback, tries);
+                };
+                if (tries <= 1 && err.reason === 'no_db_file')
+                    _this.db.persist(_afterResolve);
+                else if (tries <= 2 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.reason) > -1))
+                    _this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
+                else if (tries <= _this.db.maxTries && err.name === 'conflict')
+                    _this._performRetrieveLatest(designId, _afterResolve);
                 else
                     callback(err);
             }
@@ -65,24 +57,33 @@ var DbDesign = (function () {
     DbDesign.prototype._performRetrieveLatest = function (designId, callback) {
         this.db.raw.get('_design/' + designId, callback);
     };
-    DbDesign.prototype._persistDesign = function (designId, kind, name, callback) {
+    DbDesign.prototype._persistDesign = function (designId, kinds, callback) {
         var design = this.db.designs[designId];
         if (!design) {
             callback(new Error("No design specified for: " + designId));
             return;
         }
-        // persist document
+        // generate design document
         var body = { language: design.language };
-        switch (kind) {
-            case 'shows':
-                body.shows = {};
-                body.shows[name] = design.shows[name] || null;
-                break;
-            case 'views':
-                body.views = {};
-                body.views[name] = design.views[name] || null;
-                break;
+        for (var kind in kinds) {
+            switch (kind) {
+                case 'shows':
+                    body.shows = {};
+                    for (var _i = 0, _a = kinds[kind]; _i < _a.length; _i++) {
+                        var name_1 = _a[_i];
+                        body.shows[name_1] = design.shows[name_1] || null;
+                    }
+                    break;
+                case 'views':
+                    body.views = {};
+                    for (var _b = 0, _c = kinds[kind]; _b < _c.length; _b++) {
+                        var name_2 = _c[_b];
+                        body.views[name_2] = design.views[name_2] || null;
+                    }
+                    break;
+            }
         }
+        // persist document
         this.db.doc.updateOrCreate('_design/' + designId, body, callback);
     };
     return DbDesign;

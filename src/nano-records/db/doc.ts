@@ -21,7 +21,7 @@ export default class DbDoc
       if (err) {
         if (tries <= 1 && err.reason === 'no_db_file') {
           // create db
-          this._performDbCreate((err) => {
+          this.db.persist((err) => {
             if (err)
               callback(err);
             else
@@ -45,22 +45,28 @@ export default class DbDoc
     this.db.raw.insert(body, callback);
   }
   
-  private _performDbCreate (callback: (err: iNanoError)=>any)
+  get (id: string, callback: (err?: Error, doc?: Doc)=>any = ()=>{}, tries: number = 0)
   {
-    this.db.nano.db.create(this.db.dbName, callback);
-  }
-  
-  get (id: string, callback: (err?: Error, doc?: Doc)=>any = ()=>{})
-  {
+    tries++;
     this._performGet(id, (err, result) => {
       if (err)
-        callback(err);
+        if (tries <= 1 && err.reason === 'no_db_file') {
+          // create db
+          this.db.persist((err) => {
+            if (err)
+              callback(err);
+            else
+              this.get(id, callback, tries);
+          });
+        }
+        else
+          callback(err);
       else
         callback(null, new Doc(this.db, result)); // document found!
     });
   }
   
-  private _performGet (id: string, callback: (err: Error, result: Object)=>any)
+  private _performGet (id: string, callback: (err: iNanoError, result: Object)=>any)
   {
     this.db.raw.get(id, callback);
   }
