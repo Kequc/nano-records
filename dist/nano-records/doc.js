@@ -43,7 +43,7 @@ var Doc = (function () {
         tries++;
         this._performUpdate(body, function (err, result) {
             if (err) {
-                if (tries <= _this.db.maxTries) {
+                if (tries <= _this.db.maxTries && err.statusCode == 409) {
                     _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
@@ -78,7 +78,7 @@ var Doc = (function () {
         tries++;
         this._performDestroy(function (err) {
             if (err) {
-                if (tries <= _this.db.maxTries) {
+                if (tries <= _this.db.maxTries && err.statusCode == 409) {
                     _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);

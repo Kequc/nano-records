@@ -8,6 +8,19 @@ export interface iDesignInput {
   views?: { [index: string]: { map: string, reduce: string }};
 }
 
+export interface iNanoError {
+  name: string;
+  error?: string;
+  reason?: string;
+  scope?: string;
+  statusCode?: number;
+  request?: Object;
+  headers?: Object;
+  errid?: string;
+  description?: string;
+  message: string;
+}
+
 export default class Db
 {
   maxTries: number = 5;

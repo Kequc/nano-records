@@ -9,8 +9,16 @@ var DbDesign = (function () {
         tries++;
         this.db.raw.show(designId, showName, id, function (err, result) {
             if (err) {
-                if (tries <= 1 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.message) > -1)) {
+                if (tries <= 1 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.reason) > -1)) {
                     _this._persistDesign(designId, 'shows', showName, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.show(designId, showName, id, callback, tries);
+                    });
+                }
+                else if (tries <= _this.db.maxTries && err.name === 'conflict') {
+                    _this._performRetrieveLatest(designId, function (err) {
                         if (err)
                             callback(err);
                         else
@@ -31,8 +39,16 @@ var DbDesign = (function () {
         tries++;
         this.db.raw.view(designId, viewName, params, function (err, result) {
             if (err) {
-                if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.message) > -1)) {
+                if (tries <= 1 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.reason) > -1)) {
                     _this._persistDesign(designId, 'views', viewName, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.view(designId, viewName, params, callback, tries);
+                    });
+                }
+                else if (tries <= _this.db.maxTries && err.name === 'conflict') {
+                    _this._performRetrieveLatest(designId, function (err) {
                         if (err)
                             callback(err);
                         else
@@ -45,6 +61,9 @@ var DbDesign = (function () {
             else
                 callback(null, result); // executed successfully
         });
+    };
+    DbDesign.prototype._performRetrieveLatest = function (designId, callback) {
+        this.db.raw.get('_design/' + designId, callback);
     };
     DbDesign.prototype._persistDesign = function (designId, kind, name, callback) {
         var design = this.db.designs[designId];

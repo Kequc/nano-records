@@ -1,3 +1,4 @@
+import {iNanoError} from '../../db';
 import {default as Doc} from '../../doc';
 import {default as DbDoc} from '../doc';
 
@@ -45,7 +46,7 @@ export default class DbDocAttachment
     });
   }
   
-  private _performGet (id: string, name: string, callback: (err: Error, data?: any)=>any)
+  private _performGet (id: string, name: string, callback: (err: iNanoError, data?: any)=>any)
   {
     return this.doc.db.raw.attachment.get(id, name, {}, callback);
   }

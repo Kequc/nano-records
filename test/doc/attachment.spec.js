@@ -21,7 +21,7 @@ function forceUpdate (doc, data, callback) {
       expect(oldRev).to.be.ok;
       expect(body['rev']).to.be.ok;
       expect(oldRev).to.not.equal(body['rev']);
-      callback();
+      callback(err, body);
     });
   });
 }
@@ -82,14 +82,15 @@ describe('doc-attachment', () => {
         done();
       });
     });
-    it('read', () => {
-      // should fail
-      // FIXME: This doesn't actually return an error if the document doesn't exist
-      // streamToString(_doc.attachment.read(fileName, (err) => {
-      //   expect(err).to.be.ok;
-      //   done();
-      // }));
-    });
+    it('read');
+    // it('read', (done) => {
+    //   // should fail
+    //   // FIXME: This doesn't actually return an error if the document doesn't exist
+    //   streamToString(_doc.attachment.read(fileName, (err) => {
+    //     expect(err).to.be.ok;
+    //     done();
+    //   }));
+    // });
     it('destroy', (done) => {
       // should fail
       _doc.attachment.destroy(fileName, (err) => {

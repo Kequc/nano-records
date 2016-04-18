@@ -1,4 +1,4 @@
-import {default as Db} from './db';
+import {default as Db, iNanoError} from './db';
 import {default as DocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
 
@@ -42,7 +42,7 @@ export default class Doc
     });
   }
   
-  private _performRetrieveLatest (callback: (err: Error, result: { [index: string]: any })=>any)
+  private _performRetrieveLatest (callback: (err: iNanoError, result: { [index: string]: any })=>any)
   {
     this.db.raw.get(this.getId(), callback);
   }
@@ -56,7 +56,7 @@ export default class Doc
     tries++;
     this._performUpdate(body, (err, result) => {
       if (err) {
-        if (tries <= this.db.maxTries) {
+        if (tries <= this.db.maxTries && err.statusCode == 409) {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
@@ -75,7 +75,7 @@ export default class Doc
     });
   }
   
-  private _performUpdate (body: { [index: string]: any }, callback: (err: Error, result: { [index: string]: any })=>any)
+  private _performUpdate (body: { [index: string]: any }, callback: (err: iNanoError, result: { [index: string]: any })=>any)
   {
     this.db.raw.insert(this._extendBody(body), callback);
   }
@@ -94,7 +94,7 @@ export default class Doc
     tries++;
     this._performDestroy((err) => {
       if (err) {
-        if (tries <= this.db.maxTries) {
+        if (tries <= this.db.maxTries && err.statusCode == 409) {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
@@ -112,7 +112,7 @@ export default class Doc
     });
   }
   
-  private _performDestroy (callback: (err: Error)=>any)
+  private _performDestroy (callback: (err: iNanoError)=>any)
   {
     this.db.raw.destroy(this.getId(), this.getRev(), callback);
   }

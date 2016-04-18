@@ -15,7 +15,14 @@ var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["s
 function forceUpdate (doc, data, callback) {
   forced.get(doc.getId(), (err, body) => {
     deepExtend(body, data);
-    forced.insert(body, callback);
+    forced.insert(body, (err, body) => {
+      expect(err).to.be.falsy;
+      var oldRev = doc.getRev();
+      expect(oldRev).to.be.ok;
+      expect(body['rev']).to.be.ok;
+      expect(oldRev).to.not.equal(body['rev']);
+      callback(err, body);
+    });
   });
 }
 
@@ -87,10 +94,8 @@ describe('doc', () => {
     it('retrieveLatest', (done) => {
       // should be successful
       forceUpdate(_doc, { anotheranother: "Yay!", complex: "cats and dogs" }, (err) => {
-        expect(err).to.be.null;
         expect(_doc.body).to.not.have.keys('anotheranother');
         var oldRev = _doc.getRev();
-        expect(oldRev).to.be.ok;
         _doc.retrieveLatest((err) => {
           expect(err).to.be.null;
           expect(_doc.body).to.have.all.keys('complex', 'deep', 'num', '_id', '_rev', 'anotheranother');
@@ -119,7 +124,6 @@ describe('doc', () => {
     it('update retries', (done) => {
       // should be successful
       forceUpdate(_doc, { anotheranother: "changed" }, (err, body) => {
-        expect(err).to.be.null;
         var oldRev_1 = _doc.getRev();
         var oldRev_2 = body['rev'];
         expect(oldRev_1).to.be.ok;
@@ -150,10 +154,6 @@ describe('doc', () => {
     it('destroy retries', (done) => {
       // should be successful
       forceUpdate(_doc, { deleteMe: true }, (err, body) => {
-        var oldRev = _doc.getRev();
-        expect(oldRev).to.be.ok;
-        expect(body['rev']).to.be.ok;
-        expect(oldRev).to.not.equal(body['rev']);
         _doc.destroy((err) => {
           expect(err).to.be.null;
           expect(_doc.body).to.eql({});

@@ -12,19 +12,13 @@ var db = new NanoRecords(nano, dbName);
 
 var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["some", "values"] } };
 
-function forceUpdate (doc, data, callback) {
-  forced.get(doc.body['_id'], (err, body) => {
-    deepExtend(body, data);
-    forced.insert(body, callback);
-  });
-}
-
 describe('db-doc', () => {
   
   describe('database does not exist', () => {
     beforeEach((done) => {
       nano.db.destroy(dbName, () => { done(); });
     });
+    
     it('create', (done) => {
       // should be successful
       db.doc.create(complexBody, (err, doc) => {
@@ -41,6 +35,8 @@ describe('db-doc', () => {
         });
       });
     });
+    it('get');
+    it('update');
     it('updateOrCreate', (done) => {
       // should be successful
       db.doc.updateOrCreate("fake-id-doesnt-exist", { another: 'one' }, (err, doc) => {
@@ -56,6 +52,7 @@ describe('db-doc', () => {
         });
       });
     });
+    it('destroy');
   });
   
   describe('database exists', () => {
@@ -64,26 +61,27 @@ describe('db-doc', () => {
         nano.db.create(dbName, () => { done(); });
       });
     });
-    it('create', (done) => {
-      // should be successful
-      db.doc.create(complexBody, (err, doc) => {
-        expect(err).to.be.null;
-        expect(doc).to.be.ok;
-        expect(doc.body).to.have.all.keys('complex', 'num', 'deep', '_id', '_rev');
-        expect(doc.body['deep']).to.have.all.keys('hi', 'arr');
-        expect(doc.body['deep']['arr']).to.eql(["some", "values"]);
-        db.doc.get(doc.getId(), (err, gotDoc) => {
-          expect(err).to.be.null;
-          expect(gotDoc).to.be.ok;
-          expect(gotDoc.body).to.eql(doc.body);
-          done();
-        });
-      });
-    });
     
     describe('document does not exist', () => {
       beforeEach((done) => {
         db.doc.destroy("fake-id-doesnt-exist", () => { done(); })
+      });
+      
+      it('create', (done) => {
+        // should be successful
+        db.doc.create(complexBody, (err, doc) => {
+          expect(err).to.be.null;
+          expect(doc).to.be.ok;
+          expect(doc.body).to.have.all.keys('complex', 'num', 'deep', '_id', '_rev');
+          expect(doc.body['deep']).to.have.all.keys('hi', 'arr');
+          expect(doc.body['deep']['arr']).to.eql(["some", "values"]);
+          db.doc.get(doc.getId(), (err, gotDoc) => {
+            expect(err).to.be.null;
+            expect(gotDoc).to.be.ok;
+            expect(gotDoc.body).to.eql(doc.body);
+            done();
+          });
+        });
       });
       it('get', (done) => {
         // should fail
@@ -132,6 +130,8 @@ describe('db-doc', () => {
           done();
         }); 
       });
+      
+      it('create');
       it('get', (done) => {
         // should be successful
         db.doc.get(_doc.getId(), (err, doc) => {
@@ -185,6 +185,7 @@ describe('db-doc', () => {
           });
         });
       });
+      
     });
   });
   

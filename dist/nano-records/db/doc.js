@@ -13,7 +13,7 @@ var DbDoc = (function () {
         tries++;
         this._performCreate(body, function (err, result) {
             if (err) {
-                if (tries <= 1 && err.message === 'no_db_file') {
+                if (tries <= 1 && err.reason === 'no_db_file') {
                     // create db
                     _this._performDbCreate(function (err) {
                         if (err)

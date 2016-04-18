@@ -1,3 +1,4 @@
+import {iNanoError} from '../db';
 import {default as Doc} from '../doc';
 
 export default class DocAttachment
@@ -23,7 +24,7 @@ export default class DocAttachment
     tries++;
     this._performAdd(name, data, mimeType, (err, result) => {
       if (err) {
-        if (tries <= this.doc.db.maxTries) {
+        if (tries <= this.doc.db.maxTries && err.statusCode == 409) {
           this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
@@ -61,7 +62,7 @@ export default class DocAttachment
     });
   }
   
-  private _performAdd (name: string, data: any, mimeType: string, callback: (err: Error, result: { [index: string]: string })=>any)
+  private _performAdd (name: string, data: any, mimeType: string, callback: (err: iNanoError, result: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, callback);
   }
@@ -91,7 +92,7 @@ export default class DocAttachment
     tries++;
     this._performDestroy(name, (err, result) => {
       if (err) {
-        if (tries <= this.doc.db.maxTries) {
+        if (tries <= this.doc.db.maxTries && err.statusCode == 409) {
           this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
@@ -112,7 +113,7 @@ export default class DocAttachment
     });
   }
   
-  private _performDestroy (name: string, callback: (err: Error, result: { [index: string]: string })=>any)
+  private _performDestroy (name: string, callback: (err: iNanoError, result: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
   }

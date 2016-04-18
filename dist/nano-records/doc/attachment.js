@@ -16,7 +16,7 @@ var DocAttachment = (function () {
         tries++;
         this._performAdd(name, data, mimeType, function (err, result) {
             if (err) {
-                if (tries <= _this.doc.db.maxTries) {
+                if (tries <= _this.doc.db.maxTries && err.statusCode == 409) {
                     _this.doc.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
@@ -81,7 +81,7 @@ var DocAttachment = (function () {
         tries++;
         this._performDestroy(name, function (err, result) {
             if (err) {
-                if (tries <= _this.doc.db.maxTries) {
+                if (tries <= _this.doc.db.maxTries && err.statusCode == 409) {
                     _this.doc.retrieveLatest(function (err) {
                         if (err)
                             callback(err);

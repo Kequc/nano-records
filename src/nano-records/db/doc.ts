@@ -1,4 +1,4 @@
-import {default as Db} from '../db';
+import {default as Db, iNanoError} from '../db';
 import {default as Doc} from '../doc';
 import {default as DbDocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
@@ -19,7 +19,7 @@ export default class DbDoc
     tries++;
     this._performCreate(body, (err, result) => {
       if (err) {
-        if (tries <= 1 && err.message === 'no_db_file') {
+        if (tries <= 1 && err.reason === 'no_db_file') {
           // create db
           this._performDbCreate((err) => {
             if (err)
@@ -40,12 +40,12 @@ export default class DbDoc
     });
   }
   
-  private _performCreate (body: { [index: string]: any }, callback: (err: Error, result: { [index: string]: any })=>any)
+  private _performCreate (body: { [index: string]: any }, callback: (err: iNanoError, result: { [index: string]: any })=>any)
   {
     this.db.raw.insert(body, callback);
   }
   
-  private _performDbCreate (callback: (err: Error)=>any)
+  private _performDbCreate (callback: (err: iNanoError)=>any)
   {
     this.db.nano.db.create(this.db.dbName, callback);
   }

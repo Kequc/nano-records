@@ -23,23 +23,127 @@ var forced = nano.use(dbName);
 var db = new NanoRecords(nano, dbName, designs);
 
 function forceUpdate (doc, data, callback) {
-  forced.get(doc.body['_id'], (err, body) => {
+  forced.get(doc.getId(), (err, body) => {
     deepExtend(body, data);
-    forced.insert(body, callback);
+    forced.insert(body, (err, body) => {
+      var oldRev = doc.getRev();
+      expect(oldRev).to.be.ok;
+      expect(body['rev']).to.be.ok;
+      expect(oldRev).to.not.equal(body['rev']);
+      callback(err, body);
+    });
   });
 }
 
 describe('db-design', () => {
-  it('view creates a new design document');
-  it('view adds new');
-  it('view');
-  it('view retries');
-  it('view more than maxTimes should fail');
-  it('view does not exist should fail');
-  it('show creates a new design document');
-  it('show adds new');
-  it('show');
-  it('show retries');
-  it('show more than maxTimes should fail');
-  it('show does not exist should fail');
+
+  describe('database does not exist', () => {
+    beforeEach((done) => {
+      nano.db.destroy(dbName, () => { done(); });
+    });
+    
+    it('view', (done) => {
+      // should be successful
+      done();
+    });
+    it('show', (done) => {
+      // should be successful
+      done();
+    });
+  });
+  
+  describe('database exists', () => {
+    before((done) => {
+      nano.db.destroy(dbName, () => {
+        nano.db.create(dbName, () => { done(); });
+      });
+    });
+    
+    describe('document does not exist', () => {
+      var _doc;
+      before((done) => {
+        _doc = undefined;
+        db.doc.create({}, (err, doc) => {
+          _doc = doc;
+          _doc.destroy(() => { done(); })
+        });
+      });
+      
+      describe('definition does not exist', () => {
+        it('view', (done) => {
+          // should fail
+          done();
+        });
+        it('show', (done) => {
+          // should fail
+          done();
+        });
+      });
+      
+      describe('definition exists', () => {
+        it('view', (done) => {
+          // should be successful
+          done();
+        });
+        it('view retries', (done) => {
+          // should be successful
+          done();
+        });
+        it('view more than maxTimes should fail');
+        it('show', (done) => {
+          // should be successful
+          done();
+        });
+        it('show retries', (done) => {
+          // should be successful
+          done();
+        });
+        it('show more than maxTimes should fail');
+      });
+    });
+    
+    describe('document exists', () => {
+      var _doc;
+      beforeEach((done) => {
+        _doc = undefined;
+        db.doc.create({}, (err, doc) => {
+          _doc = doc;
+          done();
+        });
+      });
+      
+      describe('definition does not exist', () => {
+        it('view', (done) => {
+          // should fail
+          done();
+        });
+        it('show', (done) => {
+          // should fail
+          done();
+        });
+      });
+      
+      describe('definition exists', () => {
+        it('view', (done) => {
+          // should be successful
+          done();
+        });
+        it('view retries', (done) => {
+          // should be successful
+          done();
+        });
+        it('view more than maxTimes should fail');
+        it('show', (done) => {
+          // should be successful
+          done();
+        });
+        it('show retries', (done) => {
+          // should be successful
+          done();
+        });
+        it('show more than maxTimes should fail');
+      });
+    });
+  });
+  
 });
