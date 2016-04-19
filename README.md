@@ -169,7 +169,7 @@ db.doc.attachment.erase(id, name, (err) => {
 });
 ```
 
-Deletes the attachment from the database if it exists.
+Deletes the attachment from the database.
 
 #### List and exists
 
@@ -178,7 +178,7 @@ var list = doc.attachment.list();
 var exists = doc.attachment.exists(name);
 ```
 
-Returns a list of all attachments. Given the provided name whether this record has an attachment with a matching one.
+Returns a list of all attachments or whether a specific attachment exists.
 
 ## &#8620; Streams
 
@@ -212,7 +212,7 @@ var writer = doc.attachment.write(name, (err) => {
 reader.pipe(writer);
 ```
 
-It is important to note streams are not retried if there is an error you will have to pipe in a new stream yourself.
+It is important to note streams are not retried if there is an error you will have to pipe a new stream yourself.
 
 ## &#8620; Designs
 
@@ -267,6 +267,27 @@ db.design.show(designId, showName, id, (err, data) => {
 
 Persists the given show to the database and behaves similarly to `db.design.view`.
 
+## &#8620; Errors
+
+```javascript
+err.scope; // source of the error
+err.name; // a error code
+err.message; // more information
+err.raw; // the full error returned from nano
+
+// common errors
+// ==
+// not_found: Not found.
+// conflict: There was a conflict.
+// no_db_file: Database missing.
+```
+
+When an error is returned it has the above format. Generally you should never see `no_db_file` or `conflict` so maybe these are not so common errors.
+
+A conflict would only happen if the max number of retries was reached on a request, possibly there is too much activity on one specific document.
+
+You might see database missing if your couchdb instance has security locked down.
+
 ## &#8620; Contribute
 
-If you like what you see please feel encouraged to [get involved](https://github.com/Kequc/nano-records/issues) send patches and pull requests! As of the time of this writing the project is still new.
+If you like what you see please feel encouraged to [get involved](https://github.com/Kequc/nano-records/issues) report problems and submit pull requests! As of the time of this writing the project is still new.
