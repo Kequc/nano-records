@@ -30,7 +30,7 @@ db.doc.persist(body, (err, doc) => {
 });
 ```
 
-The easiest way to insert a record into to the database and instantiate a NanoRecords document representing that data. You may optionally provide an `_id` attribute in the body however be careful if that document exists in the database this method overwrites it.
+This is the easiest way to insert a record into to the database, returns a NanoRecords document representing that record. You may optionally provide an `_id` attribute in the body however be careful if that document exists in the database this method will overwrite it.
 
 #### Get
 
@@ -43,7 +43,7 @@ db.doc.get(id, (err, doc) => {
 });
 ```
 
-Perfect way to retrieve your data again from the database.
+Perfect way to retrieve your data again once it is in the database.
 
 #### Update
 
@@ -58,7 +58,7 @@ db.doc.update(id, body, (err) => {
 });
 ```
 
-Updates the database record with the provided body.
+Updates with the provided body.
 
 #### Update or persist
 
@@ -71,9 +71,9 @@ db.doc.updateOrPersist(id, body, (err, doc) => {
 });
 ```
 
-This method first looks up the document and if it exists, updates it.
+This method searched for the document in the database and updates it if it is found.
 
-Otherwise, it will persist a document with the given id. You will be certain to avoid overwriting entire documents this way, this method also returns a NanoRecords document.
+Otherwise, it will persist it along with the given id. You will be certain to avoid overwriting entire documents this way, this method also returns a NanoRecords document instance.
 
 #### Erase
 
@@ -98,7 +98,7 @@ var att1 = doc.body('my-attribute');
 var att2 = doc.body('my-attribute', 'my-nested-attribute');
 ```
 
-A copy of your data can be accessed using the body method, optionally you can pass a series of parameters to drill into toward the attribute you want instead.
+Your body data is returned in full. Optionally you can pass a series of parameters to drill into it toward the property you want.
 
 #### Get id and get rev
 
@@ -109,7 +109,7 @@ var id = doc.getId();
 var rev = doc.getRev();
 ```
 
-Methods for accessing the body's `_id` and `_rev` properties. Equivalent to running the `doc.body('_id')` and `doc.body('_rev')`.
+Methods for accessing the body's `_id` and `_rev` properties. Equivalent to running `doc.body('_id')` and `doc.body('_rev')`.
 
 #### Retrieve latest
 
@@ -124,15 +124,6 @@ doc.retrieveLatest((err) => {
 Retrieves latest version of the document from the database.
 
 ## &#8620; Attachments
-
-#### List and exists
-
-```javascript
-var list = doc.attachment.list();
-var exists = doc.attachment.exists(name);
-```
-
-Returns a list of all attachments, or given the provided name whether this record has an attachment with a matching.
 
 #### Persist
 
@@ -181,21 +172,16 @@ db.doc.attachment.erase(id, name, (err) => {
 
 Destroys the attachment in the database, returns an error unless the attachment was found and erased.
 
-## &#8620; Streams
-
-#### Write
+#### List and exists
 
 ```javascript
-var reader = fs.createReadStream('./my-file.txt');
-var writer = doc.attachment.write(name, (err) => {
-  if (!err)
-    console.log('success');
-});
-// upload to the database
-reader.pipe(writer);
+var list = doc.attachment.list();
+var exists = doc.attachment.exists(name);
 ```
 
-It is important to note streams are not retried if there is an error you will have to pipe in a new stream yourself.
+Returns a list of all attachments. Given the provided name whether this record has an attachment with a matching one.
+
+## &#8620; Streams
 
 #### Read
 
@@ -215,34 +201,44 @@ reader.pipe(writer);
 
 Reads the attachment as a stream. How convenient!
 
+#### Write
+
+```javascript
+var reader = fs.createReadStream('./my-file.txt');
+var writer = doc.attachment.write(name, (err) => {
+  if (!err)
+    console.log('success');
+});
+// upload to the database
+reader.pipe(writer);
+```
+
+It is important to note streams are not retried if there is an error you will have to pipe in a new stream yourself.
+
 ## &#8620; Designs
 
 ```json
-// > ./designs/my-db/foo.json
+// > ./designs.json
 {
-  "views": {
-    "comments": {
-      "map": "function (doc) { ... };",
-      "reduce": "function (keys, values, rereduce) { ... };"
+  "foo": {
+    "views": {
+      "comments": {
+        "map": "function (doc) { ... };",
+        "reduce": "function (keys, values, rereduce) { ... };"
+      }
+    },
+    "shows": {
+      "post": "function (doc, req) { ... };"
     }
   },
-  "shows": {
-    "post": "function (doc, req) { ... };"
+  "bar": {
+    "language": "javascript",
+    "views": {}
   }
 }
 ```
-```json
-// > ./designs/my-db/bar.json
-{
-  "language": "javascript",
-  "views": {}
-}
-```
 ```javascript
-var designs = {
-  foo: require('./designs/my-db/foo.json'),
-  bar: require('./designs/my-db/bar.json')
-};
+var designs = require('./designs.json');
 var db = new NanoRecords(nano, dbName, designs);
 ```
 
@@ -258,7 +254,7 @@ db.design.view(designId, viewName, params, (err, data) => {
 });
 ```
 
-Persists the given view denoted using the provided `designId` (ie. 'foo') to the database if it's not already there, then returns the result.
+Persists the given view using the provided `designId` (ie. 'foo') to the database if it's not already there, then returns the result.
 
 #### Show
 
@@ -270,7 +266,7 @@ db.design.show(designId, showName, id, (err, data) => {
 });
 ```
 
-Persists the given show to the database and behaves very similarly to `db.design.view`.
+Persists the given show to the database and behaves similarly to `db.design.view`.
 
 ## &#8620; Contribute
 
