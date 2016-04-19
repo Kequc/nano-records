@@ -1,9 +1,9 @@
 Nano Records
 ===
 
-A [nodejs](https://nodejs.org) utility for interacting with [couchdb](http://couchdb.apache.org) through [nano](https://github.com/dscape/nano). Each NanoRecords instance represents one database. Abstract away some of the database busywork and make your life easier.
+A [nodejs](https://nodejs.org) utility for interacting with [couchdb](http://couchdb.apache.org) through [nano](https://github.com/dscape/nano). Each NanoRecords instance represents one database. This is a simple way to get up and running with couchdb.
 
-This is a simple way to get up and running with couchdb.
+Abstract away some of the database busywork and make your life easier.
 
 ## &#8620; Usage
 
