@@ -18,7 +18,7 @@ describe('db-doc-attachment', () => {
     it('persist');
     it('get');
     it('read');
-    it('destroy');
+    it('erase');
     
   });
   
@@ -34,21 +34,34 @@ describe('db-doc-attachment', () => {
       it('persist');
       it('get');
       it('read');
-      it('destroy');
+      it('erase');
       
     });
     
     describe('document exists', () => {
       
-      it('persist');
-      it('persist retries');
-      it('persist more than maxTimes should fail');
-      it('get');
-      it('read');
-      it('destroy');
-      it('destroy retries');
-      it('destroy more than maxTimes should fail');
+      describe('attachment does not exist', () => {
+        
+        it('persist');
+        it('persist retries');
+        it('persist more than maxTries');
+        it('get');
+        it('read');
+        it('erase');
+        
+      });
+      describe('attachment exists', () => {
+        
+        it('persist');
+        it('get');
+        it('read');
+        it('erase');
+        it('erase retries');
+        it('erase more than maxTries');
+        
+      });
       
     });
+    
   });
 });

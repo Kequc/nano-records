@@ -14,18 +14,18 @@ export default class DbDoc
     this.attachment = new DbDocAttachment(this);
   }
   
-  create (body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  persist (body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{}, tries: number = 0)
   {
     tries++;
-    this._performCreate(body, (err, result) => {
+    this._performPersist(body, (err, result) => {
       if (err) {
         if (tries <= 1 && err.reason === 'no_db_file') {
           // create db
-          this.db.persist((err) => {
+          this.db.create((err) => {
             if (err)
               callback(err);
             else
-              this.create(body, callback, tries);
+              this.persist(body, callback, tries);
           });
         }
         else
@@ -35,12 +35,12 @@ export default class DbDoc
         let doc = new Doc(this.db, body); 
         doc.body['_id'] = result['id'];
         doc.body['_rev'] = result['rev'];
-        callback(null, doc); // created successfully
+        callback(null, doc); // persisted successfully
       }
     });
   }
   
-  private _performCreate (body: { [index: string]: any }, callback: (err: iNanoError, result: { [index: string]: any })=>any)
+  private _performPersist (body: { [index: string]: any }, callback: (err: iNanoError, result: { [index: string]: any })=>any)
   {
     this.db.raw.insert(body, callback);
   }
@@ -52,7 +52,7 @@ export default class DbDoc
       if (err)
         if (tries <= 1 && err.reason === 'no_db_file') {
           // create db
-          this.db.persist((err) => {
+          this.db.create((err) => {
             if (err)
               callback(err);
             else
@@ -81,11 +81,11 @@ export default class DbDoc
     });
   }
   
-  updateOrCreate (id: string, body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{})
+  updateOrPersist (id: string, body: { [index: string]: any }, callback: (err?: Error, doc?: Doc)=>any = ()=>{})
   {
     this.get(id, (err, doc) => {
       if (err)
-        this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
+        this.persist(deepExtend({}, body, { '_id': id }), callback); // attempt persist
       else {
         doc.update(body, (err) => {
           if (err)
@@ -97,13 +97,13 @@ export default class DbDoc
     });
   }
   
-  destroy (id: string, callback: (err?: Error)=>any = ()=>{})
+  erase (id: string, callback: (err?: Error)=>any = ()=>{})
   {
     this.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
-        doc.destroy(callback); // attempt destroy
+        doc.erase(callback); // attempt erase
     });
   }
 }

@@ -52,9 +52,9 @@ export default class Db
     this.design = new DbDesign(this);
   }
   
-  persist (callback: (err: Error)=>any = ()=>{})
+  create (callback: (err: Error)=>any = ()=>{})
   {
-    this._performPersist((err) => {
+    this._performCreate((err) => {
       if (err)
         callback(err);
       else
@@ -62,7 +62,7 @@ export default class Db
     });
   }
   
-  private _performPersist (callback: (err: iNanoError)=>any)
+  private _performCreate (callback: (err: iNanoError)=>any)
   {
     this.nano.db.create(this.dbName, callback);
   }

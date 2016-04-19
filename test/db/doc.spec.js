@@ -12,8 +12,8 @@ var db = new NanoRecords(nano, dbName);
 
 var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["some", "values"] } };
 
-function assertCreate (done) {
-  db.doc.create(complexBody, (err, doc) => {
+function assertPersist (done) {
+  db.doc.persist(complexBody, (err, doc) => {
     expect(err).to.be.null;
     expect(doc).to.be.ok;
     expect(doc.body).to.have.all.keys('complex', 'num', 'deep', '_id', '_rev');
@@ -51,10 +51,10 @@ function assertBody (doc, asserts, done) {
   });
 }
 
-function assertUpdateOrCreate (id, done, asserts) {
+function assertUpdateOrPersist (id, done, asserts) {
   let changes = { another: 'one', complex: 'changed' };
   asserts = deepExtend({}, asserts || {}, changes);
-  db.doc.updateOrCreate(id, changes, (err, doc) => {
+  db.doc.updateOrPersist(id, changes, (err, doc) => {
     expect(err).to.be.null;
     expect(doc).to.be.ok;
     expect(doc.body).to.include.keys('another', 'complex', '_id', '_rev');
@@ -76,8 +76,8 @@ function assertUpdate (doc, done) {
   });
 }
 
-function assertDestroy (id, done) {
-  db.doc.destroy(id, (err) => {
+function assertErase (id, done) {
+  db.doc.erase(id, (err) => {
     expect(err).to.be.null;
     db.doc.get(id, (err, gotDoc) => {
       expect(err).to.be.ok;
@@ -95,9 +95,9 @@ describe('db-doc', () => {
       nano.db.destroy(dbName, () => { done(); });
     });
     
-    it('create', (done) => {
+    it('persist', (done) => {
       // should be successful
-      assertCreate(done);
+      assertPersist(done);
     });
     it('get', (done) => {
       // should fail
@@ -116,13 +116,13 @@ describe('db-doc', () => {
         done();
       });
     });
-    it('updateOrCreate', (done) => {
+    it('updateOrPersist', (done) => {
       // should be successful
-      assertUpdateOrCreate("fake-id-doesnt-exist", done);
+      assertUpdateOrPersist("fake-id-doesnt-exist", done);
     });
-    it('destroy', (done) => {
+    it('erase', (done) => {
       // should fail
-      db.doc.destroy("fake-id-doesnt-exist", (err) => {
+      db.doc.erase("fake-id-doesnt-exist", (err) => {
         expect(err).to.be.ok;
         expect(err.reason).to.be.oneOf(['missing', 'deleted']);
         done();
@@ -139,12 +139,12 @@ describe('db-doc', () => {
     
     describe('document does not exist', () => {
       beforeEach((done) => {
-        db.doc.destroy("fake-id-doesnt-exist", () => { done(); })
+        db.doc.erase("fake-id-doesnt-exist", () => { done(); })
       });
       
-      it('create', (done) => {
+      it('persist', (done) => {
         // should be successful
-        assertCreate(done);
+        assertPersist(done);
       });
       it('get', (done) => {
         // should fail
@@ -163,13 +163,13 @@ describe('db-doc', () => {
           done();
         });
       });
-      it('updateOrCreate', (done) => {
+      it('updateOrPersist', (done) => {
         // should be successful
-        assertUpdateOrCreate("fake-id-doesnt-exist", done);
+        assertUpdateOrPersist("fake-id-doesnt-exist", done);
       });
-      it('destroy', (done) => {
+      it('erase', (done) => {
         // should fail
-        db.doc.destroy("fake-id-doesnt-exist", (err) => {
+        db.doc.erase("fake-id-doesnt-exist", (err) => {
           expect(err).to.be.ok;
           expect(err.reason).to.be.oneOf(['missing', 'deleted']);
           done();
@@ -181,15 +181,15 @@ describe('db-doc', () => {
       var _doc;
       beforeEach((done) => {
         _doc = undefined;
-        db.doc.create(complexBody, (err, doc) => {
+        db.doc.persist(complexBody, (err, doc) => {
           _doc = doc;
           done();
         }); 
       });
       
-      it('create', (done) => {
+      it('persist', (done) => {
         // should be successful
-        assertCreate(done);
+        assertPersist(done);
       });
       it('get', (done) => {
         // should be successful
@@ -199,13 +199,13 @@ describe('db-doc', () => {
         // should be successful
         assertUpdate(_doc, done);
       });
-      it('updateOrCreate', (done) => {
+      it('updateOrPersist', (done) => {
         // should be successful
-        assertUpdateOrCreate(_doc.getId(), done, _doc.body);
+        assertUpdateOrPersist(_doc.getId(), done, _doc.body);
       });
-      it('destroy', (done) => {
+      it('erase', (done) => {
         // should be successful
-        assertDestroy(_doc.getId(), done);
+        assertErase(_doc.getId(), done);
       });
       
     });

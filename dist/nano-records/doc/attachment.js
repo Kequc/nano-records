@@ -70,7 +70,7 @@ var DocAttachment = (function () {
         // we have a method already available for this on the db object
         return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
     };
-    DocAttachment.prototype.destroy = function (name, callback, tries) {
+    DocAttachment.prototype.erase = function (name, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
@@ -79,14 +79,14 @@ var DocAttachment = (function () {
             return;
         }
         tries++;
-        this._performDestroy(name, function (err, result) {
+        this._performErase(name, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.statusCode == 409) {
                     _this.doc.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this.destroy(name, callback, tries);
+                            _this.erase(name, callback, tries);
                     });
                 }
                 else
@@ -101,7 +101,7 @@ var DocAttachment = (function () {
             }
         });
     };
-    DocAttachment.prototype._performDestroy = function (name, callback) {
+    DocAttachment.prototype._performErase = function (name, callback) {
         this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
     };
     return DocAttachment;

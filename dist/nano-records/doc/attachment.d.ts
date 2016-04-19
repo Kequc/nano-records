@@ -8,6 +8,6 @@ export default class DocAttachment {
     private _performPersist(name, data, mimeType, callback);
     get(name: string, callback?: (err?: Error, data?: any) => any): void;
     read(name: string, callback?: (err?: Error) => any): any;
-    destroy(name: string, callback?: (err?: Error) => any, tries?: number): void;
-    private _performDestroy(name, callback);
+    erase(name: string, callback?: (err?: Error) => any, tries?: number): void;
+    private _performErase(name, callback);
 }

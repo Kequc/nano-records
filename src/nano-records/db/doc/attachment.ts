@@ -51,13 +51,13 @@ export default class DbDocAttachment
     return this.doc.db.raw.attachment.get(id, name, {}, callback);
   }
   
-  destroy (id: string, name: string, callback: (err: Error)=>any = ()=>{})
+  erase (id: string, name: string, callback: (err: Error)=>any = ()=>{})
   {
     this.doc.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
-        doc.attachment.destroy(name, callback); // attempt destroy
+        doc.attachment.erase(name, callback); // attempt erase
     });
   }
 }

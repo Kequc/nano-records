@@ -37,6 +37,6 @@ export default class Db {
     constructor(nano: any, dbName: string, designs?: {
         [index: string]: iDesignInput;
     });
-    persist(callback?: (err: Error) => any): void;
-    private _performPersist(callback);
+    create(callback?: (err: Error) => any): void;
+    private _performCreate(callback);
 }

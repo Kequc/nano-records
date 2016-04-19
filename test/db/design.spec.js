@@ -72,9 +72,9 @@ describe('db-design', () => {
       var _doc;
       before((done) => {
         _doc = undefined;
-        db.doc.create({}, (err, doc) => {
+        db.doc.persist({}, (err, doc) => {
           _doc = doc;
-          _doc.destroy(() => { done(); })
+          _doc.erase(() => { done(); })
         });
       });
       
@@ -105,7 +105,7 @@ describe('db-design', () => {
       var _doc;
       beforeEach((done) => {
         _doc = undefined;
-        db.doc.create({}, (err, doc) => {
+        db.doc.persist({}, (err, doc) => {
           _doc = doc;
           done();
         });
@@ -131,7 +131,7 @@ describe('db-design', () => {
           // should be successful
           done();
         });
-        it('view more than maxTimes should fail');
+        it('view more than maxTries');
         it('show', (done) => {
           // should be successful
           done();
@@ -140,7 +140,7 @@ describe('db-design', () => {
           // should be successful
           done();
         });
-        it('show more than maxTimes should fail');
+        it('show more than maxTries');
       });
     });
   });

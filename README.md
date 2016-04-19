@@ -30,7 +30,7 @@ var designs = {
 
 var db = new NanoRecords(nano, dbName, designs);
 
-db.doc.create({ hello: "there" }, function (err, doc) {
+db.doc.persist({ hello: "there" }, function (err, doc) {
   
   // doc.body;
   
@@ -39,12 +39,12 @@ db.doc.create({ hello: "there" }, function (err, doc) {
   
   // doc.retrieveLatest(callback);
   // doc.update({ doot: "dot" }, callback);
-  // doc.destroy(callback);
+  // doc.erase(callback);
   
   // doc.attachment.exists(name);
   // doc.attachment.persist(name, data, mimeType, callback);
   // doc.attachment.get(name, callback);
-  // doc.attachment.destroy(name, callback);
+  // doc.attachment.erase(name, callback);
 
   // stream.pipe(doc.attachment.write(name, mimeType, callback));
   // doc.attachment.read(name, callback).pipe(stream);
@@ -52,14 +52,14 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 });
 
 // db.doc.update(id, { doot: "dot" }, callback);
-// db.doc.destroy(id, callback);
+// db.doc.erase(id, callback);
 
 // db.doc.get(id, callback);
-// db.doc.updateOrCreate(id, { doot: "dot" }, callback);
+// db.doc.updateOrPersist(id, { doot: "dot" }, callback);
 
 // db.doc.attachment.persist(id, name, data, mimeType, callback);
 // db.doc.attachment.get(id, name, callback);
-// db.doc.attachment.destroy(id, name, callback);
+// db.doc.attachment.erase(id, name, callback);
 
 // db.doc.attachment.read(id, name).pipe(stream);
 
@@ -73,15 +73,15 @@ db.doc.create({ hello: "there" }, function (err, doc) {
 var db = new NanoRecords(nano: NanoInstance, dbName: string, designs?: DesignSet);
 ```
 
-A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of designs. This command will do nothing on its own just construct an instance, no database is created, no design documents are persisted, or anything like that.
+A new instance of NanoRecords takes your running nano, a chosen database name, and optional set of designs. This command will do nothing on its own just construct an instance, no database is persistd, no design documents are persisted, or anything like that.
 
-### create / get / updateOrCreate
+### persist / get / updateOrPersist
 
 ```typescript
-db.doc.create(body: Object, callback?: (err?: Error, doc?: Doc) => any);
+db.doc.persist(body: Object, callback?: (err?: Error, doc?: Doc) => any);
 ```
 
-Create a document you may choose to include a custom `_id` attribute here if you wish. This command will create a database if it's missing, then persist a new document, then run the given callback with an error and undefined, or null and a NanoRecords document.
+Persist a document you may choose to include a custom `_id` attribute here if you wish. This command will persist a database if it's missing, then persist a new document, then run the given callback with an error and undefined, or null and a NanoRecords document.
 
 ```typescript
 db.doc.get(id: string, callback?: (err?: Error, doc?: Doc) => any);
@@ -90,10 +90,10 @@ db.doc.get(id: string, callback?: (err?: Error, doc?: Doc) => any);
 Find a document, callback returns an error and undefined, or null and a NanoRecords document.
 
 ```typescript
-db.doc.updateOrCreate(id: string, body: Object, callback?: (err?: Error, doc?: Doc) => any);
+db.doc.updateOrPersist(id: string, body: Object, callback?: (err?: Error, doc?: Doc) => any);
 ```
 
-Find a document if it exists and update it, if the document doesn't exist then create it. Callback will run with an error and undefined, or null and the NanoRecords document.
+Find a document if it exists and update it, if the document doesn't exist then persist it. Callback will run with an error and undefined, or null and the NanoRecords document.
 
 ### NanoRecords document
 
@@ -123,7 +123,7 @@ doc.update(body: Object, callback?: (err?: Error) => any);
 Update document by merging the given body. Will attempt to use the document's available body Object however retrieves the latest version from the database if needed. Callback returns an error or null.
 
 ```typescript
-doc.destroy(callback?: (err?: Error) => any);
+doc.erase(callback?: (err?: Error) => any);
 ```
 
 Destroy document it will run the given callback with an error or null.
@@ -149,7 +149,7 @@ doc.attachment.get(name: string, callback?: (err?: Error, data?: any) => any);
 Get an attachment from the database if it exists on this document, it will run the given callback with an error and undefined, or null and your attachment.
 
 ```typescript
-doc.attachment.destroy(name: string, callback?: (err?: Error) => any);
+doc.attachment.erase(name: string, callback?: (err?: Error) => any);
 ```
 
 Destroy an attachment it will run the given callback with an error or null.
@@ -174,11 +174,11 @@ These methods are the same as their counterparts above but allow you to provide 
 
 ```typescript
 db.doc.update(id: string, body: Object, callback?: (err?: Error) => any);
-db.doc.destroy(id: string, callback?: (err?: Error) => any);
+db.doc.erase(id: string, callback?: (err?: Error) => any);
 
 db.doc.attachment.persist(id: string, name: string, data: any, mimeType: string, callback?: (err?: Error) => any);
 db.doc.attachment.get(id: string, name: string, callback?: (err?: Error, data?: any) => any);
-db.doc.attachment.destroy(id: string, name: string, callback?: (err?: Error) => any);
+db.doc.attachment.erase(id: string, name: string, callback?: (err?: Error) => any);
 
 db.doc.attachment.read(id: string, name: string).pipe(stream);
 ```
@@ -191,4 +191,4 @@ db.design.view(designId: string, viewName: string, params: Object, callback?: ca
 db.design.show(designId: string, showName: string, id: string, callback?: callback);
 ```
 
-This will run one of your provided design views or shows and return the result. It will create a design document with the provided designId if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.
+This will run one of your provided design views or shows and return the result. It will persist a design document with the provided designId if one doesn't exist, append the requested view if it is missing. Then the callback will return an error and undefined, or null and your data set.

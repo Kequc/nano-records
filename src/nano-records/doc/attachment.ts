@@ -83,21 +83,21 @@ export default class DocAttachment
     return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  destroy (name: string, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
+  erase (name: string, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performDestroy(name, (err, result) => {
+    this._performErase(name, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.statusCode == 409) {
           this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.destroy(name, callback, tries);
+              this.erase(name, callback, tries);
           });
         }
         else
@@ -113,7 +113,7 @@ export default class DocAttachment
     });
   }
   
-  private _performDestroy (name: string, callback: (err: iNanoError, result: { [index: string]: string })=>any)
+  private _performErase (name: string, callback: (err: iNanoError, result: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, callback);
   }

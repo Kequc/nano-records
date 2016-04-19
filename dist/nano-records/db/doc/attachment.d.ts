@@ -6,5 +6,5 @@ export default class DbDocAttachment {
     get(id: string, name: string, callback?: (err?: Error, data?: any) => any): void;
     read(id: string, name: string, callback?: (err?: Error) => any): any;
     private _performGet(id, name, callback);
-    destroy(id: string, name: string, callback?: (err: Error) => any): void;
+    erase(id: string, name: string, callback?: (err: Error) => any): void;
 }

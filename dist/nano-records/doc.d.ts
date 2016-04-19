@@ -16,6 +16,6 @@ export default class Doc {
     update(body: Object, callback?: (err?: Error) => any, tries?: number): void;
     private _performUpdate(body, callback);
     private _extendBody(body);
-    destroy(callback?: (err?: Error) => any, tries?: number): void;
-    private _performDestroy(callback);
+    erase(callback?: (err?: Error) => any, tries?: number): void;
+    private _performErase(callback);
 }

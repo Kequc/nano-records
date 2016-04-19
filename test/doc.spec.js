@@ -40,9 +40,9 @@ function assertBody (doc, asserts, done) {
   });
 }
 
-function assertDestroy (doc, done) {
+function assertErase (doc, done) {
   let id = doc.getId();
-  doc.destroy(function (err) {
+  doc.erase(function (err) {
     expect(err).to.be.null;
     expect(doc.body).to.eql({});
     db.doc.get(id, (err, gotDoc) => {
@@ -60,9 +60,9 @@ describe('doc', () => {
     var _doc;
     before((done) => {
       _doc = undefined;
-      db.doc.updateOrCreate("fake-id-doesnt-exist", complexBody, (err, doc) => {
+      db.doc.updateOrPersist("fake-id-doesnt-exist", complexBody, (err, doc) => {
         _doc = doc;
-        doc.destroy(() => { done(); })
+        doc.erase(() => { done(); })
       });
     });
     
@@ -90,9 +90,9 @@ describe('doc', () => {
         done();
       });
     });
-    it('destroy', (done) => {
+    it('erase', (done) => {
       // should fail
-      _doc.destroy((err) => {
+      _doc.erase((err) => {
         expect(err).to.be.ok;
         done();
       });
@@ -103,7 +103,7 @@ describe('doc', () => {
     var _doc;
     beforeEach((done) => {
       _doc = undefined;
-      db.doc.create(complexBody, (err, doc) => {
+      db.doc.persist(complexBody, (err, doc) => {
         _doc = doc;
         done();
       });
@@ -157,7 +157,7 @@ describe('doc', () => {
         });
       });
     });
-    it('update more than maxTimes should fail', (done) => {
+    it('update more than maxTries', (done) => {
       // should fail
       forceUpdate(_doc, { a: 'change' }, () => {
         _doc.update({ boo: "oorns" }, (err) => {
@@ -166,20 +166,20 @@ describe('doc', () => {
         }, db.maxTries); // tried x times
       });
     });
-    it('destroy', (done) => {
+    it('erase', (done) => {
       // should be successful
-      assertDestroy(_doc, done);
+      assertErase(_doc, done);
     });
-    it('destroy retries', (done) => {
+    it('erase retries', (done) => {
       // should be successful
       forceUpdate(_doc, { deleteMe: true }, () => {
-        assertDestroy(_doc, done);
+        assertErase(_doc, done);
       });
     });
-    it('destroy more than maxTries should fail', (done) => {
+    it('erase more than maxTries', (done) => {
       // should fail
       forceUpdate(_doc, { a: 'change' }, () => {
-        _doc.destroy((err) => {
+        _doc.erase((err) => {
           expect(err).to.be.ok;
           done();
         }, db.maxTries); // tried x times

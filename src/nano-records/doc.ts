@@ -85,21 +85,21 @@ export default class Doc
     return deepExtend({}, this.body, body);
   }
   
-  destroy (callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
+  erase (callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
       callback(new Error('Document does not exist.'));
       return;
     }
     tries++;
-    this._performDestroy((err) => {
+    this._performErase((err) => {
       if (err) {
         if (tries <= this.db.maxTries && err.statusCode == 409) {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.destroy(callback, tries);
+              this.erase(callback, tries);
           });
         }
         else
@@ -112,7 +112,7 @@ export default class Doc
     });
   }
   
-  private _performDestroy (callback: (err: iNanoError)=>any)
+  private _performErase (callback: (err: iNanoError)=>any)
   {
     this.db.raw.destroy(this.getId(), this.getRev(), callback);
   }

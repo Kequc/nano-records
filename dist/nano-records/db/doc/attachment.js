@@ -37,13 +37,13 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype._performGet = function (id, name, callback) {
         return this.doc.db.raw.attachment.get(id, name, {}, callback);
     };
-    DbDocAttachment.prototype.destroy = function (id, name, callback) {
+    DbDocAttachment.prototype.erase = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
-                doc.attachment.destroy(name, callback); // attempt destroy
+                doc.attachment.erase(name, callback); // attempt erase
         });
     };
     return DbDocAttachment;

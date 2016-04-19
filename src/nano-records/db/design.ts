@@ -21,7 +21,7 @@ export default class DbDesign
             this.show(designId, showName, id, callback, tries);
         };
         if (tries <= 1 && err.reason === 'no_db_file')
-          this.db.persist(_afterResolve);
+          this.db.create(_afterResolve);
         else if (tries <= 2 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.reason) > -1))
           this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
         else if (tries <= this.db.maxTries && err.name === 'conflict')
@@ -46,7 +46,7 @@ export default class DbDesign
             this.view(designId, viewName, params, callback, tries);
         };
         if (tries <= 1 && err.reason === 'no_db_file')
-          this.db.persist(_afterResolve);
+          this.db.create(_afterResolve);
         else if (tries <= 2 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.reason) > -1))
           this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
         else if (tries <= this.db.maxTries && err.name === 'conflict')
@@ -90,6 +90,6 @@ export default class DbDesign
       }
     }
     // persist document
-    this.db.doc.updateOrCreate('_design/' + designId, body, callback);
+    this.db.doc.updateOrPersist('_design/' + designId, body, callback);
   }
 }

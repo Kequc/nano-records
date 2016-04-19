@@ -27,7 +27,7 @@ var nano = require('nano')("http://127.0.0.1:5984/");
 
 describe('db', function () {
   
-  it('creates a new db object', () => {
+  it('instantiates a new db object', () => {
     // should be successful
     let db = new NanoRecords(nano, dbName);
     expect(db.nano).to.equal(nano);
@@ -36,7 +36,7 @@ describe('db', function () {
     expect(db.raw).to.respondTo('insert'); // is a nano instance
   });
   
-  it('creates a new db object with designs', () => {
+  it('instantiates a new db object with designs', () => {
     // should be successful
     let db = new NanoRecords(nano, dbName, designs);
     expect(db.nano).to.equal(nano);

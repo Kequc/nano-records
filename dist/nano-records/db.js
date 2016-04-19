@@ -20,16 +20,16 @@ var Db = (function () {
         this.doc = new doc_1.default(this);
         this.design = new design_1.default(this);
     }
-    Db.prototype.persist = function (callback) {
+    Db.prototype.create = function (callback) {
         if (callback === void 0) { callback = function () { }; }
-        this._performPersist(function (err) {
+        this._performCreate(function (err) {
             if (err)
                 callback(err);
             else
                 callback(null);
         });
     };
-    Db.prototype._performPersist = function (callback) {
+    Db.prototype._performCreate = function (callback) {
         this.nano.db.create(this.dbName, callback);
     };
     return Db;

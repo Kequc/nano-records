@@ -5,17 +5,17 @@ export default class DbDoc {
     db: Db;
     attachment: DbDocAttachment;
     constructor(db: Db);
-    create(body: {
+    persist(body: {
         [index: string]: any;
     }, callback?: (err?: Error, doc?: Doc) => any, tries?: number): void;
-    private _performCreate(body, callback);
+    private _performPersist(body, callback);
     get(id: string, callback?: (err?: Error, doc?: Doc) => any, tries?: number): void;
     private _performGet(id, callback);
     update(id: string, body: {
         [index: string]: any;
     }, callback?: (err?: Error) => any): void;
-    updateOrCreate(id: string, body: {
+    updateOrPersist(id: string, body: {
         [index: string]: any;
     }, callback?: (err?: Error, doc?: Doc) => any): void;
-    destroy(id: string, callback?: (err?: Error) => any): void;
+    erase(id: string, callback?: (err?: Error) => any): void;
 }

@@ -67,7 +67,7 @@ var Doc = (function () {
     Doc.prototype._extendBody = function (body) {
         return deepExtend({}, this.body, body);
     };
-    Doc.prototype.destroy = function (callback, tries) {
+    Doc.prototype.erase = function (callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
@@ -76,14 +76,14 @@ var Doc = (function () {
             return;
         }
         tries++;
-        this._performDestroy(function (err) {
+        this._performErase(function (err) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.statusCode == 409) {
                     _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this.destroy(callback, tries);
+                            _this.erase(callback, tries);
                     });
                 }
                 else
@@ -95,7 +95,7 @@ var Doc = (function () {
             }
         });
     };
-    Doc.prototype._performDestroy = function (callback) {
+    Doc.prototype._performErase = function (callback) {
         this.db.raw.destroy(this.getId(), this.getRev(), callback);
     };
     return Doc;

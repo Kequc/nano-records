@@ -16,7 +16,7 @@ var DbDesign = (function () {
                         _this.show(designId, showName, id, callback, tries);
                 };
                 if (tries <= 1 && err.reason === 'no_db_file')
-                    _this.db.persist(_afterResolve);
+                    _this.db.create(_afterResolve);
                 else if (tries <= 2 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.reason) > -1))
                     _this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
                 else if (tries <= _this.db.maxTries && err.name === 'conflict')
@@ -42,7 +42,7 @@ var DbDesign = (function () {
                         _this.view(designId, viewName, params, callback, tries);
                 };
                 if (tries <= 1 && err.reason === 'no_db_file')
-                    _this.db.persist(_afterResolve);
+                    _this.db.create(_afterResolve);
                 else if (tries <= 2 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.reason) > -1))
                     _this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
                 else if (tries <= _this.db.maxTries && err.name === 'conflict')
@@ -84,7 +84,7 @@ var DbDesign = (function () {
             }
         }
         // persist document
-        this.db.doc.updateOrCreate('_design/' + designId, body, callback);
+        this.db.doc.updateOrPersist('_design/' + designId, body, callback);
     };
     return DbDesign;
 })();

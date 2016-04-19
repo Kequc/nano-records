@@ -6,20 +6,20 @@ var DbDoc = (function () {
         this.db = db;
         this.attachment = new attachment_1.default(this);
     }
-    DbDoc.prototype.create = function (body, callback, tries) {
+    DbDoc.prototype.persist = function (body, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performCreate(body, function (err, result) {
+        this._performPersist(body, function (err, result) {
             if (err) {
                 if (tries <= 1 && err.reason === 'no_db_file') {
                     // create db
-                    _this.db.persist(function (err) {
+                    _this.db.create(function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this.create(body, callback, tries);
+                            _this.persist(body, callback, tries);
                     });
                 }
                 else
@@ -29,11 +29,11 @@ var DbDoc = (function () {
                 var doc = new doc_1.default(_this.db, body);
                 doc.body['_id'] = result['id'];
                 doc.body['_rev'] = result['rev'];
-                callback(null, doc); // created successfully
+                callback(null, doc); // persisted successfully
             }
         });
     };
-    DbDoc.prototype._performCreate = function (body, callback) {
+    DbDoc.prototype._performPersist = function (body, callback) {
         this.db.raw.insert(body, callback);
     };
     DbDoc.prototype.get = function (id, callback, tries) {
@@ -45,7 +45,7 @@ var DbDoc = (function () {
             if (err)
                 if (tries <= 1 && err.reason === 'no_db_file') {
                     // create db
-                    _this.db.persist(function (err) {
+                    _this.db.create(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -70,12 +70,12 @@ var DbDoc = (function () {
                 doc.update(body, callback); // attempt update
         });
     };
-    DbDoc.prototype.updateOrCreate = function (id, body, callback) {
+    DbDoc.prototype.updateOrPersist = function (id, body, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
             if (err)
-                _this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
+                _this.persist(deepExtend({}, body, { '_id': id }), callback); // attempt persist
             else {
                 doc.update(body, function (err) {
                     if (err)
@@ -86,13 +86,13 @@ var DbDoc = (function () {
             }
         });
     };
-    DbDoc.prototype.destroy = function (id, callback) {
+    DbDoc.prototype.erase = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
-                doc.destroy(callback); // attempt destroy
+                doc.erase(callback); // attempt erase
         });
     };
     return DbDoc;
