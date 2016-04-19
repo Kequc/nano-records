@@ -1,4 +1,5 @@
-import {default as Db, iNanoError, iDesignInput} from '../db';
+import {default as Err} from '../err';
+import {default as Db, iDesignInput} from '../db';
 
 export default class DbDesign
 {
@@ -9,66 +10,90 @@ export default class DbDesign
     this.db = db;
   }
   
-  show (designId: string, showName: string, id: string, callback: (err?: Error, data?: any)=>any = ()=>{}, tries: number = 0)
+  show (designId: string, showName: string, id: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {
+    if (!designId) {
+      callback(Err.missing('design'));
+      return;
+    }
     tries++;
-    this.db.raw.show(designId, showName, id, (err: iNanoError, result: { [index: string]: any }) => {
+    this._performShow(designId, showName, id, (err, result) => {
       if (err) {
-        let _afterResolve = (err: Error) => {
+        let _afterResolve = (err: Err) => {
           if (err)
             callback(err);
           else
             this.show(designId, showName, id, callback, tries);
         };
-        if (tries <= 1 && err.reason === 'no_db_file')
+        if (tries <= 1 && err.name == "no_db_file")
           this.db.create(_afterResolve);
-        else if (tries <= 2 && (['missing', 'deleted', 'missing_named_show'].indexOf(err.reason) > -1))
+        else if (tries <= 2 && err.name == "not_found")
           this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
-        else if (tries <= this.db.maxTries && err.name === 'conflict')
+        else if (tries <= this.db.maxTries && err.name == "conflict")
           this._performRetrieveLatest(designId, _afterResolve);
         else
           callback(err);
       }
       else
-        callback(null, result); // executed successfully
+        callback(undefined, result); // executed successfully
     });
   }
   
-  view (designId: string, viewName: string, params: Object, callback: (err?: Error, data?: any)=>any = ()=>{}, tries: number = 0)
+  private _performShow (designId: string, showName: string, id: string, callback: (err: Err, data: any)=>any)
   {
+    this.db.raw.show(designId, showName, id, (err: any, data: any) => {
+      callback(Err.make('design', err), data);
+    });
+  }
+  
+  view (designId: string, viewName: string, params: Object, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
+  {
+    if (!designId) {
+      callback(Err.missing('doc'));
+      return;
+    }
     tries++;
-    this.db.raw.view(designId, viewName, params, (err: iNanoError, result: { [index: string]: any }) => {
+    this._performView(designId, viewName, params, (err, result) => {
       if (err) {
-        let _afterResolve = (err: Error) => {
+        let _afterResolve = (err: Err) => {
           if (err)
             callback(err);
           else
             this.view(designId, viewName, params, callback, tries);
         };
-        if (tries <= 1 && err.reason === 'no_db_file')
+        if (tries <= 1 && err.name == "no_db_file")
           this.db.create(_afterResolve);
-        else if (tries <= 2 && (['missing', 'deleted', 'missing_named_view'].indexOf(err.reason) > -1))
+        else if (tries <= 2 && err.name == "not_found")
           this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
-        else if (tries <= this.db.maxTries && err.name === 'conflict')
+        else if (tries <= this.db.maxTries && err.name == "conflict")
           this._performRetrieveLatest(designId, _afterResolve);
         else
           callback(err);
       }
       else
-        callback(null, result); // executed successfully
+        callback(undefined, result); // executed successfully
     });
   }
   
-  private _performRetrieveLatest (designId: string, callback: (err: iNanoError, result: { [index: string]: any })=>any)
+  private _performView (designId: string, viewName: string, params: Object, callback: (err: Err, data: any)=>any)
   {
-    this.db.raw.get('_design/' + designId, callback);
+    this.db.raw.view(designId, viewName, params, (err: any, data: any) => {
+      callback(Err.make('design', err), data);
+    });
   }
   
-  private _persistDesign (designId: string, kinds: { [index: string]: string[] }, callback: (err: iNanoError)=>any)
+  private _performRetrieveLatest (designId: string, callback: (err: Err, result: { [index: string]: any })=>any)
+  {
+    this.db.raw.get('_design/' + designId, (err: any, result: any) => {
+      callback(Err.make('design', err), result);
+    });
+  }
+  
+  private _persistDesign (designId: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)
   {
     let design = this.db.designs[designId];
     if (!design) {
-      callback(new Error("No design specified for: " + designId));
+      callback(new Err('design', "not_defined", "No design specified for: " + designId));
       return;
     }
     // generate design document

@@ -1,4 +1,5 @@
-import {default as Db, iNanoError} from './db';
+import {default as Err} from './err';
+import {default as Db} from './db';
 import {default as DocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
 
@@ -31,10 +32,10 @@ export default class Doc
     return deepExtend({}, this.body);
   }
   
-  retrieveLatest (callback: (err?: Error)=>any = ()=>{})
+  retrieveLatest (callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.getId()) {
-      callback(new Error('Document does not exist.'));
+      callback(Err.missing('doc'));
       return;
     }
     this._performRetrieveLatest((err, result) => {
@@ -42,26 +43,28 @@ export default class Doc
         callback(err);
       else {
         this.body = result;
-        callback(null); // up to date
+        callback(); // up to date
       }
     });
   }
   
-  private _performRetrieveLatest (callback: (err: iNanoError, result: { [index: string]: any })=>any)
+  private _performRetrieveLatest (callback: (err: Err, result: { [index: string]: any })=>any)
   {
-    this.db.raw.get(this.getId(), callback);
+    this.db.raw.get(this.getId(), (err: any, result: any) => {
+      callback(Err.make('doc', err), result);
+    });
   }
   
-  update (body: Object, callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
+  update (body: Object, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
-      callback(new Error('Document does not exist.'));
+      callback(Err.missing('doc'));
       return;
     }
     tries++;
     this._performUpdate(body, (err, result) => {
       if (err) {
-        if (tries <= this.db.maxTries && err.statusCode == 409) {
+        if (tries <= this.db.maxTries && err.name == "conflict") {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
@@ -75,14 +78,16 @@ export default class Doc
       else {
         this.body = this._extendBody(body);
         this.body['_rev'] = result['rev'];
-        callback(null); // success
+        callback(); // success
       }
     });
   }
   
-  private _performUpdate (body: { [index: string]: any }, callback: (err: iNanoError, result: { [index: string]: any })=>any)
+  private _performUpdate (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
   {
-    this.db.raw.insert(this._extendBody(body), callback);
+    this.db.raw.insert(this._extendBody(body), (err: any, result: any) => {
+      callback(Err.make('doc', err), result);
+    });
   }
   
   private _extendBody (body: { [index: string]: any }): { [index: string]: any }
@@ -90,16 +95,16 @@ export default class Doc
     return deepExtend({}, this.body, body);
   }
   
-  erase (callback: (err?: Error)=>any = ()=>{}, tries: number = 0)
+  erase (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
-      callback(new Error('Document does not exist.'));
+      callback(Err.missing('doc'));
       return;
     }
     tries++;
     this._performErase((err) => {
       if (err) {
-        if (tries <= this.db.maxTries && err.statusCode == 409) {
+        if (tries <= this.db.maxTries && err.name == "conflict") {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
@@ -112,13 +117,15 @@ export default class Doc
       }
       else {
         this.body = {};
-        callback(null); // success
+        callback(); // success
       }
     });
   }
   
-  private _performErase (callback: (err: iNanoError)=>any)
+  private _performErase (callback: (err: Err)=>any)
   {
-    this.db.raw.destroy(this.getId(), this.getRev(), callback);
+    this.db.raw.destroy(this.getId(), this.getRev(), (err: any) => {
+      callback(Err.make('doc', err));
+    });
   }
 }

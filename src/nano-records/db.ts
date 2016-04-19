@@ -1,3 +1,4 @@
+import {default as Err} from './err';
 import {default as Doc} from './doc';
 import {default as DbDoc} from './db/doc';
 import {default as DbDesign} from './db/design';
@@ -7,19 +8,6 @@ export interface iDesignInput {
   language?: string,
   shows?: { [index: string]: string };
   views?: { [index: string]: { map: string, reduce: string }};
-}
-
-export interface iNanoError {
-  name: string;
-  error?: string;
-  reason?: string;
-  scope?: string;
-  statusCode?: number;
-  request?: Object;
-  headers?: Object;
-  errid?: string;
-  description?: string;
-  message: string;
 }
 
 export default class Db
@@ -52,7 +40,7 @@ export default class Db
     this.design = new DbDesign(this);
   }
   
-  create (callback: (err: Error)=>any = ()=>{})
+  create (callback: (err: Err)=>any = ()=>{})
   {
     this._performCreate((err) => {
       if (err)
@@ -62,8 +50,10 @@ export default class Db
     });
   }
   
-  private _performCreate (callback: (err: iNanoError)=>any)
+  private _performCreate (callback: (err: Err)=>any)
   {
-    this.nano.db.create(this.dbName, callback);
+    this.nano.db.create(this.dbName, (err: any) => {
+      callback(Err.make('db', err));
+    });
   }
 }

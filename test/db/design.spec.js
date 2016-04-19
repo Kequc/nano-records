@@ -37,7 +37,10 @@ function forceUpdate (doc, data, callback) {
 }
 
 describe('db-design', () => {
-
+  after((done) => {
+    nano.db.destroy(dbName, () => { done(); });
+  });
+  
   describe('database does not exist', () => {
     beforeEach((done) => {
       nano.db.destroy(dbName, () => { done(); });
@@ -72,7 +75,7 @@ describe('db-design', () => {
       var _doc;
       before((done) => {
         _doc = undefined;
-        db.doc.persist({}, (err, doc) => {
+        db.doc.persist({ _id: "fake-id-doesnt-exist" }, (err, doc) => {
           _doc = doc;
           _doc.erase(() => { done(); })
         });

@@ -33,7 +33,7 @@ function assertBody (doc, asserts, done) {
   }
   expect(asserts['_rev']).to.not.equal(doc.getRev());
   db.doc.get(doc.getId(), (err, gotDoc) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     expect(gotDoc).to.be.ok;
     expect(gotDoc.body).to.eql(doc.body);
     done();
@@ -43,11 +43,11 @@ function assertBody (doc, asserts, done) {
 function assertErase (doc, done) {
   let id = doc.getId();
   doc.erase(function (err) {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     expect(doc.body).to.eql({});
     db.doc.get(id, (err, gotDoc) => {
       expect(err).to.be.ok;
-      expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+      expect(err.name).to.equal("not_found");
       expect(gotDoc).to.be.undefined;
       done();
     });
@@ -55,6 +55,9 @@ function assertErase (doc, done) {
 }
 
 describe('doc', () => {
+  after((done) => {
+    nano.db.destroy(dbName, () => { done(); });
+  });
   
   describe('document does not exist', () => {
     var _doc;
@@ -84,6 +87,7 @@ describe('doc', () => {
       // should fail
       _doc.retrieveLatest((err) => {
         expect(err).to.be.ok;
+        expect(err.name).to.equal("not_found");
         done();
       });
     });
@@ -91,6 +95,7 @@ describe('doc', () => {
       // should fail
       _doc.update({ boo: "oorns" }, (err) => {
         expect(err).to.be.ok;
+        expect(err.name).to.equal("not_found");
         done();
       });
     });
@@ -98,6 +103,7 @@ describe('doc', () => {
       // should fail
       _doc.erase((err) => {
         expect(err).to.be.ok;
+        expect(err.name).to.equal("not_found");
         done();
       });
     });
@@ -138,7 +144,7 @@ describe('doc', () => {
       forceUpdate(_doc, changes, () => {
         expect(_doc.body).to.not.have.keys('anotheranother');
         _doc.retrieveLatest((err) => {
-          expect(err).to.be.null;
+          expect(err).to.be.undefined;
           expect(_doc.body).to.include.keys('complex', 'anotheranother', '_id', '_rev');
           assertBody(_doc, asserts, done);
         });
@@ -150,7 +156,7 @@ describe('doc', () => {
       let asserts = deepExtend({}, _doc.body, changes);
       expect(_doc.body).to.not.have.keys('more');
       _doc.update(changes, (err) => {
-        expect(err).to.be.null;
+        expect(err).to.be.undefined;
         expect(_doc.body).to.include.keys('complex', 'more', '_id', '_rev');
         assertBody(_doc, asserts, done);
       });
@@ -163,7 +169,7 @@ describe('doc', () => {
       forceUpdate(_doc, changes1, () => {
         expect(_doc.body).to.not.have.keys('anotheranother', 'added');
         _doc.update(changes2, (err) => {
-          expect(err).to.be.null;
+          expect(err).to.be.undefined;
           expect(_doc.body).to.include.keys('added', 'anotheranother', 'num', '_id', '_rev');
           assertBody(_doc, asserts, done);
         });
@@ -174,6 +180,7 @@ describe('doc', () => {
       forceUpdate(_doc, { a: 'change' }, () => {
         _doc.update({ boo: "oorns" }, (err) => {
           expect(err).to.be.ok;
+          expect(err.name).to.equal("conflict");
           done();
         }, db.maxTries); // tried x times
       });
@@ -193,6 +200,7 @@ describe('doc', () => {
       forceUpdate(_doc, { a: 'change' }, () => {
         _doc.erase((err) => {
           expect(err).to.be.ok;
+          expect(err.name).to.equal("conflict");
           done();
         }, db.maxTries); // tried x times
       });

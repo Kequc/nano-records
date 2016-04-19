@@ -26,6 +26,9 @@ var NanoRecords = require('../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 
 describe('db', function () {
+  after((done) => {
+    nano.db.destroy(dbName, () => { done(); });
+  });
   
   it('instantiates a new db object', () => {
     // should be successful

@@ -14,13 +14,13 @@ var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["s
 
 function assertPersist (done) {
   db.doc.persist(complexBody, (err, doc) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.body).to.have.all.keys('complex', 'num', 'deep', '_id', '_rev');
     expect(doc.body['deep']).to.have.all.keys('hi', 'arr');
     expect(doc.body['deep']['arr']).to.eql(["some", "values"]);
     db.doc.get(doc.getId(), (err, gotDoc) => {
-      expect(err).to.be.null;
+      expect(err).to.be.undefined;
       expect(gotDoc).to.be.ok;
       expect(gotDoc.body).to.eql(doc.body);
       done();
@@ -30,7 +30,7 @@ function assertPersist (done) {
 
 function assertGet (doc, done) {
   db.doc.get(doc.getId(), (err, gotDoc) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     expect(gotDoc).to.be.ok;
       expect(gotDoc.body).to.eql(doc.body);
     done();
@@ -44,7 +44,7 @@ function assertBody (doc, asserts, done) {
   }
   expect(asserts['_rev']).to.not.equal(doc.getRev());
   db.doc.get(doc.getId(), (err, gotDoc) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     expect(gotDoc).to.be.ok;
     expect(gotDoc.body).to.eql(doc.body);
     done();
@@ -55,7 +55,7 @@ function assertUpdateOrPersist (id, done, asserts) {
   let changes = { another: 'one', complex: 'changed' };
   asserts = deepExtend({}, asserts || {}, changes);
   db.doc.updateOrPersist(id, changes, (err, doc) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.body).to.include.keys('another', 'complex', '_id', '_rev');
     expect(doc.getId()).to.equal(id);
@@ -67,9 +67,9 @@ function assertUpdate (doc, done) {
   let changes = { complex: 'document updated', updated: 'changehere' };
   let asserts = deepExtend({}, doc.body, changes);
   db.doc.update(doc.getId(), changes, (err) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     doc.retrieveLatest((err) => {
-      expect(err).to.be.null;
+      expect(err).to.be.undefined;
       expect(doc.body).to.include.keys('complex', 'updated', '_id', '_rev');
       assertBody(doc, asserts, done);
     });
@@ -78,10 +78,10 @@ function assertUpdate (doc, done) {
 
 function assertErase (id, done) {
   db.doc.erase(id, (err) => {
-    expect(err).to.be.null;
+    expect(err).to.be.undefined;
     db.doc.get(id, (err, gotDoc) => {
       expect(err).to.be.ok;
-      expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+      expect(err.name).to.equal("not_found");
       expect(gotDoc).to.be.undefined;
       done();
     });
@@ -89,6 +89,9 @@ function assertErase (id, done) {
 }
 
 describe('db-doc', () => {
+  after((done) => {
+    nano.db.destroy(dbName, () => { done(); });
+  });
   
   describe('database does not exist', () => {
     beforeEach((done) => {
@@ -103,7 +106,7 @@ describe('db-doc', () => {
       // should fail
       db.doc.get("fake-id-doesnt-exist", (err, gotDoc) => {
         expect(err).to.be.ok;
-        expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+        expect(err.name).to.equal("not_found");
         expect(gotDoc).to.be.undefined;
         done();
       });
@@ -112,7 +115,7 @@ describe('db-doc', () => {
       // should fail
       db.doc.update("fake-id-doesnt-exist", { blah: 'will fail' }, (err) => {
         expect(err).to.be.ok;
-        expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+        expect(err.name).to.equal("not_found");
         done();
       });
     });
@@ -124,7 +127,7 @@ describe('db-doc', () => {
       // should fail
       db.doc.erase("fake-id-doesnt-exist", (err) => {
         expect(err).to.be.ok;
-        expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+        expect(err.name).to.equal("not_found");
         done();
       });
     });
@@ -150,7 +153,7 @@ describe('db-doc', () => {
         // should fail
         db.doc.get("fake-id-doesnt-exist", (err, doc) => {
           expect(err).to.be.ok;
-          expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+          expect(err.name).to.equal("not_found");
           expect(doc).to.be.undefined;
           done();
         });
@@ -159,7 +162,7 @@ describe('db-doc', () => {
         // should fail
         db.doc.update("fake-id-doesnt-exist", { blah: 'will fail' }, (err) => {
           expect(err).to.be.ok;
-          expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+          expect(err.name).to.equal("not_found");
           done();
         });
       });
@@ -171,7 +174,7 @@ describe('db-doc', () => {
         // should fail
         db.doc.erase("fake-id-doesnt-exist", (err) => {
           expect(err).to.be.ok;
-          expect(err.reason).to.be.oneOf(['missing', 'deleted']);
+          expect(err.name).to.equal("not_found");
           done();
         });
       });

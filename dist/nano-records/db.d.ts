@@ -1,3 +1,4 @@
+import { default as Err } from './err';
 import { default as DbDoc } from './db/doc';
 import { default as DbDesign } from './db/design';
 export interface iDesignInput {
@@ -12,18 +13,6 @@ export interface iDesignInput {
         };
     };
 }
-export interface iNanoError {
-    name: string;
-    error?: string;
-    reason?: string;
-    scope?: string;
-    statusCode?: number;
-    request?: Object;
-    headers?: Object;
-    errid?: string;
-    description?: string;
-    message: string;
-}
 export default class Db {
     maxTries: number;
     nano: any;
@@ -37,6 +26,6 @@ export default class Db {
     constructor(nano: any, dbName: string, designs?: {
         [index: string]: iDesignInput;
     });
-    create(callback?: (err: Error) => any): void;
+    create(callback?: (err: Err) => any): void;
     private _performCreate(callback);
 }

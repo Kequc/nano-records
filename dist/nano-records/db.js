@@ -1,3 +1,4 @@
+var err_1 = require('./err');
 var doc_1 = require('./db/doc');
 var design_1 = require('./db/design');
 var deepExtend = require('deep-extend');
@@ -30,7 +31,9 @@ var Db = (function () {
         });
     };
     Db.prototype._performCreate = function (callback) {
-        this.nano.db.create(this.dbName, callback);
+        this.nano.db.create(this.dbName, function (err) {
+            callback(err_1.default.make('db', err));
+        });
     };
     return Db;
 })();

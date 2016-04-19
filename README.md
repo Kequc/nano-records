@@ -169,7 +169,7 @@ db.doc.attachment.erase(id, name, (err) => {
 });
 ```
 
-Destroys the attachment in the database, returns an error unless the attachment was found and deleted.
+Deletes the attachment from the database if it exists.
 
 #### List and exists
 
