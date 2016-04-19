@@ -76,6 +76,7 @@ describe('doc', () => {
       expect(_doc.body['_rev']).to.be.undefined;
       expect(_doc.getRev()).to.be.null;
     });
+    it('body');
     it('retrieveLatest', (done) => {
       // should fail
       _doc.retrieveLatest((err) => {
@@ -119,6 +120,7 @@ describe('doc', () => {
       expect(_doc.body['_rev']).to.be.ok;
       expect(_doc.getRev()).to.equal(_doc.body['_rev']);
     });
+    it('body');
     it('retrieveLatest', (done) => {
       // should be successful
       let changes = { anotheranother: "Yay!", complex: "cats and dogs" };

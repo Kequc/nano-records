@@ -121,6 +121,7 @@ describe('doc-attachment', () => {
       });
     });
     
+    it('list');
     it('exists', () => {
       // should fail
       expect(_doc.attachment.exists(fileName)).to.be.false;
@@ -187,6 +188,7 @@ describe('doc-attachment', () => {
         _doc.attachment.erase(fileName, () => { done(); });
       });
       
+      it('list');
       it('exists', () => {
         // should fail
         expect(_doc.attachment.exists(fileName)).to.be.false;
@@ -246,6 +248,7 @@ describe('doc-attachment', () => {
         });
       });
       
+      it('list');
       it('exists', () => {
         // should be successful
         expect(_doc.attachment.exists(fileName)).to.be.true;

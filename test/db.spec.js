@@ -56,4 +56,6 @@ describe('db', function () {
     expect(db.raw).to.respondTo('insert'); // is a nano instance
   });
   
+  it('create');
+  
 });
