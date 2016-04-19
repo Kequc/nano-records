@@ -76,7 +76,10 @@ describe('doc', () => {
       expect(_doc.body['_rev']).to.be.undefined;
       expect(_doc.getRev()).to.be.null;
     });
-    it('body');
+    it('body', () => {
+      // should fail
+      expect(_doc.body).to.eql({});
+    });
     it('retrieveLatest', (done) => {
       // should fail
       _doc.retrieveLatest((err) => {
@@ -120,7 +123,14 @@ describe('doc', () => {
       expect(_doc.body['_rev']).to.be.ok;
       expect(_doc.getRev()).to.equal(_doc.body['_rev']);
     });
-    it('body');
+    it('getBody', () => {
+      // should be successful
+      let copy = _doc.getBody();
+      expect(copy).to.include.keys('_id', '_rev', 'complex', 'num', 'deep');
+      expect(copy['deep']).to.include.keys('hi', 'arr');
+      expect(copy['deep']['arr']).to.eql(["some", "values"]);
+      expect(copy['deep']).to.eql(_doc.body['deep']);
+    });
     it('retrieveLatest', (done) => {
       // should be successful
       let changes = { anotheranother: "Yay!", complex: "cats and dogs" };

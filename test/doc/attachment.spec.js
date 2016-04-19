@@ -121,7 +121,10 @@ describe('doc-attachment', () => {
       });
     });
     
-    it('list');
+    it('list', () => {
+      // should fail
+      expect(_doc.attachment.list()).to.eql([]);
+    });
     it('exists', () => {
       // should fail
       expect(_doc.attachment.exists(fileName)).to.be.false;
@@ -188,7 +191,10 @@ describe('doc-attachment', () => {
         _doc.attachment.erase(fileName, () => { done(); });
       });
       
-      it('list');
+      it('list', () => {
+        // should fail
+        expect(_doc.attachment.list()).to.eql([]);
+      });
       it('exists', () => {
         // should fail
         expect(_doc.attachment.exists(fileName)).to.be.false;
@@ -248,7 +254,10 @@ describe('doc-attachment', () => {
         });
       });
       
-      it('list');
+      it('list', () => {
+        // should be successful
+        expect(_doc.attachment.list()).to.eql([fileName]);
+      });
       it('exists', () => {
         // should be successful
         expect(_doc.attachment.exists(fileName)).to.be.true;

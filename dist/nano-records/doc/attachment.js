@@ -2,6 +2,14 @@ var DocAttachment = (function () {
     function DocAttachment(doc) {
         this.doc = doc;
     }
+    DocAttachment.prototype.list = function () {
+        var attachments = [];
+        for (var name_1 in (this.doc.body['_attachments'] || {})) {
+            attachments.push(name_1);
+        }
+        ;
+        return attachments;
+    };
     DocAttachment.prototype.exists = function (name) {
         return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
     };

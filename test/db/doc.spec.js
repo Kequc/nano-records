@@ -32,7 +32,7 @@ function assertGet (doc, done) {
   db.doc.get(doc.getId(), (err, gotDoc) => {
     expect(err).to.be.null;
     expect(gotDoc).to.be.ok;
-    expect(gotDoc.body).to.eql(doc.body);
+      expect(gotDoc.body).to.eql(doc.body);
     done();
   });
 }

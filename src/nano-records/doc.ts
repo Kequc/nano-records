@@ -26,6 +26,11 @@ export default class Doc
     return this.body['_rev'] || null;
   }
   
+  getBody (): { [index: string]: any }
+  {
+    return deepExtend({}, this.body);
+  }
+  
   retrieveLatest (callback: (err?: Error)=>any = ()=>{})
   {
     if (!this.getId()) {

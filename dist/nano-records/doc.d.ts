@@ -11,6 +11,9 @@ export default class Doc {
     });
     getId(): string;
     getRev(): string;
+    getBody(): {
+        [index: string]: any;
+    };
     retrieveLatest(callback?: (err?: Error) => any): void;
     private _performRetrieveLatest(callback);
     update(body: Object, callback?: (err?: Error) => any, tries?: number): void;

@@ -10,6 +10,15 @@ export default class DocAttachment
     this.doc = doc;
   }
   
+  list (): string[]
+  {
+    let attachments: string[] = [];
+    for (let name in (this.doc.body['_attachments'] || {})) {
+      attachments.push(name);
+    };
+    return attachments;
+  }
+  
   exists (name: string): boolean
   {
     return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);

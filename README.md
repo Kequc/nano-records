@@ -26,7 +26,7 @@ db.doc.persist(body, (err, doc) => {
   if (err)
     return;
   // doc is a NanoRecords document
-  console.log(doc.body());
+  console.log(doc.body);
 });
 ```
 
@@ -39,7 +39,7 @@ db.doc.get(id, (err, doc) => {
   if (err)
     return;
   // doc is a NanoRecords document
-  console.log(doc.body());
+  console.log(doc.body);
 });
 ```
 
@@ -58,7 +58,7 @@ db.doc.update(id, body, (err) => {
 });
 ```
 
-Updates with the provided body.
+Adds the provided body to the existing body and then persists it to the database.
 
 #### Update or persist
 
@@ -67,11 +67,11 @@ db.doc.updateOrPersist(id, body, (err, doc) => {
   if (err)
     return;
   // doc is a NanoRecords document
-  console.log(doc.body());
+  console.log(doc.body);
 });
 ```
 
-This method searched for the document in the database and updates it if it is found.
+This method searches for the document in the database and updates it if it is found.
 
 Otherwise, it will persist it along with the given id. You will be certain to avoid overwriting entire documents this way, this method also returns a NanoRecords document instance.
 
@@ -93,23 +93,22 @@ Destroys the document in the database, returns an error unless the document was 
 #### Body
 
 ```javascript
-var body = doc.body();
-var att1 = doc.body('my-attribute');
-var att2 = doc.body('my-attribute', 'my-nested-attribute');
+// doc.body;
+var body = doc.getBody();
 ```
 
-Your body data is returned in full. Optionally you can pass a series of parameters to drill into it toward the property you want.
+A convenience method used to return a clone of your data. The same data is available directly however it is not a good idea to make changes to it.
 
 #### Get id and get rev
 
 ```javascript
-// doc.body('_id');
+// doc.body['_id'];
 var id = doc.getId();
-// doc.body('_rev');
+// doc.body['_rev'];
 var rev = doc.getRev();
 ```
 
-Methods for accessing the body's `_id` and `_rev` properties. Equivalent to running `doc.body('_id')` and `doc.body('_rev')`.
+Methods for accessing the body's `_id` and `_rev` properties. Equivalent to running `doc.body['_id']` and `doc.body['_rev']`.
 
 #### Retrieve latest
 
@@ -117,7 +116,7 @@ Methods for accessing the body's `_id` and `_rev` properties. Equivalent to runn
 doc.retrieveLatest((err) => {
   if (err)
     return;
-  console.log(doc.body());
+  console.log(doc.body);
 });
 ```
 
@@ -170,7 +169,7 @@ db.doc.attachment.erase(id, name, (err) => {
 });
 ```
 
-Destroys the attachment in the database, returns an error unless the attachment was found and erased.
+Destroys the attachment in the database, returns an error unless the attachment was found and deleted.
 
 #### List and exists
 
@@ -189,13 +188,14 @@ Returns a list of all attachments. Given the provided name whether this record h
 var writer = fs.createWriteStream('./my-file.txt');
 var reader = doc.attachment.read(name, (err) => {
   if (!err)
-    console.log('success');
+    console.log('success!');
 });
+reader.pipe(writer);
+var writer = fs.createWriteStream('./my-file.txt');
 var reader = db.doc.attachment.read(id, name, (err) => {
   if (!err)
-    console.log('success');
+    console.log('success!');
 });
-// download from the database
 reader.pipe(writer);
 ```
 
@@ -207,9 +207,8 @@ Reads the attachment as a stream. How convenient!
 var reader = fs.createReadStream('./my-file.txt');
 var writer = doc.attachment.write(name, (err) => {
   if (!err)
-    console.log('success');
+    console.log('success!');
 });
-// upload to the database
 reader.pipe(writer);
 ```
 
@@ -270,4 +269,4 @@ Persists the given show to the database and behaves similarly to `db.design.view
 
 ## &#8620; Contribute
 
-If you like what you see please feel encouraged to [get involved](https://github.com/Kequc/nano-records/issues) patches and pull requests! As of the time of this writing the project is still new.
+If you like what you see please feel encouraged to [get involved](https://github.com/Kequc/nano-records/issues) send patches and pull requests! As of the time of this writing the project is still new.

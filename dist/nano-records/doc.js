@@ -13,6 +13,9 @@ var Doc = (function () {
     Doc.prototype.getRev = function () {
         return this.body['_rev'] || null;
     };
+    Doc.prototype.getBody = function () {
+        return deepExtend({}, this.body);
+    };
     Doc.prototype.retrieveLatest = function (callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
