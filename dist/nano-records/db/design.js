@@ -3,6 +3,11 @@ var DbDesign = (function () {
     function DbDesign(db) {
         this.db = db;
     }
+    // FIXME: might not be so useful.
+    // get (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+    // {
+    //   this.db.doc.get('_design/' + designId, callback);
+    // }
     DbDesign.prototype.show = function (designId, showName, id, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
@@ -24,8 +29,6 @@ var DbDesign = (function () {
                     _this.db.create(_afterResolve);
                 else if (tries <= 2 && err.name == "not_found")
                     _this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
-                else if (tries <= _this.db.maxTries && err.name == "conflict")
-                    _this._performRetrieveLatest(designId, _afterResolve);
                 else
                     callback(err);
             }
@@ -59,8 +62,6 @@ var DbDesign = (function () {
                     _this.db.create(_afterResolve);
                 else if (tries <= 2 && err.name == "not_found")
                     _this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
-                else if (tries <= _this.db.maxTries && err.name == "conflict")
-                    _this._performRetrieveLatest(designId, _afterResolve);
                 else
                     callback(err);
             }
@@ -92,14 +93,24 @@ var DbDesign = (function () {
                     body.shows = {};
                     for (var _i = 0, _a = kinds[kind]; _i < _a.length; _i++) {
                         var name_1 = _a[_i];
-                        body.shows[name_1] = design.shows[name_1] || null;
+                        if (design.shows[name_1])
+                            body.shows[name_1] = design.shows[name_1];
+                        else {
+                            callback(new err_1.default('design', "missing_show", "Missing deinition for: " + name_1));
+                            return;
+                        }
                     }
                     break;
                 case 'views':
                     body.views = {};
                     for (var _b = 0, _c = kinds[kind]; _b < _c.length; _b++) {
                         var name_2 = _c[_b];
-                        body.views[name_2] = design.views[name_2] || null;
+                        if (design.views[name_2])
+                            body.views[name_2] = design.views[name_2];
+                        else {
+                            callback(new err_1.default('design', "missing_view", "Missing deinition for: " + name_2));
+                            return;
+                        }
                     }
                     break;
             }

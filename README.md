@@ -241,7 +241,7 @@ var designs = require('./designs.json');
 var db = new NanoRecords(nano, dbName, designs);
 ```
 
-When creating your NanoRecords instance optionally provide it a set of designs to use. By default the language will be javascript.
+When creating your NanoRecords instance optionally provide it a set of designs to use. You can read more about [views](http://docs.couchdb.org/en/1.6.1/couchapp/views/intro.html), shows, and [design documents](http://docs.couchdb.org/en/1.6.1/couchapp/ddocs.html) on the couchdb website.
 
 #### View
 

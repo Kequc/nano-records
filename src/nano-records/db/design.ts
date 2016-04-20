@@ -1,5 +1,6 @@
 import {default as Err} from '../err';
 import {default as Db, iDesignInput} from '../db';
+import {default as Doc} from '../doc';
 
 export default class DbDesign
 {
@@ -9,6 +10,12 @@ export default class DbDesign
   {
     this.db = db;
   }
+
+  // FIXME: might not be so useful.
+  // get (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  // {
+  //   this.db.doc.get('_design/' + designId, callback);
+  // }
   
   show (designId: string, showName: string, id: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {
@@ -29,8 +36,6 @@ export default class DbDesign
           this.db.create(_afterResolve);
         else if (tries <= 2 && err.name == "not_found")
           this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
-        else if (tries <= this.db.maxTries && err.name == "conflict")
-          this._performRetrieveLatest(designId, _afterResolve);
         else
           callback(err);
       }
@@ -65,8 +70,6 @@ export default class DbDesign
           this.db.create(_afterResolve);
         else if (tries <= 2 && err.name == "not_found")
           this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
-        else if (tries <= this.db.maxTries && err.name == "conflict")
-          this._performRetrieveLatest(designId, _afterResolve);
         else
           callback(err);
       }
@@ -103,13 +106,23 @@ export default class DbDesign
         case 'shows':
         body.shows = {};
         for (let name of kinds[kind]) {
-          body.shows[name] = design.shows[name] || null;
+          if (design.shows[name])
+            body.shows[name] = design.shows[name];
+          else {
+            callback(new Err('design', "missing_show", "Missing deinition for: " + name));
+            return;
+          }
         }
         break;
         case 'views':
         body.views = {};
         for (let name of kinds[kind]) {
-          body.views[name] = design.views[name] || null;
+          if (design.views[name])
+            body.views[name] = design.views[name];
+          else {
+            callback(new Err('design', "missing_view", "Missing deinition for: " + name));
+            return;
+          }
         }
         break;
       }
