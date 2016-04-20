@@ -42,17 +42,24 @@ export default class Db
   
   create (callback: (err: Err)=>any = ()=>{})
   {
-    this._performCreate((err) => {
-      if (err)
-        callback(err);
-      else
-        callback(null);
-    });
+    this._performCreate(callback);
   }
   
   private _performCreate (callback: (err: Err)=>any)
   {
     this.nano.db.create(this.dbName, (err: any) => {
+      callback(Err.make('db', err));
+    });
+  }
+  
+  destroy (callback: (err: Err)=>any = ()=>{})
+  {
+    this._performDestroy(callback);
+  }
+  
+  private _performDestroy (callback: (err: Err)=>any)
+  {
+    this.nano.db.destroy(this.dbName, (err: any) => {
       callback(Err.make('db', err));
     });
   }

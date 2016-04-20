@@ -98,7 +98,7 @@ export default class Doc
   erase (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
-      callback(Err.missing('doc'));
+      callback(); // nothing to see here
       return;
     }
     tries++;

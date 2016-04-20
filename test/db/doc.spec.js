@@ -90,12 +90,12 @@ function assertErase (id, done) {
 
 describe('db-doc', () => {
   after((done) => {
-    nano.db.destroy(dbName, () => { done(); });
+    db.destroy(() => { done(); });
   });
   
   describe('database does not exist', () => {
     beforeEach((done) => {
-      nano.db.destroy(dbName, () => { done(); });
+      db.destroy(() => { done(); });
     });
     
     it('persist', (done) => {
@@ -124,19 +124,15 @@ describe('db-doc', () => {
       assertUpdateOrPersist("fake-id-doesnt-exist", done);
     });
     it('erase', (done) => {
-      // should fail
-      db.doc.erase("fake-id-doesnt-exist", (err) => {
-        expect(err).to.be.ok;
-        expect(err.name).to.equal("not_found");
-        done();
-      });
+      // should be successful
+      assertErase("fake-id-doesnt-exist", done);
     });
   });
   
   describe('database exists', () => {
     before((done) => {
-      nano.db.destroy(dbName, () => {
-        nano.db.create(dbName, () => { done(); });
+      db.destroy(() => {
+        db.create(() => { done(); });
       });
     });
     
@@ -171,12 +167,8 @@ describe('db-doc', () => {
         assertUpdateOrPersist("fake-id-doesnt-exist", done);
       });
       it('erase', (done) => {
-        // should fail
-        db.doc.erase("fake-id-doesnt-exist", (err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("not_found");
-          done();
-        });
+        // should be successful
+        assertErase("fake-id-doesnt-exist", done);
       });
     });
     

@@ -1,4 +1,5 @@
 var err_1 = require('../err');
+var devNull = require('dev-null');
 var DocAttachment = (function () {
     function DocAttachment(doc) {
         this.doc = doc;
@@ -51,7 +52,7 @@ var DocAttachment = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (!this.doc.getId()) {
             callback(err_1.default.missing('doc'));
-            return;
+            return devNull();
         }
         return this._performPersist(name, null, mimetype, function (err, result) {
             if (err)
@@ -73,19 +74,11 @@ var DocAttachment = (function () {
     };
     DocAttachment.prototype.get = function (name, callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (!this.doc.getId()) {
-            callback(err_1.default.missing('doc'));
-            return;
-        }
         // we have a method already available for this on the db object
         this.doc.db.doc.attachment.get(this.doc.getId(), name, callback);
     };
     DocAttachment.prototype.read = function (name, callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (!this.doc.getId()) {
-            callback(err_1.default.missing('doc'));
-            return;
-        }
         // we have a method already available for this on the db object
         return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
     };

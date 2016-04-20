@@ -110,7 +110,10 @@ export default class DbDoc
   {
     this.get(id, (err, doc) => {
       if (err) {
-        callback(err);
+        if (err.name == "not_found")
+          callback(); // nothing to see here
+        else
+          callback(err);
       }
       else
         doc.erase(callback); // attempt erase

@@ -98,7 +98,7 @@ function assertErase (doc, done) {
 
 describe('doc-attachment', () => {
   after((done) => {
-    nano.db.destroy(dbName, () => { done(); });
+    db.destroy(() => { done(); });
   });
   
   describe('document does not exist', () => {
@@ -157,7 +157,9 @@ describe('doc-attachment', () => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("not_found");
         done();
-      }));
+      }), (result) => {
+        expect(result).to.equal("");
+      });
     });
     it('erase', (done) => {
       // should fail
@@ -236,7 +238,10 @@ describe('doc-attachment', () => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("not_found");
           done();
-        }));
+        }), (result) => {
+          expect(result).to.be.ok;
+          // expect(result).to.equal("");
+        });
       });
       it('erase', (done) => {
         // should be successful

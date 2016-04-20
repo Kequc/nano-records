@@ -1,5 +1,6 @@
 import {default as Err} from '../err';
 import {default as Doc} from '../doc';
+import devNull = require('dev-null');
 
 export default class DocAttachment
 {
@@ -59,7 +60,7 @@ export default class DocAttachment
   {
     if (!this.doc.getId()) {
       callback(Err.missing('doc'));
-      return;
+      return devNull();
     }
     return this._performPersist(name, null, mimetype, (err, result) => {
       if (err)
@@ -84,20 +85,12 @@ export default class DocAttachment
   
   get (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
   {
-    if (!this.doc.getId()) {
-      callback(Err.missing('doc'));
-      return;
-    }
     // we have a method already available for this on the db object
     this.doc.db.doc.attachment.get(this.doc.getId(), name, callback);
   }
   
   read (name: string, callback: (err?: Err)=>any = ()=>{})
   {
-    if (!this.doc.getId()) {
-      callback(Err.missing('doc'));
-      return;
-    }
     // we have a method already available for this on the db object
     return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }

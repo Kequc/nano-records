@@ -99,7 +99,10 @@ var DbDoc = (function () {
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
             if (err) {
-                callback(err);
+                if (err.name == "not_found")
+                    callback(); // nothing to see here
+                else
+                    callback(err);
             }
             else
                 doc.erase(callback); // attempt erase

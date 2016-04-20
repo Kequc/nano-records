@@ -80,7 +80,7 @@ var Doc = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(); // nothing to see here
             return;
         }
         tries++;

@@ -88,7 +88,7 @@ db.doc.erase(id, (err) => {
 });
 ```
 
-Destroys the document in the database, returns an error unless the document was found and erased.
+Removes the document from the database.
 
 #### Body
 
@@ -169,7 +169,7 @@ db.doc.attachment.erase(id, name, (err) => {
 });
 ```
 
-Deletes the attachment from the database.
+Removes the attachment from the database.
 
 #### List and exists
 
@@ -267,6 +267,30 @@ db.design.show(designId, showName, id, (err, data) => {
 
 Persists the given show to the database and behaves similarly to `db.design.view`.
 
+## &#8620; Db
+
+#### Create
+
+```javascript
+db.create((err) => {
+  if (!err)
+    console.log('success!');
+});
+```
+
+Creates the database. You should never need to use this but it's there if you need it.
+
+#### Destroy
+
+```javascript
+db.destroy((err) => {
+  if (!err)
+    console.log('success!');
+});
+```
+
+Destroys the database.
+
 ## &#8620; Errors
 
 ```javascript
@@ -284,9 +308,9 @@ err.raw; // the full error returned from nano
 
 When an error is returned it has the above format. Generally you should never see `no_db_file` or `conflict` so maybe these are not so common errors.
 
-A conflict would only happen if the max number of retries was reached on a request, possibly there is too much activity on one specific document.
+A conflict would only happen if the max number of retries was reached on a request, possibly you have too much activity on one specific document.
 
-You might see database missing if your couchdb instance has security locked down.
+You might see database missing if your couchdb has security locked down.
 
 ## &#8620; Contribute
 

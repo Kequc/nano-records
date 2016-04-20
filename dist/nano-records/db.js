@@ -23,15 +23,19 @@ var Db = (function () {
     }
     Db.prototype.create = function (callback) {
         if (callback === void 0) { callback = function () { }; }
-        this._performCreate(function (err) {
-            if (err)
-                callback(err);
-            else
-                callback(null);
-        });
+        this._performCreate(callback);
     };
     Db.prototype._performCreate = function (callback) {
         this.nano.db.create(this.dbName, function (err) {
+            callback(err_1.default.make('db', err));
+        });
+    };
+    Db.prototype.destroy = function (callback) {
+        if (callback === void 0) { callback = function () { }; }
+        this._performDestroy(callback);
+    };
+    Db.prototype._performDestroy = function (callback) {
+        this.nano.db.destroy(this.dbName, function (err) {
             callback(err_1.default.make('db', err));
         });
     };

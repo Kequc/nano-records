@@ -31,7 +31,7 @@ export default class Err
       return;
     else if (err.statusCode == 412)
       return new Err(scope, "db_already_exists", "Database already exists.", err);
-    else if (err.reason == "no_db_file")
+    else if ((err.statusCode == 404 && scope == 'db') || err.reason == "no_db_file")
       return new Err(scope, "no_db_file", "Database missing.", err);
     else if (err.statusCode == 404)
       return this.missing(scope, err);

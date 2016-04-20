@@ -1,6 +1,7 @@
 import {default as Err} from '../../err';
 import {default as Doc} from '../../doc';
 import {default as DbDoc} from '../doc';
+import stream = require('stream');
 
 export default class DbDocAttachment
 {
@@ -27,14 +28,16 @@ export default class DbDocAttachment
       callback(Err.missing('doc'));
       return;
     }
-    // doesn't need _rev
-    // so we can skip doc.get
-    this._performGet(id, name, (err, data) => {
-      // NOTE: This is probably unnecessarily verbose
-      if (err)
-        callback(err);
-      else
-        callback(undefined, data); // attachment found!
+    // doesn't need `_rev` so we can skip `doc.get`
+    this._performGet(id, name, callback);
+  }
+  
+  private _performGet (id: string, name: string, callback: (err: Err, data: any)=>any)
+  {
+    // TODO: truthfully this returns pretty ugly streams when there is an error
+    // would be nice to clean this up
+    this.doc.db.raw.attachment.get(id, name, {}, (err: any, data: any) => {
+      callback(Err.make('attachment', err), data);
     });
   }
   
@@ -42,22 +45,19 @@ export default class DbDocAttachment
   {
     if (!id) {
       callback(Err.missing('doc'));
-      return;
+      // return empty stream
+      let readable = new stream.Readable();
+      readable._read = ()=>{};
+      readable.push(null);
+      return readable;
     }
-    return this._performGet(id, name, function (err) {
-      // NOTE: Yeah yeah this is maybe too verbose too
-      // FIXME: This doesn't actually return an error if the document doesn't exist
-      if (err)
-        callback(err);
-      else
-        callback(); // found it!
-    });
+    return this._performRead(id, name, callback);
   }
   
-  private _performGet (id: string, name: string, callback: (err?: Err, data?: any)=>any)
+  private _performRead (id: string, name: string, callback: (err?: Err)=>any)
   {
-    return this.doc.db.raw.attachment.get(id, name, {}, (err: any, data: any) => {
-      callback(Err.make('attachment', err), data);
+    return this.doc.db.raw.attachment.get(id, name, {}, (err: any) => {
+      callback(Err.make('attachment', err));
     });
   }
   

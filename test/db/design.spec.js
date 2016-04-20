@@ -38,12 +38,12 @@ function forceUpdate (doc, data, callback) {
 
 describe('db-design', () => {
   after((done) => {
-    nano.db.destroy(dbName, () => { done(); });
+    db.destroy(() => { done(); });
   });
   
   describe('database does not exist', () => {
     beforeEach((done) => {
-      nano.db.destroy(dbName, () => { done(); });
+      db.destroy(() => { done(); });
     });
     
     it('view', (done) => {
@@ -66,8 +66,8 @@ describe('db-design', () => {
   
   describe('database exists', () => {
     before((done) => {
-      nano.db.destroy(dbName, () => {
-        nano.db.create(dbName, () => { done(); });
+      db.destroy(() => {
+        db.create(() => { done(); });
       });
     });
     

@@ -28,4 +28,6 @@ export default class Db {
     });
     create(callback?: (err: Err) => any): void;
     private _performCreate(callback);
+    destroy(callback?: (err: Err) => any): void;
+    private _performDestroy(callback);
 }

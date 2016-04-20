@@ -56,7 +56,7 @@ function assertErase (doc, done) {
 
 describe('doc', () => {
   after((done) => {
-    nano.db.destroy(dbName, () => { done(); });
+    db.destroy(() => { done(); });
   });
   
   describe('document does not exist', () => {
@@ -100,12 +100,8 @@ describe('doc', () => {
       });
     });
     it('erase', (done) => {
-      // should fail
-      _doc.erase((err) => {
-        expect(err).to.be.ok;
-        expect(err.name).to.equal("not_found");
-        done();
-      });
+      // should be successful
+      assertErase(_doc, done);
     });
   });
   
