@@ -4,32 +4,30 @@ var DbDocAttachment = (function () {
     function DbDocAttachment(doc) {
         this.doc = doc;
     }
-    DbDocAttachment.prototype.persist = function (id, name, data, mimeType, callback) {
+    DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
-                doc.attachment.persist(name, data, mimeType, callback); // attempt attachment
+                doc.attachment.write(name, data, mimeType, callback); // attempt write
         });
     };
-    DbDocAttachment.prototype.get = function (id, name, callback) {
+    DbDocAttachment.prototype.read = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id) {
             callback(err_1.default.missing('doc'));
             return;
         }
         // doesn't need `_rev` so we can skip `doc.get`
-        this._performGet(id, name, callback);
+        this._performRead(id, name, callback);
     };
-    DbDocAttachment.prototype._performGet = function (id, name, callback) {
-        // TODO: truthfully this returns pretty ugly streams when there is an error
-        // would be nice to clean this up
+    DbDocAttachment.prototype._performRead = function (id, name, callback) {
         this.doc.db.raw.attachment.get(id, name, {}, function (err, data) {
             callback(err_1.default.make('attachment', err), data);
         });
     };
-    DbDocAttachment.prototype.read = function (id, name, callback) {
+    DbDocAttachment.prototype.readable = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id) {
             callback(err_1.default.missing('doc'));
@@ -41,18 +39,20 @@ var DbDocAttachment = (function () {
         }
         return this._performRead(id, name, callback);
     };
-    DbDocAttachment.prototype._performRead = function (id, name, callback) {
+    DbDocAttachment.prototype._performReadable = function (id, name, callback) {
+        // TODO: truthfully this returns pretty ugly streams when there is an error
+        // would be nice to clean this up
         return this.doc.db.raw.attachment.get(id, name, {}, function (err) {
             callback(err_1.default.make('attachment', err));
         });
     };
-    DbDocAttachment.prototype.erase = function (id, name, callback) {
+    DbDocAttachment.prototype.destroy = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.doc.get(id, function (err, doc) {
             if (err)
                 callback(err);
             else
-                doc.attachment.erase(name, callback); // attempt erase
+                doc.attachment.destroy(name, callback); // attempt destroy
         });
     };
     return DbDocAttachment;

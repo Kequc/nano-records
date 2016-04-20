@@ -106,11 +106,9 @@ describe('db-design', () => {
       var _doc;
       beforeEach((done) => {
         _doc = undefined;
-        db.doc.erase("_design/foo", () => {
-          db.doc.persist({ _id: "_design/foo" }, (err, doc) => {
-            _doc = doc;
-            done();
-          });
+        db.doc.persistOrCreate("_design/foo", {}, (err, doc) => {
+          _doc = doc;
+          done();
         });
       });
       

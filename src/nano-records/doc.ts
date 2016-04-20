@@ -55,7 +55,43 @@ export default class Doc
     });
   }
   
-  update (body: Object, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  overwrite (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  {
+    if (!this.getId()) {
+      callback(Err.missing('doc'));
+      return;
+    }
+    tries++;
+    this._performOverwrite(body, (err, result) => {
+      if (err) {
+        if (tries <= this.db.maxTries && err.name == "conflict") {
+          this.retrieveLatest((err) => {
+            if (err)
+              callback(err);
+            else
+              this.overwrite(body, callback, tries);
+          });
+        }
+        else
+          callback(err);
+      }
+      else {
+        this.body = body;
+        this.body['_id'] = result['id'];
+        this.body['_rev'] = result['rev'];
+        callback(); // success
+      }
+    });
+  }
+  
+  private _performOverwrite (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  {
+    this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this.getRev() }), (err: any, result: any) => {
+      callback(Err.make('doc', err), result);
+    });
+  }
+  
+  update (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
       callback(Err.missing('doc'));
@@ -95,21 +131,21 @@ export default class Doc
     return deepExtend({}, this.body, body);
   }
   
-  erase (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  destroy (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
       callback(); // nothing to see here
       return;
     }
     tries++;
-    this._performErase((err) => {
+    this._performDestroy((err) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.erase(callback, tries);
+              this.destroy(callback, tries);
           });
         }
         else
@@ -122,7 +158,7 @@ export default class Doc
     });
   }
   
-  private _performErase (callback: (err: Err)=>any)
+  private _performDestroy (callback: (err: Err)=>any)
   {
     this.db.raw.destroy(this.getId(), this.getRev(), (err: any) => {
       callback(Err.make('doc', err));

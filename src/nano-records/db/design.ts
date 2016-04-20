@@ -128,6 +128,6 @@ export default class DbDesign
       }
     }
     // persist document
-    this.db.doc.updateOrPersist('_design/' + designId, body, callback);
+    this.db.doc.updateOrCreate('_design/' + designId, body, callback);
   }
 }

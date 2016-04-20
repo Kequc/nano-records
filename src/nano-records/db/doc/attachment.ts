@@ -12,36 +12,34 @@ export default class DbDocAttachment
     this.doc = doc;
   }
   
-  persist (id: string, name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{})
+  write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{})
   {
     this.doc.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
-        doc.attachment.persist(name, data, mimeType, callback); // attempt attachment
+        doc.attachment.write(name, data, mimeType, callback); // attempt write
     });
   }
   
-  get (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
+  read (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
   {
     if (!id) {
       callback(Err.missing('doc'));
       return;
     }
     // doesn't need `_rev` so we can skip `doc.get`
-    this._performGet(id, name, callback);
+    this._performRead(id, name, callback);
   }
   
-  private _performGet (id: string, name: string, callback: (err: Err, data: any)=>any)
+  private _performRead (id: string, name: string, callback: (err: Err, data: any)=>any)
   {
-    // TODO: truthfully this returns pretty ugly streams when there is an error
-    // would be nice to clean this up
     this.doc.db.raw.attachment.get(id, name, {}, (err: any, data: any) => {
       callback(Err.make('attachment', err), data);
     });
   }
   
-  read (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
+  readable (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!id) {
       callback(Err.missing('doc'));
@@ -54,20 +52,22 @@ export default class DbDocAttachment
     return this._performRead(id, name, callback);
   }
   
-  private _performRead (id: string, name: string, callback: (err?: Err)=>any)
+  private _performReadable (id: string, name: string, callback: (err?: Err)=>any)
   {
+    // TODO: truthfully this returns pretty ugly streams when there is an error
+    // would be nice to clean this up
     return this.doc.db.raw.attachment.get(id, name, {}, (err: any) => {
       callback(Err.make('attachment', err));
     });
   }
   
-  erase (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
+  destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
   {
     this.doc.get(id, (err, doc) => {
       if (err)
         callback(err);
       else
-        doc.attachment.erase(name, callback); // attempt erase
+        doc.attachment.destroy(name, callback); // attempt destroy
     });
   }
 }

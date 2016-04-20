@@ -7,12 +7,12 @@ var DbDoc = (function () {
         this.db = db;
         this.attachment = new attachment_1.default(this);
     }
-    DbDoc.prototype.persist = function (body, callback, tries) {
+    DbDoc.prototype.create = function (body, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performPersist(body, function (err, result) {
+        this._performCreate(body, function (err, result) {
             if (err) {
                 if (tries <= 1 && err.name == "no_db_file") {
                     // create db
@@ -20,7 +20,7 @@ var DbDoc = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.persist(body, callback, tries);
+                            _this.create(body, callback, tries);
                     });
                 }
                 else
@@ -30,11 +30,11 @@ var DbDoc = (function () {
                 var doc = new doc_1.default(_this.db, body);
                 doc.body['_id'] = result['id'];
                 doc.body['_rev'] = result['rev'];
-                callback(undefined, doc); // persisted successfully
+                callback(undefined, doc); // created successfully
             }
         });
     };
-    DbDoc.prototype._performPersist = function (body, callback) {
+    DbDoc.prototype._performCreate = function (body, callback) {
         this.db.raw.insert(body, function (err, result) {
             callback(err_1.default.make('doc', err), result);
         });
@@ -70,6 +70,15 @@ var DbDoc = (function () {
             callback(err_1.default.make('doc', err), result);
         });
     };
+    DbDoc.prototype.overwrite = function (id, body, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        this.get(id, function (err, doc) {
+            if (err)
+                callback(err);
+            else
+                doc.overwrite(body, callback); // attempt overwrite
+        });
+    };
     DbDoc.prototype.update = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
@@ -79,12 +88,12 @@ var DbDoc = (function () {
                 doc.update(body, callback); // attempt update
         });
     };
-    DbDoc.prototype.updateOrPersist = function (id, body, callback) {
+    DbDoc.prototype.updateOrCreate = function (id, body, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
             if (err)
-                _this.persist(deepExtend({}, body, { '_id': id }), callback); // attempt persist
+                _this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
             else {
                 doc.update(body, function (err) {
                     if (err)
@@ -95,7 +104,23 @@ var DbDoc = (function () {
             }
         });
     };
-    DbDoc.prototype.erase = function (id, callback) {
+    DbDoc.prototype.overwriteOrCreate = function (id, body, callback) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        this.get(id, function (err, doc) {
+            if (err)
+                _this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
+            else {
+                doc.overwrite(body, function (err) {
+                    if (err)
+                        callback(err);
+                    else
+                        callback(undefined, doc);
+                }); // attempt overwrite
+            }
+        });
+    };
+    DbDoc.prototype.destroy = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
         this.get(id, function (err, doc) {
             if (err) {
@@ -105,7 +130,7 @@ var DbDoc = (function () {
                     callback(err);
             }
             else
-                doc.erase(callback); // attempt erase
+                doc.destroy(callback); // attempt destroy
         });
     };
     return DbDoc;

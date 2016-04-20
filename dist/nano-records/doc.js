@@ -38,6 +38,41 @@ var Doc = (function () {
             callback(err_1.default.make('doc', err), result);
         });
     };
+    Doc.prototype.overwrite = function (body, callback, tries) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        if (tries === void 0) { tries = 0; }
+        if (!this.getId()) {
+            callback(err_1.default.missing('doc'));
+            return;
+        }
+        tries++;
+        this._performOverwrite(body, function (err, result) {
+            if (err) {
+                if (tries <= _this.db.maxTries && err.name == "conflict") {
+                    _this.retrieveLatest(function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.overwrite(body, callback, tries);
+                    });
+                }
+                else
+                    callback(err);
+            }
+            else {
+                _this.body = body;
+                _this.body['_id'] = result['id'];
+                _this.body['_rev'] = result['rev'];
+                callback(); // success
+            }
+        });
+    };
+    Doc.prototype._performOverwrite = function (body, callback) {
+        this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this.getRev() }), function (err, result) {
+            callback(err_1.default.make('doc', err), result);
+        });
+    };
     Doc.prototype.update = function (body, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
@@ -75,7 +110,7 @@ var Doc = (function () {
     Doc.prototype._extendBody = function (body) {
         return deepExtend({}, this.body, body);
     };
-    Doc.prototype.erase = function (callback, tries) {
+    Doc.prototype.destroy = function (callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
@@ -84,14 +119,14 @@ var Doc = (function () {
             return;
         }
         tries++;
-        this._performErase(function (err) {
+        this._performDestroy(function (err) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
                     _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this.erase(callback, tries);
+                            _this.destroy(callback, tries);
                     });
                 }
                 else
@@ -103,7 +138,7 @@ var Doc = (function () {
             }
         });
     };
-    Doc.prototype._performErase = function (callback) {
+    Doc.prototype._performDestroy = function (callback) {
         this.db.raw.destroy(this.getId(), this.getRev(), function (err) {
             callback(err_1.default.make('doc', err));
         });

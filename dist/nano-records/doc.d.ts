@@ -17,9 +17,15 @@ export default class Doc {
     };
     retrieveLatest(callback?: (err?: Err) => any): void;
     private _performRetrieveLatest(callback);
-    update(body: Object, callback?: (err?: Err) => any, tries?: number): void;
+    overwrite(body: {
+        [index: string]: any;
+    }, callback?: (err?: Err) => any, tries?: number): void;
+    private _performOverwrite(body, callback);
+    update(body: {
+        [index: string]: any;
+    }, callback?: (err?: Err) => any, tries?: number): void;
     private _performUpdate(body, callback);
     private _extendBody(body);
-    erase(callback?: (err?: Err) => any, tries?: number): void;
-    private _performErase(callback);
+    destroy(callback?: (err?: Err) => any, tries?: number): void;
+    private _performDestroy(callback);
 }

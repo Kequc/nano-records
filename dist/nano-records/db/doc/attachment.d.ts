@@ -3,10 +3,10 @@ import { default as DbDoc } from '../doc';
 export default class DbDocAttachment {
     doc: DbDoc;
     constructor(doc: DbDoc);
-    persist(id: string, name: string, data: any, mimeType: string, callback?: (err?: Err) => any): void;
-    get(id: string, name: string, callback?: (err?: Err, data?: any) => any): void;
-    private _performGet(id, name, callback);
-    read(id: string, name: string, callback?: (err?: Err) => any): any;
+    write(id: string, name: string, data: any, mimeType: string, callback?: (err?: Err) => any): void;
+    read(id: string, name: string, callback?: (err?: Err, data?: any) => any): void;
     private _performRead(id, name, callback);
-    erase(id: string, name: string, callback?: (err?: Err) => any): void;
+    readable(id: string, name: string, callback?: (err?: Err) => any): any;
+    private _performReadable(id, name, callback);
+    destroy(id: string, name: string, callback?: (err?: Err) => any): void;
 }

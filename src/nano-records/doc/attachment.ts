@@ -25,28 +25,28 @@ export default class DocAttachment
     return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
   }
   
-  persist (name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  write (name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
       callback(Err.missing('doc'));
       return;
     }
     tries++;
-    this._performPersist(name, data, mimeType, (err, result) => {
+    this._performWrite(name, data, mimeType, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
           this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.persist(name, data, mimeType, callback, tries);
+              this.write(name, data, mimeType, callback, tries);
           });
         }
         else
           callback(err);
       }
       else {
-        // attachment persisted
+        // attachment written
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
@@ -56,17 +56,24 @@ export default class DocAttachment
     });
   }
   
-  write (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
+  private _performWrite (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  {
+    this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, (err: any, result: any) => {
+      callback(Err.make('attachment', err), result);
+    });
+  }
+  
+  writable (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.doc.getId()) {
       callback(Err.missing('doc'));
       return devNull();
     }
-    return this._performPersist(name, null, mimetype, (err, result) => {
+    return this._performWritable(name, null, mimetype, (err, result) => {
       if (err)
         callback(err);
       else {
-        // attachment persisted
+        // attachment written
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
@@ -76,40 +83,40 @@ export default class DocAttachment
     });
   }
   
-  private _performPersist (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performWritable (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, (err: any, result: any) => {
       callback(Err.make('attachment', err), result);
     });
   }
   
-  get (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
+  read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    this.doc.db.doc.attachment.get(this.doc.getId(), name, callback);
+    this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  read (name: string, callback: (err?: Err)=>any = ()=>{})
+  readable (name: string, callback: (err?: Err)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    return this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
+    return this.doc.db.doc.attachment.readable(this.doc.getId(), name, callback);
   }
   
-  erase (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  destroy (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
       callback(Err.missing('doc'));
       return;
     }
     tries++;
-    this._performErase(name, (err, result) => {
+    this._performDestroy(name, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
           this.doc.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.erase(name, callback, tries);
+              this.destroy(name, callback, tries);
           });
         }
         else
@@ -125,7 +132,7 @@ export default class DocAttachment
     });
   }
   
-  private _performErase (name: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performDestroy (name: string, callback: (err: Err, result: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, (err: any, result: any) => {
       callback(Err.make('attachment', err), result);
