@@ -52,14 +52,14 @@ var DocAttachment = (function () {
             callback(err_1.default.make('attachment', err), result);
         });
     };
-    DocAttachment.prototype.writable = function (name, mimetype, callback) {
+    DocAttachment.prototype.writer = function (name, mimetype, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (!this.doc.getId()) {
             callback(err_1.default.missing('doc'));
             return devNull();
         }
-        return this._performWritable(name, null, mimetype, function (err, result) {
+        return this._performWriter(name, null, mimetype, function (err, result) {
             if (err)
                 callback(err);
             else {
@@ -72,7 +72,7 @@ var DocAttachment = (function () {
             }
         });
     };
-    DocAttachment.prototype._performWritable = function (name, data, mimeType, callback) {
+    DocAttachment.prototype._performWriter = function (name, data, mimeType, callback) {
         return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, function (err, result) {
             callback(err_1.default.make('attachment', err), result);
         });
@@ -82,10 +82,10 @@ var DocAttachment = (function () {
         // we have a method already available for this on the db object
         this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
     };
-    DocAttachment.prototype.readable = function (name, callback) {
+    DocAttachment.prototype.reader = function (name, callback) {
         if (callback === void 0) { callback = function () { }; }
         // we have a method already available for this on the db object
-        return this.doc.db.doc.attachment.readable(this.doc.getId(), name, callback);
+        return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
     };
     DocAttachment.prototype.destroy = function (name, callback, tries) {
         var _this = this;

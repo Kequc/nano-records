@@ -63,13 +63,13 @@ export default class DocAttachment
     });
   }
   
-  writable (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
+  writer (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.doc.getId()) {
       callback(Err.missing('doc'));
       return devNull();
     }
-    return this._performWritable(name, null, mimetype, (err, result) => {
+    return this._performWriter(name, null, mimetype, (err, result) => {
       if (err)
         callback(err);
       else {
@@ -83,7 +83,7 @@ export default class DocAttachment
     });
   }
   
-  private _performWritable (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performWriter (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, (err: any, result: any) => {
       callback(Err.make('attachment', err), result);
@@ -96,10 +96,10 @@ export default class DocAttachment
     this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  readable (name: string, callback: (err?: Err)=>any = ()=>{})
+  reader (name: string, callback: (err?: Err)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    return this.doc.db.doc.attachment.readable(this.doc.getId(), name, callback);
+    return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
   }
   
   destroy (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)

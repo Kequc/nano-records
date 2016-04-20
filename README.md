@@ -19,10 +19,10 @@ Provide NanoRecords with a running instance of nano and a chosen database name. 
 
 ## &#8620; Documents
 
-#### Persist
+#### Create
 
 ```javascript
-db.doc.persist(body, (err, doc) => {
+db.doc.create(body, (err, doc) => {
   if (err)
     return;
   // doc is a NanoRecords document
@@ -30,7 +30,7 @@ db.doc.persist(body, (err, doc) => {
 });
 ```
 
-This is the easiest way to insert a record into to the database, returns a NanoRecords document representing that record. You may optionally provide an `_id` attribute in the body however be careful if that document exists in the database this method will overwrite it.
+This is the easiest way to create a record in the database, returns a NanoRecords document representing that new record, `_id` is generated automatically.
 
 #### Get
 
@@ -43,7 +43,22 @@ db.doc.get(id, (err, doc) => {
 });
 ```
 
-Perfect way to retrieve your data again once it is in the database.
+Perfect way to retrieve your data once it is in the database.
+
+#### Overwrite
+
+```javascript
+doc.overwrite(body, (err) => {
+  if (!err)
+    console.log('success!');
+});
+db.doc.overwrite(id, body, (err) => {
+  if (!err)
+    console.log('success!');
+});
+```
+
+Replaces content of the document with body.
 
 #### Update
 
@@ -58,12 +73,12 @@ db.doc.update(id, body, (err) => {
 });
 ```
 
-Adds the provided body to the existing body and then persists it to the database.
+Adds the provided body to the existing body and then saves it to the database.
 
-#### Update or persist
+#### Overwrite or create
 
 ```javascript
-db.doc.updateOrPersist(id, body, (err, doc) => {
+db.doc.overwriteOrCreate(id, body, (err, doc) => {
   if (err)
     return;
   // doc is a NanoRecords document
@@ -71,18 +86,29 @@ db.doc.updateOrPersist(id, body, (err, doc) => {
 });
 ```
 
-This method searches for the document in the database and updates it if it is found.
+This is perhaps the purest way to persist data with a specific `_id` will force as best it can, this method also returns a NanoRecords document instance.
 
-Otherwise, it will persist it along with the given id. You will be certain to avoid overwriting entire documents this way, this method also returns a NanoRecords document instance.
-
-#### Erase
+#### Update or create
 
 ```javascript
-doc.erase((err) => {
+db.doc.updateOrCreate(id, body, (err, doc) => {
+  if (err)
+    return;
+  // doc is a NanoRecords document
+  console.log(doc.body);
+});
+```
+
+This method searches for the document in the database and updates it if it is found, otherwise a new record will be created with the given id. You will be certain to avoid overwriting entire documents this way.
+
+#### Destroy
+
+```javascript
+doc.destroy((err) => {
   if (!err)
     console.log('success!');
 });
-db.doc.erase(id, (err) => {
+db.doc.destroy(id, (err) => {
   if (!err)
     console.log('success!');
 });
@@ -124,46 +150,46 @@ Retrieves latest version of the document from the database.
 
 ## &#8620; Attachments
 
-#### Persist
+#### Write
 
 ```javascript
-doc.attachment.persist(name, data, mimeType, (err) => {
+doc.attachment.write(name, data, mimeType, (err) => {
   if (!err)
     console.log('success!');
 });
-db.doc.attachment.persist(id, name, data, mimeType, (err) => {
+db.doc.attachment.write(id, name, data, mimeType, (err) => {
   if (!err)
     console.log('success!');
 });
 ```
 
-Easiest way to add a new attachment to a document, be aware if the provided name exists the attachment will be overwritten.
+Easiest way to save an attachment to a document, be aware if the provided name exists the attachment will be overwritten.
 
-#### Get
+#### Read
 
 ```javascript
-doc.attachment.get(name, (err, data) => {
+doc.attachment.read(name, (err, data) => {
   if (err)
     return;
   console.log(data.length);
 });
-db.doc.attachment.get(id, name, (err, data) => {
+db.doc.attachment.read(id, name, (err, data) => {
   if (err)
     return;
   console.log(data.length);
 });
 ```
 
-Gets an attachment from the database.
+Reads an attachment from the database.
 
-#### Erase
+#### Destroy
 
 ```javascript
-doc.attachment.erase(name, (err) => {
+doc.attachment.destroy(name, (err) => {
   if (!err)
     console.log('success!');
 });
-db.doc.attachment.erase(id, name, (err) => {
+db.doc.attachment.destroy(id, name, (err) => {
   if (!err)
     console.log('success!');
 });
@@ -182,17 +208,17 @@ Returns a list of all attachments or whether a specific attachment exists.
 
 ## &#8620; Streams
 
-#### Read
+#### Readable
 
 ```javascript
 var writer = fs.createWriteStream('./my-file.txt');
-var reader = doc.attachment.read(name, (err) => {
+var reader = doc.attachment.reader(name, (err) => {
   if (!err)
     console.log('success!');
 });
 reader.pipe(writer);
 var writer = fs.createWriteStream('./my-file.txt');
-var reader = db.doc.attachment.read(id, name, (err) => {
+var reader = db.doc.attachment.reader(id, name, (err) => {
   if (!err)
     console.log('success!');
 });
@@ -205,14 +231,14 @@ Reads the attachment as a stream. How convenient!
 
 ```javascript
 var reader = fs.createReadStream('./my-file.txt');
-var writer = doc.attachment.write(name, (err) => {
+var writer = doc.attachment.writer(name, (err) => {
   if (!err)
     console.log('success!');
 });
 reader.pipe(writer);
 ```
 
-It is important to note streams are not retried if there is an error you will have to pipe a new stream yourself.
+It is important to note streams cannot be retried, if there is an error you will have to pipe a new stream yourself.
 
 ## &#8620; Designs
 
@@ -303,6 +329,7 @@ err.raw; // the full error returned from nano
 // ==
 // not_found: Not found.
 // conflict: There was a conflict.
+// malformed_script: Problem with one of your designs.
 // no_db_file: Database missing.
 ```
 
