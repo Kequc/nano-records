@@ -27,7 +27,7 @@ export default class Db {
         [index: string]: iDesignInput;
     });
     reset(verify: string, callback?: (err?: Err) => any): void;
-    create(verify: string, callback?: (err?: Err) => any): void;
+    create(callback?: (err?: Err) => any): void;
     private _performCreate(callback);
     destroy(verify: string, callback?: (err?: Err) => any): void;
     private _performDestroy(callback);

@@ -56,7 +56,7 @@ function assertDestroy (doc, done) {
 
 describe('doc', () => {
   after((done) => {
-    db.destroy('DESTROY_', () => { done(); });
+    db.destroy('_DESTROY_', () => { done(); });
   });
   
   describe('document does not exist', () => {

@@ -42,24 +42,21 @@ export default class Db
   
   reset (verify: string, callback: (err?: Err)=>any = ()=>{})
   {
-    if (verify != "RESET_")
+    if (verify !== "_RESET_")
       callback(Err.verifyFailed('db'));
     else {
-      this.destroy("DESTROY_", (err) => {
+      this.destroy("_DESTROY_", (err) => {
         if (!err || err.name == "no_db_file")
-          this.create("CREATE_", callback);
+          this.create(callback);
         else
           callback(err);
       });
     }
   }
   
-  create (verify: string, callback: (err?: Err)=>any = ()=>{})
+  create (callback: (err?: Err)=>any = ()=>{})
   {
-    if (verify != "CREATE_")
-      callback(Err.verifyFailed('db'));
-    else
-      this._performCreate(callback);
+    this._performCreate(callback);
   }
   
   private _performCreate (callback: (err: Err)=>any)
@@ -71,7 +68,7 @@ export default class Db
   
   destroy (verify: string, callback: (err?: Err)=>any = ()=>{})
   {
-    if (verify != "DESTROY_")
+    if (verify !== "_DESTROY_")
       callback(Err.verifyFailed('db'));
     else
       this._performDestroy(callback);

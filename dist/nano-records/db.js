@@ -25,23 +25,20 @@ var Db = (function () {
     Db.prototype.reset = function (verify, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        if (verify != "RESET_")
+        if (verify !== "_RESET_")
             callback(err_1.default.verifyFailed('db'));
         else {
-            this.destroy("DESTROY_", function (err) {
+            this.destroy("_DESTROY_", function (err) {
                 if (!err || err.name == "no_db_file")
-                    _this.create("CREATE_", callback);
+                    _this.create(callback);
                 else
                     callback(err);
             });
         }
     };
-    Db.prototype.create = function (verify, callback) {
+    Db.prototype.create = function (callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (verify != "CREATE_")
-            callback(err_1.default.verifyFailed('db'));
-        else
-            this._performCreate(callback);
+        this._performCreate(callback);
     };
     Db.prototype._performCreate = function (callback) {
         this.nano.db.create(this.dbName, function (err) {
@@ -50,7 +47,7 @@ var Db = (function () {
     };
     Db.prototype.destroy = function (verify, callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (verify != "DESTROY_")
+        if (verify !== "_DESTROY_")
             callback(err_1.default.verifyFailed('db'));
         else
             this._performDestroy(callback);

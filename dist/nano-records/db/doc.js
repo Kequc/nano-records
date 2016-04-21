@@ -17,7 +17,7 @@ var DbDoc = (function () {
             if (err) {
                 if (tries <= 1 && err.name == "no_db_file") {
                     // create db
-                    _this.db.create('CREATE_', function (err) {
+                    _this.db.create(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -108,7 +108,7 @@ var DbDoc = (function () {
             if (err)
                 if (tries <= 1 && err.name == "no_db_file") {
                     // create db
-                    _this.db.create('CREATE_', function (err) {
+                    _this.db.create(function (err) {
                         if (err)
                             callback(err);
                         else

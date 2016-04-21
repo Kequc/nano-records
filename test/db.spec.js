@@ -28,7 +28,7 @@ var db;
 
 describe('db', function () {
   after((done) => {
-    db.destroy('DESTROY_', () => { done(); });
+    db.destroy('_DESTROY_', () => { done(); });
   });
   
   describe('instance does not exist', () => {
@@ -78,13 +78,9 @@ describe('db', function () {
       
       it('create', (done) => {
         // should be successful
-        db.create('INCORRECT', (err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("verify_failed");
-          db.create('CREATE_', (err) => {
-            expect(err).to.be.undefined;
-            done();
-          });
+        db.create((err) => {
+          expect(err).to.be.undefined;
+          done();
         });
       });
       it('destroy', (done) => {
@@ -92,7 +88,7 @@ describe('db', function () {
         db.destroy('INCORRECT', (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("verify_failed");
-          db.destroy('DESTROY_', (err) => {
+          db.destroy('_DESTROY_', (err) => {
             expect(err).to.be.ok;
             expect(err.name).to.equal("no_db_file");
             done();
@@ -104,7 +100,7 @@ describe('db', function () {
         db.reset('INCORRECT', (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("verify_failed");
-          db.reset('RESET_', (err) => {
+          db.reset('_RESET_', (err) => {
             expect(err).to.be.undefined;
             done();
           });
@@ -121,14 +117,10 @@ describe('db', function () {
       
       it('create', (done) => {
         // should fail
-        db.create('INCORRECT', (err) => {
+        db.create((err) => {
           expect(err).to.be.ok;
-          expect(err.name).to.equal("verify_failed");
-          db.create('CREATE_', (err) => {
-            expect(err).to.be.ok;
-            expect(err.name).to.equal("db_already_exists");
-            done();
-          });
+          expect(err.name).to.equal("db_already_exists");
+          done();
         });
       });
       it('destroy', (done) => {
@@ -136,7 +128,7 @@ describe('db', function () {
         db.destroy('INCORRECT', (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("verify_failed");
-          db.destroy('DESTROY_', (err) => {
+          db.destroy('_DESTROY_', (err) => {
             expect(err).to.be.undefined;
             done();
           });
@@ -147,7 +139,7 @@ describe('db', function () {
         db.reset('INCORRECT', (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("verify_failed");
-          db.reset('RESET_', (err) => {
+          db.reset('_RESET_', (err) => {
             expect(err).to.be.undefined;
             done();
           });

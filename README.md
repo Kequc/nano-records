@@ -282,35 +282,35 @@ Persist the given show similar to `db.design.view` then return the result.
 #### Create
 
 ```javascript
-db.create("CREATE_", (err) => {
+db.create((err) => {
   if (!err)
     console.log('success!');
 });
 ```
 
-Creates the database, first parameter must be `CREATE_`. You should never need to use this, but it is there if you want to use it.
+Creates the database, you should never need to but it is there if you want to use it.
 
 #### Destroy
 
 ```javascript
-db.destroy("DESTROY_", (err) => {
+db.destroy("_DESTROY_", (err) => {
   if (!err)
     console.log('success!');
 });
 ```
 
-Destroys the database, first parameter must be `DESTROY_`.
+Destroys the database, first parameter must be `_DESTROY_`.
 
 #### Reset
 
 ```javascript
-db.reset("RESET_", (err) => {
+db.reset("_RESET_", (err) => {
   if (!err)
     console.log('success!');
 });
 ```
 
-Destroys and then recreates the database, first parameter must be `RESET_`.
+Destroys and then recreates the database, first parameter must be `_RESET_`.
 
 ## &#8620; Errors
 
@@ -331,9 +331,9 @@ err.raw; // the full error returned from nano
 
 When an error is returned it has the above format. Generally you should never see `no_db_file` or `conflict` so maybe these are not so common errors.
 
-A conflict would only happen if the max number of retries was reached on a request, possibly you have too much activity on one specific document.
+A `conflict` would only happen if the max number of retries was reached on a request, possibly you have too much activity on one specific document.
 
-You might see database missing if your couchdb has security locked down.
+You might see `no_db_file` if your couchdb has security locked down.
 
 ## &#8620; Contribute
 

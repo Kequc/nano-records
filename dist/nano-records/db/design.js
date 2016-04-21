@@ -27,7 +27,7 @@ var DbDesign = (function () {
                         _this.show(designId, showName, id, callback, tries);
                 };
                 if (tries <= 1 && err.name == "no_db_file")
-                    _this.db.create('CREATE_', _afterResolve);
+                    _this.db.create(_afterResolve);
                 else if (tries <= 2 && err.name == "not_found")
                     _this._updateDesign(designId, { 'shows': [showName] }, _afterResolve);
                 else
@@ -60,7 +60,7 @@ var DbDesign = (function () {
                         _this.view(designId, viewName, params, callback, tries);
                 };
                 if (tries <= 1 && err.name == "no_db_file")
-                    _this.db.create('CREATE_', _afterResolve);
+                    _this.db.create(_afterResolve);
                 else if (tries <= 2 && err.name == "not_found")
                     _this._updateDesign(designId, { 'views': [viewName] }, _afterResolve);
                 else

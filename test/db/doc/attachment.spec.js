@@ -64,12 +64,12 @@ function assertDestroy (doc, done) {
 
 describe('db-doc-attachment', () => {
   after((done) => {
-    db.destroy('DESTROY_', () => { done(); });
+    db.destroy('_DESTROY_', () => { done(); });
   });
 
   describe('database does not exist', () => {
     beforeEach((done) => {
-      db.destroy('DESTROY_', () => { done(); });
+      db.destroy('_DESTROY_', () => { done(); });
     });
     
     it('write', (done) => {
@@ -109,7 +109,7 @@ describe('db-doc-attachment', () => {
   
   describe('database exists', () => {
     before((done) => {
-      db.reset('RESET_', () => { done(); });
+      db.reset('_RESET_', () => { done(); });
     });
     
     describe('document does not exist', () => {

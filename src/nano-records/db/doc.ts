@@ -22,7 +22,7 @@ export default class DbDoc
       if (err) {
         if (tries <= 1 && err.name == "no_db_file") {
           // create db
-          this.db.create('CREATE_', (err) => {
+          this.db.create((err) => {
             if (err)
               callback(err);
             else
@@ -115,7 +115,7 @@ export default class DbDoc
       if (err)
         if (tries <= 1 && err.name == "no_db_file") {
           // create db
-          this.db.create('CREATE_', (err) => {
+          this.db.create((err) => {
             if (err)
               callback(err);
             else
