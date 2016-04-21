@@ -41,7 +41,7 @@ function assertWrite (doc, done) {
   doc.attachment.write(fileName, "Can write here.", "text/plain", (err) => {
     expect(err).to.be.undefined;
     expect(doc.attachment.exists(fileName)).to.be.true;
-    doc.retrieveLatest((err) => {
+    doc.read((err) => {
       expect(err).to.be.undefined;
       expect(doc.attachment.exists(fileName)).to.be.true;
       expect(doc.getId()).to.be.ok;
@@ -54,7 +54,7 @@ function assertWriter (doc, done) {
   fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writer(fileName, "text/plain", (err) => {
     expect(err).to.be.undefined;
     expect(doc.attachment.exists(fileName)).to.be.true;
-    doc.retrieveLatest((err) => {
+    doc.read((err) => {
       expect(err).to.be.undefined;
       expect(doc.attachment.exists(fileName)).to.be.true;
       expect(doc.getId()).to.be.ok;
@@ -87,7 +87,7 @@ function assertDestroy (doc, done) {
   doc.attachment.destroy(fileName, (err) => {
     expect(err).to.be.undefined;
     expect(doc.attachment.exists(fileName)).to.be.false;
-    doc.retrieveLatest((err) => {
+    doc.read((err) => {
       expect(err).to.be.undefined;
       expect(doc.attachment.exists(fileName)).to.be.false;
       expect(doc.getId()).to.be.ok;

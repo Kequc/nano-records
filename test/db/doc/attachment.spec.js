@@ -53,7 +53,7 @@ function assertReader (doc, done) {
 function assertDestroy (doc, done) {
   db.doc.attachment.destroy(doc.getId(), fileName, (err) => {
     expect(err).to.be.undefined;
-    doc.retrieveLatest((err) => {
+    doc.read((err) => {
       expect(err).to.be.undefined;
       expect(doc.attachment.exists(fileName)).to.be.false;
       expect(doc.getId()).to.be.ok;

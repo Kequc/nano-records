@@ -83,9 +83,9 @@ describe('doc', () => {
       // should fail
       expect(_doc.body).to.eql({});
     });
-    it('retrieveLatest', (done) => {
+    it('read', (done) => {
       // should fail
-      _doc.retrieveLatest((err) => {
+      _doc.read((err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         done();
@@ -140,13 +140,13 @@ describe('doc', () => {
       expect(copy).to.eql(_doc.body);
       expect(copy).to.not.equal(_doc.body);
     });
-    it('retrieveLatest', (done) => {
+    it('read', (done) => {
       // should be successful
       let changes = { anotheranother: "Yay!", complex: "cats and dogs" };
       let asserts = deepExtend({}, _doc.body, changes);
       forceUpdate(_doc, changes, () => {
         expect(_doc.body).to.not.have.keys('anotheranother');
-        _doc.retrieveLatest((err) => {
+        _doc.read((err) => {
           expect(err).to.be.undefined;
           expect(_doc.body).to.include.keys('complex', 'anotheranother', '_id', '_rev');
           assertBody(_doc, asserts, done);

@@ -18,14 +18,14 @@ var Doc = (function () {
     Doc.prototype.getBody = function () {
         return deepExtend({}, this.body);
     };
-    Doc.prototype.retrieveLatest = function (callback) {
+    Doc.prototype.read = function (callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (!this.getId()) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        this._performRetrieveLatest(function (err, result) {
+        this._performread(function (err, result) {
             if (err)
                 callback(err);
             else {
@@ -34,7 +34,7 @@ var Doc = (function () {
             }
         });
     };
-    Doc.prototype._performRetrieveLatest = function (callback) {
+    Doc.prototype._performread = function (callback) {
         this.db.raw.get(this.getId(), function (err, result) {
             callback(err_1.default.make('doc', err), result);
         });
@@ -56,7 +56,7 @@ var Doc = (function () {
         this._performWrite(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
-                    _this.retrieveLatest(function (err) {
+                    _this.read(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -90,7 +90,7 @@ var Doc = (function () {
         this._performUpdate(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
-                    _this.retrieveLatest(function (err) {
+                    _this.read(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -127,7 +127,7 @@ var Doc = (function () {
         this._performDestroy(function (err) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
-                    _this.retrieveLatest(function (err) {
+                    _this.read(function (err) {
                         if (err)
                             callback(err);
                         else

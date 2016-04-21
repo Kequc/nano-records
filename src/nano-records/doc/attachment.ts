@@ -35,7 +35,7 @@ export default class DocAttachment
     this._performWrite(name, data, mimeType, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
-          this.doc.retrieveLatest((err) => {
+          this.doc.read((err) => {
             if (err)
               callback(err);
             else
@@ -112,7 +112,7 @@ export default class DocAttachment
     this._performDestroy(name, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
-          this.doc.retrieveLatest((err) => {
+          this.doc.read((err) => {
             if (err)
               callback(err);
             else

@@ -28,7 +28,7 @@ var DocAttachment = (function () {
         this._performWrite(name, data, mimeType, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
-                    _this.doc.retrieveLatest(function (err) {
+                    _this.doc.read(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -100,7 +100,7 @@ var DocAttachment = (function () {
         this._performDestroy(name, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
-                    _this.doc.retrieveLatest(function (err) {
+                    _this.doc.read(function (err) {
                         if (err)
                             callback(err);
                         else

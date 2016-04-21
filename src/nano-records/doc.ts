@@ -32,13 +32,13 @@ export default class Doc
     return deepExtend({}, this.body);
   }
   
-  retrieveLatest (callback: (err?: Err)=>any = ()=>{})
+  read (callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.getId()) {
       callback(Err.missingId('doc'));
       return;
     }
-    this._performRetrieveLatest((err, result) => {
+    this._performread((err, result) => {
       if (err)
         callback(err);
       else {
@@ -48,7 +48,7 @@ export default class Doc
     });
   }
   
-  private _performRetrieveLatest (callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performread (callback: (err: Err, result: { [index: string]: any })=>any)
   {
     this.db.raw.get(this.getId(), (err: any, result: any) => {
       callback(Err.make('doc', err), result);
@@ -71,7 +71,7 @@ export default class Doc
     this._performWrite(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
-          this.retrieveLatest((err) => {
+          this.read((err) => {
             if (err)
               callback(err);
             else
@@ -106,7 +106,7 @@ export default class Doc
     this._performUpdate(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
-          this.retrieveLatest((err) => {
+          this.read((err) => {
             if (err)
               callback(err);
             else
@@ -146,7 +146,7 @@ export default class Doc
     this._performDestroy((err) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
-          this.retrieveLatest((err) => {
+          this.read((err) => {
             if (err)
               callback(err);
             else

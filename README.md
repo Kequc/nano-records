@@ -10,7 +10,6 @@ Abstract away some of the database busywork and make your life easier.
 ```javascript
 var nano = require('nano')("localhost");
 var NanoRecords = require('nano-records');
-
 var dbName = "my-database";
 var db = new NanoRecords(nano, dbName);
 ```
@@ -32,36 +31,6 @@ db.doc.create(body, (err, doc) => {
 
 This is the easiest way to create a record in the database, returns a NanoRecords document representing that new record, `_id` is generated automatically.
 
-#### Read
-
-```javascript
-db.doc.read(id, (err, doc) => {
-  if (err)
-    return;
-  // doc is a NanoRecords document
-  console.log(doc.body);
-});
-```
-
-Perfect way to retrieve your data once it is in the database.
-
-#### Head
-
-```javascript
-doc.head((err, data) => {
-  if (err)
-    return;
-  console.log(data);
-});
-db.doc.head(id, (err, data) => {
-  if (err)
-    return;
-  console.log(data);
-});
-```
-
-Retrieves header data.
-
 #### Write
 
 ```javascript
@@ -77,7 +46,7 @@ db.doc.write(id, body, (err, doc) => {
 });
 ```
 
-Replaces content of the document with body, in the second case creates a new record if one doesn't exist.
+Replace content of the document with body, create a new record if one doesn't exist.
 
 #### Update
 
@@ -94,7 +63,7 @@ db.doc.update(id, body, (err, doc) => {
 });
 ```
 
-Adds the provided body to the existing body and then saves it to the database, in the second case creates a new record if one doesn't exist.
+Merge the provided body to the existing body and persist changes, create a new record if one doesn't exist.
 
 #### Destroy
 
@@ -109,16 +78,50 @@ db.doc.destroy(id, (err) => {
 });
 ```
 
-Removes the document from the database.
+Remove a document.
+
+#### Read
+
+```javascript
+doc.read((err) => {
+  if (!err)
+    console.log('success!');
+});
+db.doc.read(id, (err, doc) => {
+  if (err)
+    return;
+  // doc is a NanoRecords document
+  console.log(doc.body);
+});
+```
+
+Retrieve the latest version of your data.
+
+#### Head
+
+```javascript
+doc.head((err, data) => {
+  if (err)
+    return;
+  console.log(data);
+});
+db.doc.head(id, (err, data) => {
+  if (err)
+    return;
+  console.log(data);
+});
+```
+
+Retrieve header information.
 
 #### Body
 
 ```javascript
-// doc.body;
-var body = doc.getBody();
+var clone = doc.getBody();
+clone == doc.body; // false
 ```
 
-A convenient method used to clone of your data. Data is also available directly however it is not a good idea to change it.
+Method for cloning your data. Data is available directly however it is not a good idea to accidentally make changes to it so I added this to help out.
 
 #### Get id and get rev
 
@@ -128,18 +131,6 @@ doc.getRev() == doc.body['_rev']; // true
 ```
 
 Methods for accessing the body's `_id` and `_rev` properties. Equivalent to `doc.body['_id']` and `doc.body['_rev']`.
-
-#### Retrieve latest
-
-```javascript
-doc.retrieveLatest((err) => {
-  if (err)
-    return;
-  console.log(doc.body);
-});
-```
-
-Retrieves latest version from the database.
 
 ## &#8620; Attachments
 
@@ -156,7 +147,7 @@ db.doc.attachment.write(id, name, data, mimeType, (err) => {
 });
 ```
 
-Easiest way to save an attachment to a document, be aware if the name exists the attachment will be overwritten. In the second case creates a new record if one doesn't exist.
+Add an attachment to a document. Will overwrite an existing attachment with the same name, create a new record if one doesn't exist.
 
 #### Read
 
@@ -173,7 +164,7 @@ db.doc.attachment.read(id, name, (err, data) => {
 });
 ```
 
-Reads an attachment from the database.
+Read an attachment.
 
 #### Destroy
 
@@ -188,13 +179,13 @@ db.doc.attachment.destroy(id, name, (err) => {
 });
 ```
 
-Removes the attachment from the database.
+Remove an attachment.
 
 #### List and exists
 
 ```javascript
 var list = doc.attachment.list();
-var exists = doc.attachment.exists(name);
+var hasAttachment = doc.attachment.exists(name);
 ```
 
 Returns a list of all attachments or whether a specific attachment exists.
@@ -218,7 +209,7 @@ var reader = db.doc.attachment.reader(id, name, (err) => {
 reader.pipe(writer);
 ```
 
-Reads the attachment as a stream. How convenient!
+Read the attachment as a stream. How convenient!
 
 #### Writer
 
@@ -231,7 +222,7 @@ var writer = doc.attachment.writer(name, (err) => {
 reader.pipe(writer);
 ```
 
-Important to note that streams cannot be retried, if there is an error you will have to pipe a new stream yourself.
+Write an attachment using a stream. It's important to note that streams cannot be retried, if there is an error you will have to pipe a new stream yourself.
 
 ## &#8620; Designs
 
@@ -272,7 +263,7 @@ db.design.view(designId, viewName, params, (err, data) => {
 });
 ```
 
-Persists the given view using the provided `designId` (ie. 'foo') to the database if it's not already there, then returns the result.
+Persist the given view using the provided `designId` (ie. 'foo') to the database if it's not already there, then returns the result.
 
 #### Show
 
@@ -284,7 +275,7 @@ db.design.show(designId, showName, id, (err, data) => {
 });
 ```
 
-Persists the given show to the database and behaves similarly to `db.design.view`.
+Persists the show similar to `db.design.view` then return the result.
 
 ## &#8620; Db
 
@@ -297,7 +288,7 @@ db.create("CREATE_", (err) => {
 });
 ```
 
-Creates the database, first parameter must equal `CREATE_`. You should never need to use this but it's there if you want it.
+Creates the database, first parameter must equal `CREATE_`. You should never need to use this, but it's there if you want to.
 
 #### Destroy
 

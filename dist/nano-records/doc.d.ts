@@ -15,8 +15,8 @@ export default class Doc {
     getBody(): {
         [index: string]: any;
     };
-    retrieveLatest(callback?: (err?: Err) => any): void;
-    private _performRetrieveLatest(callback);
+    read(callback?: (err?: Err) => any): void;
+    private _performread(callback);
     head(callback?: (err?: Err, data?: any) => any): void;
     write(body: {
         [index: string]: any;

@@ -68,7 +68,7 @@ function assertUpdate (id, done, asserts) {
 //   let asserts = deepExtend({}, doc.body, changes);
 //   db.doc.update(doc.getId(), changes, (err) => {
 //     expect(err).to.be.undefined;
-//     doc.retrieveLatest((err) => {
+//     doc.read((err) => {
 //       expect(err).to.be.undefined;
 //       expect(doc.body).to.include.keys('complex', 'updated', '_id', '_rev');
 //       assertBody(doc, asserts, done);
