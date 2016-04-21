@@ -1,3 +1,4 @@
+"use strict";
 var err_1 = require('./err');
 var attachment_1 = require('./doc/attachment');
 var deepExtend = require('deep-extend');
@@ -21,7 +22,7 @@ var Doc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (!this.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         this._performRetrieveLatest(function (err, result) {
@@ -38,23 +39,28 @@ var Doc = (function () {
             callback(err_1.default.make('doc', err), result);
         });
     };
-    Doc.prototype.overwrite = function (body, callback, tries) {
+    Doc.prototype.head = function (callback) {
+        if (callback === void 0) { callback = function () { }; }
+        // we have a method already available for this on the db object
+        this.db.doc.head(this.getId(), callback);
+    };
+    Doc.prototype.write = function (body, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
-        this._performOverwrite(body, function (err, result) {
+        this._performWrite(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
                     _this.retrieveLatest(function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this.overwrite(body, callback, tries);
+                            _this.write(body, callback, tries);
                     });
                 }
                 else
@@ -62,13 +68,12 @@ var Doc = (function () {
             }
             else {
                 _this.body = body;
-                _this.body['_id'] = result['id'];
                 _this.body['_rev'] = result['rev'];
                 callback(); // success
             }
         });
     };
-    Doc.prototype._performOverwrite = function (body, callback) {
+    Doc.prototype._performWrite = function (body, callback) {
         this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this.getRev() }), function (err, result) {
             callback(err_1.default.make('doc', err), result);
         });
@@ -78,7 +83,7 @@ var Doc = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
@@ -115,7 +120,7 @@ var Doc = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.getId()) {
-            callback(); // nothing to see here
+            callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
@@ -144,6 +149,6 @@ var Doc = (function () {
         });
     };
     return Doc;
-})();
+}());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Doc;

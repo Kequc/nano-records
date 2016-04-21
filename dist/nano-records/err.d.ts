@@ -4,6 +4,7 @@ export interface iNanoError {
     reason?: string;
     scope?: string;
     statusCode?: number;
+    code?: string;
     request?: Object;
     headers?: Object;
     errid?: string;
@@ -18,4 +19,6 @@ export default class Err {
     constructor(scope: string, name?: string, message?: string, raw?: iNanoError);
     static make(scope: string, err: iNanoError): Err;
     static missing(scope: string, err?: iNanoError): Err;
+    static missingId(scope: string): Err;
+    static verifyFailed(scope: string): Err;
 }

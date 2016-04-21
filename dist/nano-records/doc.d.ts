@@ -17,10 +17,11 @@ export default class Doc {
     };
     retrieveLatest(callback?: (err?: Err) => any): void;
     private _performRetrieveLatest(callback);
-    overwrite(body: {
+    head(callback?: (err?: Err, data?: any) => any): void;
+    write(body: {
         [index: string]: any;
     }, callback?: (err?: Err) => any, tries?: number): void;
-    private _performOverwrite(body, callback);
+    private _performWrite(body, callback);
     update(body: {
         [index: string]: any;
     }, callback?: (err?: Err) => any, tries?: number): void;

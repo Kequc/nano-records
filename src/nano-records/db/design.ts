@@ -10,17 +10,17 @@ export default class DbDesign
   {
     this.db = db;
   }
-
+  
   // FIXME: might not be so useful.
-  // get (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  // read (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
   // {
-  //   this.db.doc.get('_design/' + designId, callback);
+  //   this.db.doc.read('_design/' + designId, callback);
   // }
   
   show (designId: string, showName: string, id: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {
     if (!designId) {
-      callback(Err.missing('design'));
+      callback(Err.missingId('design'));
       return;
     }
     tries++;
@@ -33,9 +33,9 @@ export default class DbDesign
             this.show(designId, showName, id, callback, tries);
         };
         if (tries <= 1 && err.name == "no_db_file")
-          this.db.create(_afterResolve);
+          this.db.create('CREATE_', _afterResolve);
         else if (tries <= 2 && err.name == "not_found")
-          this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
+          this._updateDesign(designId, { 'shows': [showName] }, _afterResolve);
         else
           callback(err);
       }
@@ -54,7 +54,7 @@ export default class DbDesign
   view (designId: string, viewName: string, params: Object, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {
     if (!designId) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;
@@ -67,9 +67,9 @@ export default class DbDesign
             this.view(designId, viewName, params, callback, tries);
         };
         if (tries <= 1 && err.name == "no_db_file")
-          this.db.create(_afterResolve);
+          this.db.create('CREATE_', _afterResolve);
         else if (tries <= 2 && err.name == "not_found")
-          this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
+          this._updateDesign(designId, { 'views': [viewName] }, _afterResolve);
         else
           callback(err);
       }
@@ -92,13 +92,14 @@ export default class DbDesign
     });
   }
   
-  private _persistDesign (designId: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)
+  private _updateDesign (designId: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)
   {
     let design = this.db.designs[designId];
     if (!design) {
       callback(new Err('design', "not_defined", "No design specified for: " + designId));
       return;
     }
+    
     // generate design document
     let body: iDesignInput = { language: design.language };
     for (let kind in kinds) {
@@ -127,7 +128,8 @@ export default class DbDesign
         break;
       }
     }
-    // persist document
-    this.db.doc.updateOrCreate('_design/' + designId, body, callback);
+    
+    // update design
+    this.db.doc.update('_design/' + designId, body, callback);
   }
 }

@@ -8,5 +8,5 @@ export default class DbDesign {
     view(designId: string, viewName: string, params: Object, callback?: (err?: Err, data?: any) => any, tries?: number): void;
     private _performView(designId, viewName, params, callback);
     private _performRetrieveLatest(designId, callback);
-    private _persistDesign(designId, kinds, callback);
+    private _updateDesign(designId, kinds, callback);
 }

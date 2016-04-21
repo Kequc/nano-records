@@ -28,7 +28,7 @@ export default class DocAttachment
   write (name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;
@@ -63,10 +63,22 @@ export default class DocAttachment
     });
   }
   
+  read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
+  {
+    // we have a method already available for this on the db object
+    this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
+  }
+  
+  reader (name: string, callback: (err?: Err)=>any = ()=>{})
+  {
+    // we have a method already available for this on the db object
+    return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
+  }
+  
   writer (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.doc.getId()) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return devNull();
     }
     return this._performWriter(name, null, mimetype, (err, result) => {
@@ -90,22 +102,10 @@ export default class DocAttachment
     });
   }
   
-  read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
-  {
-    // we have a method already available for this on the db object
-    this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
-  }
-  
-  reader (name: string, callback: (err?: Err)=>any = ()=>{})
-  {
-    // we have a method already available for this on the db object
-    return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
-  }
-  
   destroy (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.doc.getId()) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;

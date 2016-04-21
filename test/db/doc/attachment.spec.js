@@ -21,20 +21,19 @@ function streamToString (stream, callback) {
   });
 }
 
-function assertPersist (doc, done) {
-  db.doc.attachment.persist(doc.getId(), fileName, "Can persist here.", "text/plain", (err) => {
+function assertWrite (id, done) {
+  db.doc.attachment.write(id, fileName, "Can write here.", "text/plain", (err) => {
     expect(err).to.be.undefined;
-    doc.retrieveLatest((err) => {
+    db.doc.read(id, (err, doc) => {
       expect(err).to.be.undefined;
       expect(doc.attachment.exists(fileName)).to.be.true;
-      expect(doc.getId()).to.be.ok;
       done();
     });
   });
 }
 
-function assertGet (doc, done) {
-  db.doc.attachment.get(doc.getId(), fileName, (err, data) => {
+function assertRead (doc, done) {
+  db.doc.attachment.read(doc.getId(), fileName, (err, data) => {
     expect(err).to.be.undefined;
     expect(data).to.be.ok;
     expect(doc.getId()).to.be.ok;
@@ -42,8 +41,8 @@ function assertGet (doc, done) {
   });
 }
 
-function assertRead (doc, done) {
-  streamToString(db.doc.attachment.read(doc.getId(), fileName, (err) => {
+function assertReader (doc, done) {
+  streamToString(db.doc.attachment.reader(doc.getId(), fileName, (err) => {
     expect(err).to.be.undefined;
     done();
   }), (result) => {
@@ -51,8 +50,8 @@ function assertRead (doc, done) {
   });
 }
 
-function assertErase (doc, done) {
-  db.doc.attachment.erase(doc.getId(), fileName, (err) => {
+function assertDestroy (doc, done) {
+  db.doc.attachment.destroy(doc.getId(), fileName, (err) => {
     expect(err).to.be.undefined;
     doc.retrieveLatest((err) => {
       expect(err).to.be.undefined;
@@ -65,34 +64,30 @@ function assertErase (doc, done) {
 
 describe('db-doc-attachment', () => {
   after((done) => {
-    db.destroy(() => { done(); });
+    db.destroy('DESTROY_', () => { done(); });
   });
 
   describe('database does not exist', () => {
     beforeEach((done) => {
-      db.destroy(() => { done(); });
+      db.destroy('DESTROY_', () => { done(); });
     });
     
-    it('persist', (done) => {
-      // should fail
-      db.doc.attachment.persist("fake-id-doesnt-exist", fileName, "Cannot add here.", "text/plain", (err) => {
-        expect(err).to.be.ok;
-        expect(err.name).to.equal("not_found");
-        done();
-      });
+    it('write', (done) => {
+      // should be successful
+      assertWrite("fake-id-doesnt-exist", done);
     });
-    it('get', (done) => {
+    it('read', (done) => {
       // should fail
-      db.doc.attachment.get("fake-id-doesnt-exist", fileName, (err, data) => {
+      db.doc.attachment.read("fake-id-doesnt-exist", fileName, (err, data) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("not_found");
         expect(data).to.be.undefined;
         done();
       });
     });
-    it('read', (done) => {
+    it('reader', (done) => {
       // should fail
-      streamToString(db.doc.attachment.read("fake-id-doesnt-exist", fileName, (err) => {
+      streamToString(db.doc.attachment.reader("fake-id-doesnt-exist", fileName, (err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("not_found");
         done();
@@ -101,9 +96,9 @@ describe('db-doc-attachment', () => {
         // expect(result).to.equal("");
       });
     });
-    it('erase', (done) => {
+    it('destroy', (done) => {
       // should fail
-      db.doc.attachment.erase("fake-id-doesnt-exist", fileName, (err) => {
+      db.doc.attachment.destroy("fake-id-doesnt-exist", fileName, (err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("not_found");
         done();
@@ -114,36 +109,30 @@ describe('db-doc-attachment', () => {
   
   describe('database exists', () => {
     before((done) => {
-      db.destroy(() => {
-        db.create(() => { done(); });
-      });
+      db.reset('RESET_', () => { done(); });
     });
     
     describe('document does not exist', () => {
       beforeEach((done) => {
-        db.doc.erase("fake-id-doesnt-exist", () => { done(); })
+        db.doc.destroy("fake-id-doesnt-exist", () => { done(); })
       });
       
-      it('persist', (done) => {
-        // should fail
-        db.doc.attachment.persist("fake-id-doesnt-exist", fileName, "Cannot add here.", "text/plain", (err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("not_found");
-          done();
-        });
+      it('write', (done) => {
+        // should be successful
+        assertWrite("fake-id-doesnt-exist", done);
       });
-      it('get', (done) => {
+      it('read', (done) => {
         // should fail
-        db.doc.attachment.get("fake-id-doesnt-exist", fileName, (err, data) => {
+        db.doc.attachment.read("fake-id-doesnt-exist", fileName, (err, data) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("not_found");
           expect(data).to.be.undefined;
           done();
         });
       });
-      it('read', (done) => {
+      it('reader', (done) => {
         // should fail
-        streamToString(db.doc.attachment.read("fake-id-doesnt-exist", fileName, (err) => {
+        streamToString(db.doc.attachment.reader("fake-id-doesnt-exist", fileName, (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("not_found");
           done();
@@ -152,9 +141,9 @@ describe('db-doc-attachment', () => {
           // expect(result).to.equal("");
         });
       });
-      it('erase', (done) => {
+      it('destroy', (done) => {
         // should fail
-        db.doc.attachment.erase("fake-id-doesnt-exist", fileName, (err) => {
+        db.doc.attachment.destroy("fake-id-doesnt-exist", fileName, (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("not_found");
           done();
@@ -167,7 +156,7 @@ describe('db-doc-attachment', () => {
       var _doc;
       before((done) => {
         _doc = undefined;
-        db.doc.persist({ hi: "there" }, (err, doc) => {
+        db.doc.create({ hi: "there" }, (err, doc) => {
           _doc = doc;
           done();
         });
@@ -175,16 +164,16 @@ describe('db-doc-attachment', () => {
       
       describe('attachment does not exist', () => {
         beforeEach((done) => {
-          _doc.attachment.erase(fileName, () => { done(); });
+          _doc.attachment.destroy(fileName, () => { done(); });
         });
         
-        it('persist', (done) => {
+        it('write', (done) => {
           // should be successful
-          assertPersist(_doc, done);
+          assertWrite(_doc.getId(), done);
         });
-        it('get', (done) => {
+        it('read', (done) => {
           // should fail
-          db.doc.attachment.get(_doc.getId(), fileName, (err, data) => {
+          db.doc.attachment.read(_doc.getId(), fileName, (err, data) => {
             expect(err).to.be.ok;
             expect(err.name).to.equal("not_found");
             expect(data).to.be.undefined;
@@ -192,9 +181,9 @@ describe('db-doc-attachment', () => {
             done();
           });
         });
-        it('read', (done) => {
+        it('reader', (done) => {
           // should fail
-          streamToString(db.doc.attachment.read(_doc.getId(), fileName, (err) => {
+          streamToString(db.doc.attachment.reader(_doc.getId(), fileName, (err) => {
             expect(err).to.be.ok;
             expect(err.name).to.equal("not_found");
             expect(_doc.getId()).to.be.ok;
@@ -204,32 +193,32 @@ describe('db-doc-attachment', () => {
             // expect(result).to.equal("");
           });
         });
-        it('erase', (done) => {
+        it('destroy', (done) => {
           // should be successful
-          assertErase(_doc, done);
+          assertDestroy(_doc, done);
         });
         
       });
       describe('attachment exists', () => {
         beforeEach((done) => {
-          _doc.attachment.persist(fileName, "This is an example attachment.", "text/plain", (err) => { done(); });
+          _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", (err) => { done(); });
         });
         
-        it('persist', (done) => {
+        it('write', (done) => {
           // should be successful
-          assertPersist(_doc, done);
-        });
-        it('get', (done) => {
-          // should be successful
-          assertGet(_doc, done);
+          assertWrite(_doc.getId(), done);
         });
         it('read', (done) => {
           // should be successful
           assertRead(_doc, done);
         });
-        it('erase', (done) => {
+        it('reader', (done) => {
           // should be successful
-          assertErase(_doc, done);
+          assertReader(_doc, done);
+        });
+        it('destroy', (done) => {
+          // should be successful
+          assertDestroy(_doc, done);
         });
         
       });

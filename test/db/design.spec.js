@@ -59,12 +59,12 @@ function assertShow (done) {
 
 describe('db-design', () => {
   after((done) => {
-    db.destroy(() => { done(); });
+    db.destroy('DESTROY_', () => { done(); });
   });
   
   describe('database does not exist', () => {
     beforeEach((done) => {
-      db.destroy(() => { done(); });
+      db.destroy('DESTROY_', () => { done(); });
     });
     
     it('view', (done) => {
@@ -80,15 +80,13 @@ describe('db-design', () => {
   
   describe('database exists', () => {
     before((done) => {
-      db.destroy(() => {
-        db.create(() => { done(); });
-      });
+      db.reset('RESET_', () => { done(); });
     });
     
     describe('document does not exist', () => {
       var _doc;
       beforeEach((done) => {
-        db.doc.erase("_design/foo", () => { done(); })
+        db.doc.destroy("_design/foo", () => { done(); })
       });
       
       it('view', (done) => {
@@ -106,7 +104,7 @@ describe('db-design', () => {
       var _doc;
       beforeEach((done) => {
         _doc = undefined;
-        db.doc.persistOrCreate("_design/foo", {}, (err, doc) => {
+        db.doc.write("_design/foo", {}, (err, doc) => {
           _doc = doc;
           done();
         });

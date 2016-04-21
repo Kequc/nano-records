@@ -35,7 +35,7 @@ export default class Doc
   retrieveLatest (callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.getId()) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     this._performRetrieveLatest((err, result) => {
@@ -55,21 +55,27 @@ export default class Doc
     });
   }
   
-  overwrite (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  head (callback: (err?: Err, data?: any)=>any = ()=>{})
+  {
+    // we have a method already available for this on the db object
+    this.db.doc.head(this.getId(), callback);
+  }
+  
+  write (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;
-    this._performOverwrite(body, (err, result) => {
+    this._performWrite(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
           this.retrieveLatest((err) => {
             if (err)
               callback(err);
             else
-              this.overwrite(body, callback, tries);
+              this.write(body, callback, tries);
           });
         }
         else
@@ -77,14 +83,13 @@ export default class Doc
       }
       else {
         this.body = body;
-        this.body['_id'] = result['id'];
         this.body['_rev'] = result['rev'];
         callback(); // success
       }
     });
   }
   
-  private _performOverwrite (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performWrite (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
   {
     this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this.getRev() }), (err: any, result: any) => {
       callback(Err.make('doc', err), result);
@@ -94,7 +99,7 @@ export default class Doc
   update (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;
@@ -134,7 +139,7 @@ export default class Doc
   destroy (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     if (!this.getId()) {
-      callback(); // nothing to see here
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;

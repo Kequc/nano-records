@@ -26,8 +26,9 @@ export default class Db {
     constructor(nano: any, dbName: string, designs?: {
         [index: string]: iDesignInput;
     });
-    create(callback?: (err: Err) => any): void;
+    reset(verify: string, callback?: (err?: Err) => any): void;
+    create(verify: string, callback?: (err?: Err) => any): void;
     private _performCreate(callback);
-    destroy(callback?: (err: Err) => any): void;
+    destroy(verify: string, callback?: (err?: Err) => any): void;
     private _performDestroy(callback);
 }

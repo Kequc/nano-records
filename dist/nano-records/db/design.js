@@ -1,19 +1,20 @@
+"use strict";
 var err_1 = require('../err');
 var DbDesign = (function () {
     function DbDesign(db) {
         this.db = db;
     }
     // FIXME: might not be so useful.
-    // get (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+    // read (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
     // {
-    //   this.db.doc.get('_design/' + designId, callback);
+    //   this.db.doc.read('_design/' + designId, callback);
     // }
     DbDesign.prototype.show = function (designId, showName, id, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!designId) {
-            callback(err_1.default.missing('design'));
+            callback(err_1.default.missingId('design'));
             return;
         }
         tries++;
@@ -26,9 +27,9 @@ var DbDesign = (function () {
                         _this.show(designId, showName, id, callback, tries);
                 };
                 if (tries <= 1 && err.name == "no_db_file")
-                    _this.db.create(_afterResolve);
+                    _this.db.create('CREATE_', _afterResolve);
                 else if (tries <= 2 && err.name == "not_found")
-                    _this._persistDesign(designId, { 'shows': [showName] }, _afterResolve);
+                    _this._updateDesign(designId, { 'shows': [showName] }, _afterResolve);
                 else
                     callback(err);
             }
@@ -46,7 +47,7 @@ var DbDesign = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!designId) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
@@ -59,9 +60,9 @@ var DbDesign = (function () {
                         _this.view(designId, viewName, params, callback, tries);
                 };
                 if (tries <= 1 && err.name == "no_db_file")
-                    _this.db.create(_afterResolve);
+                    _this.db.create('CREATE_', _afterResolve);
                 else if (tries <= 2 && err.name == "not_found")
-                    _this._persistDesign(designId, { 'views': [viewName] }, _afterResolve);
+                    _this._updateDesign(designId, { 'views': [viewName] }, _afterResolve);
                 else
                     callback(err);
             }
@@ -79,7 +80,7 @@ var DbDesign = (function () {
             callback(err_1.default.make('design', err), result);
         });
     };
-    DbDesign.prototype._persistDesign = function (designId, kinds, callback) {
+    DbDesign.prototype._updateDesign = function (designId, kinds, callback) {
         var design = this.db.designs[designId];
         if (!design) {
             callback(new err_1.default('design', "not_defined", "No design specified for: " + designId));
@@ -115,10 +116,10 @@ var DbDesign = (function () {
                     break;
             }
         }
-        // persist document
-        this.db.doc.updateOrCreate('_design/' + designId, body, callback);
+        // update design
+        this.db.doc.update('_design/' + designId, body, callback);
     };
     return DbDesign;
-})();
+}());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = DbDesign;

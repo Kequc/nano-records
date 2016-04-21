@@ -14,18 +14,33 @@ export default class DbDocAttachment
   
   write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{})
   {
-    this.doc.get(id, (err, doc) => {
-      if (err)
-        callback(err);
+    if (!id) {
+      callback(Err.missingId('doc'));
+      return;
+    }
+    this.doc.read(id, (err, doc) => {
+      if (err) {
+        if (err.name == "not_found")
+          this._performWrite(id, name, data, mimeType, callback); // we'll do it live!
+        else
+          callback(err);
+      }
       else
         doc.attachment.write(name, data, mimeType, callback); // attempt write
+    });
+  }
+  
+  private _performWrite (id: string, name: string, data: any, mimeType: string, callback: (err: Err)=>any)
+  {
+    this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, (err: any) => {
+      callback(Err.make('attachment', err));
     });
   }
   
   read (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
   {
     if (!id) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     // doesn't need `_rev` so we can skip `doc.get`
@@ -42,7 +57,7 @@ export default class DbDocAttachment
   reader (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!id) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       // return empty stream
       let readable = new stream.Readable();
       readable._read = ()=>{};
@@ -63,7 +78,11 @@ export default class DbDocAttachment
   
   destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
   {
-    this.doc.get(id, (err, doc) => {
+    if (!id) {
+      callback(Err.missingId('doc'));
+      return;
+    }
+    this.doc.read(id, (err, doc) => {
       if (err)
         callback(err);
       else

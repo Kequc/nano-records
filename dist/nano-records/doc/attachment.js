@@ -1,3 +1,4 @@
+"use strict";
 var err_1 = require('../err');
 var devNull = require('dev-null');
 var DocAttachment = (function () {
@@ -20,7 +21,7 @@ var DocAttachment = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.doc.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
@@ -52,11 +53,21 @@ var DocAttachment = (function () {
             callback(err_1.default.make('attachment', err), result);
         });
     };
+    DocAttachment.prototype.read = function (name, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        // we have a method already available for this on the db object
+        this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
+    };
+    DocAttachment.prototype.reader = function (name, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        // we have a method already available for this on the db object
+        return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
+    };
     DocAttachment.prototype.writer = function (name, mimetype, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (!this.doc.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return devNull();
         }
         return this._performWriter(name, null, mimetype, function (err, result) {
@@ -77,22 +88,12 @@ var DocAttachment = (function () {
             callback(err_1.default.make('attachment', err), result);
         });
     };
-    DocAttachment.prototype.read = function (name, callback) {
-        if (callback === void 0) { callback = function () { }; }
-        // we have a method already available for this on the db object
-        this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
-    };
-    DocAttachment.prototype.reader = function (name, callback) {
-        if (callback === void 0) { callback = function () { }; }
-        // we have a method already available for this on the db object
-        return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
-    };
     DocAttachment.prototype.destroy = function (name, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
         if (!this.doc.getId()) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
@@ -124,6 +125,6 @@ var DocAttachment = (function () {
         });
     };
     return DocAttachment;
-})();
+}());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = DocAttachment;

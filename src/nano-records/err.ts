@@ -4,6 +4,7 @@ export interface iNanoError {
   reason?: string;
   scope?: string;
   statusCode?: number;
+  code?: string;
   request?: Object;
   headers?: Object;
   errid?: string;
@@ -56,6 +57,10 @@ export default class Err
       // views do not have this issue
       return this.missing(scope, err);
     }
+    else if (err.code == 'ECONNREFUSED') {
+      // could not contact database
+      return new Err(scope, "connection_refused", "Could not connect to database.", err);
+    }
     else {
       // best guess!
       return new Err(scope, err.reason, err.description, err);
@@ -64,5 +69,13 @@ export default class Err
   
   static missing (scope: string, err?: iNanoError): Err {
     return new Err(scope, "not_found", "Not found.", err);
+  }
+  
+  static missingId (scope: string): Err {
+    return new Err(scope, "missing_id", "Id parameter required.");
+  }
+  
+  static verifyFailed (scope: string): Err {
+    return new Err(scope, "verify_failed", "Verify code mismatch.");
   }
 }

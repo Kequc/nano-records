@@ -28,7 +28,7 @@ var db;
 
 describe('db', function () {
   after((done) => {
-    nano.db.destroy(dbName, () => { done(); });
+    db.destroy('DESTROY_', () => { done(); });
   });
   
   describe('instance does not exist', () => {
@@ -78,17 +78,36 @@ describe('db', function () {
       
       it('create', (done) => {
         // should be successful
-        db.create((err) => {
-          expect(err).to.be.undefined;
-          done();
+        db.create('INCORRECT', (err) => {
+          expect(err).to.be.ok;
+          expect(err.name).to.equal("verify_failed");
+          db.create('CREATE_', (err) => {
+            expect(err).to.be.undefined;
+            done();
+          });
         });
       });
       it('destroy', (done) => {
         // should fail
-        db.destroy((err) => {
+        db.destroy('INCORRECT', (err) => {
           expect(err).to.be.ok;
-          expect(err.name).to.equal("no_db_file");
-          done();
+          expect(err.name).to.equal("verify_failed");
+          db.destroy('DESTROY_', (err) => {
+            expect(err).to.be.ok;
+            expect(err.name).to.equal("no_db_file");
+            done();
+          });
+        });
+      });
+      it('reset', (done) => {
+        // should be successful
+        db.reset('INCORRECT', (err) => {
+          expect(err).to.be.ok;
+          expect(err.name).to.equal("verify_failed");
+          db.reset('RESET_', (err) => {
+            expect(err).to.be.undefined;
+            done();
+          });
         });
       });
       
@@ -102,17 +121,36 @@ describe('db', function () {
       
       it('create', (done) => {
         // should fail
-        db.create((err) => {
+        db.create('INCORRECT', (err) => {
           expect(err).to.be.ok;
-          expect(err.name).to.equal("db_already_exists");
-          done();
+          expect(err.name).to.equal("verify_failed");
+          db.create('CREATE_', (err) => {
+            expect(err).to.be.ok;
+            expect(err.name).to.equal("db_already_exists");
+            done();
+          });
         });
       });
       it('destroy', (done) => {
         // should be successful
-        db.destroy((err) => {
-          expect(err).to.be.undefined;
-          done();
+        db.destroy('INCORRECT', (err) => {
+          expect(err).to.be.ok;
+          expect(err.name).to.equal("verify_failed");
+          db.destroy('DESTROY_', (err) => {
+            expect(err).to.be.undefined;
+            done();
+          });
+        });
+      });
+      it('reset', (done) => {
+        // should be successful
+        db.reset('INCORRECT', (err) => {
+          expect(err).to.be.ok;
+          expect(err.name).to.equal("verify_failed");
+          db.reset('RESET_', (err) => {
+            expect(err).to.be.undefined;
+            done();
+          });
         });
       });
       

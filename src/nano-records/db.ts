@@ -40,9 +40,26 @@ export default class Db
     this.design = new DbDesign(this);
   }
   
-  create (callback: (err: Err)=>any = ()=>{})
+  reset (verify: string, callback: (err?: Err)=>any = ()=>{})
   {
-    this._performCreate(callback);
+    if (verify != "RESET_")
+      callback(Err.verifyFailed('db'));
+    else {
+      this.destroy("DESTROY_", (err) => {
+        if (!err || err.name == "no_db_file")
+          this.create("CREATE_", callback);
+        else
+          callback(err);
+      });
+    }
+  }
+  
+  create (verify: string, callback: (err?: Err)=>any = ()=>{})
+  {
+    if (verify != "CREATE_")
+      callback(Err.verifyFailed('db'));
+    else
+      this._performCreate(callback);
   }
   
   private _performCreate (callback: (err: Err)=>any)
@@ -52,9 +69,12 @@ export default class Db
     });
   }
   
-  destroy (callback: (err: Err)=>any = ()=>{})
+  destroy (verify: string, callback: (err?: Err)=>any = ()=>{})
   {
-    this._performDestroy(callback);
+    if (verify != "DESTROY_")
+      callback(Err.verifyFailed('db'));
+    else
+      this._performDestroy(callback);
   }
   
   private _performDestroy (callback: (err: Err)=>any)

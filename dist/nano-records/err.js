@@ -1,3 +1,4 @@
+"use strict";
 var Err = (function () {
     function Err(scope, name, message, raw) {
         this.scope = scope;
@@ -35,6 +36,10 @@ var Err = (function () {
             // views do not have this issue
             return this.missing(scope, err);
         }
+        else if (err.code == 'ECONNREFUSED') {
+            // could not contact database
+            return new Err(scope, "connection_refused", "Could not connect to database.", err);
+        }
         else {
             // best guess!
             return new Err(scope, err.reason, err.description, err);
@@ -43,7 +48,13 @@ var Err = (function () {
     Err.missing = function (scope, err) {
         return new Err(scope, "not_found", "Not found.", err);
     };
+    Err.missingId = function (scope) {
+        return new Err(scope, "missing_id", "Id parameter required.");
+    };
+    Err.verifyFailed = function (scope) {
+        return new Err(scope, "verify_failed", "Verify code mismatch.");
+    };
     return Err;
-})();
+}());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Err;

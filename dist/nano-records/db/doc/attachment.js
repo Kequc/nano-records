@@ -1,3 +1,4 @@
+"use strict";
 var err_1 = require('../../err');
 var stream = require('stream');
 var DbDocAttachment = (function () {
@@ -5,18 +6,32 @@ var DbDocAttachment = (function () {
         this.doc = doc;
     }
     DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        this.doc.get(id, function (err, doc) {
-            if (err)
-                callback(err);
+        if (!id) {
+            callback(err_1.default.missingId('doc'));
+            return;
+        }
+        this.doc.read(id, function (err, doc) {
+            if (err) {
+                if (err.name == "not_found")
+                    _this._performWrite(id, name, data, mimeType, callback); // we'll do it live!
+                else
+                    callback(err);
+            }
             else
                 doc.attachment.write(name, data, mimeType, callback); // attempt write
+        });
+    };
+    DbDocAttachment.prototype._performWrite = function (id, name, data, mimeType, callback) {
+        this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, function (err) {
+            callback(err_1.default.make('attachment', err));
         });
     };
     DbDocAttachment.prototype.read = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             return;
         }
         // doesn't need `_rev` so we can skip `doc.get`
@@ -30,7 +45,7 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype.reader = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id) {
-            callback(err_1.default.missing('doc'));
+            callback(err_1.default.missingId('doc'));
             // return empty stream
             var readable = new stream.Readable();
             readable._read = function () { };
@@ -48,7 +63,11 @@ var DbDocAttachment = (function () {
     };
     DbDocAttachment.prototype.destroy = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
-        this.doc.get(id, function (err, doc) {
+        if (!id) {
+            callback(err_1.default.missingId('doc'));
+            return;
+        }
+        this.doc.read(id, function (err, doc) {
             if (err)
                 callback(err);
             else
@@ -56,6 +75,6 @@ var DbDocAttachment = (function () {
         });
     };
     return DbDocAttachment;
-})();
+}());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = DbDocAttachment;

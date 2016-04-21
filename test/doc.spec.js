@@ -32,7 +32,7 @@ function assertBody (doc, asserts, done) {
       expect(doc.body[key]).to.eql(asserts[key]);
   }
   expect(asserts['_rev']).to.not.equal(doc.getRev());
-  db.doc.get(doc.getId(), (err, gotDoc) => {
+  db.doc.read(doc.getId(), (err, gotDoc) => {
     expect(err).to.be.undefined;
     expect(gotDoc).to.be.ok;
     expect(gotDoc.body).to.eql(doc.body);
@@ -40,12 +40,12 @@ function assertBody (doc, asserts, done) {
   });
 }
 
-function assertErase (doc, done) {
+function assertDestroy (doc, done) {
   let id = doc.getId();
-  doc.erase(function (err) {
+  doc.destroy(function (err) {
     expect(err).to.be.undefined;
     expect(doc.body).to.eql({});
-    db.doc.get(id, (err, gotDoc) => {
+    db.doc.read(id, (err, gotDoc) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("not_found");
       expect(gotDoc).to.be.undefined;
@@ -56,16 +56,16 @@ function assertErase (doc, done) {
 
 describe('doc', () => {
   after((done) => {
-    db.destroy(() => { done(); });
+    db.destroy('DESTROY_', () => { done(); });
   });
   
   describe('document does not exist', () => {
     var _doc;
     before((done) => {
       _doc = undefined;
-      db.doc.updateOrPersist("fake-id-doesnt-exist", complexBody, (err, doc) => {
+      db.doc.write("fake-id-doesnt-exist", complexBody, (err, doc) => {
         _doc = doc;
-        doc.erase(() => { done(); })
+        doc.destroy(() => { done(); })
       });
     });
     
@@ -87,7 +87,7 @@ describe('doc', () => {
       // should fail
       _doc.retrieveLatest((err) => {
         expect(err).to.be.ok;
-        expect(err.name).to.equal("not_found");
+        expect(err.name).to.equal("missing_id");
         done();
       });
     });
@@ -95,13 +95,17 @@ describe('doc', () => {
       // should fail
       _doc.update({ boo: "oorns" }, (err) => {
         expect(err).to.be.ok;
-        expect(err.name).to.equal("not_found");
+        expect(err.name).to.equal("missing_id");
         done();
       });
     });
-    it('erase', (done) => {
-      // should be successful
-      assertErase(_doc, done);
+    it('destroy', (done) => {
+      // should fail
+      _doc.destroy((err) => {
+        expect(err).to.be.ok;
+        expect(err.name).to.equal("missing_id");
+        done();
+      });
     });
   });
   
@@ -109,7 +113,7 @@ describe('doc', () => {
     var _doc;
     beforeEach((done) => {
       _doc = undefined;
-      db.doc.persist(complexBody, (err, doc) => {
+      db.doc.create(complexBody, (err, doc) => {
         _doc = doc;
         done();
       });
@@ -132,6 +136,9 @@ describe('doc', () => {
       expect(copy['deep']).to.include.keys('hi', 'arr');
       expect(copy['deep']['arr']).to.eql(["some", "values"]);
       expect(copy['deep']).to.eql(_doc.body['deep']);
+      expect(copy['deep']).to.not.equal(_doc.body['deep']);
+      expect(copy).to.eql(_doc.body);
+      expect(copy).to.not.equal(_doc.body);
     });
     it('retrieveLatest', (done) => {
       // should be successful
@@ -181,20 +188,20 @@ describe('doc', () => {
         }, db.maxTries); // tried x times
       });
     });
-    it('erase', (done) => {
+    it('destroy', (done) => {
       // should be successful
-      assertErase(_doc, done);
+      assertDestroy(_doc, done);
     });
-    it('erase retries', (done) => {
+    it('destroy retries', (done) => {
       // should be successful
       forceUpdate(_doc, { deleteMe: true }, () => {
-        assertErase(_doc, done);
+        assertDestroy(_doc, done);
       });
     });
-    it('erase more than maxTries', (done) => {
+    it('destroy more than maxTries', (done) => {
       // should fail
       forceUpdate(_doc, { a: 'change' }, () => {
-        _doc.erase((err) => {
+        _doc.destroy((err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("conflict");
           done();

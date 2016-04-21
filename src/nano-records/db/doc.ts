@@ -18,11 +18,11 @@ export default class DbDoc
   create (body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
   {
     tries++;
-    this._performCreate(body, (err, result) => {
+    this._performWriteAndInstantiateDoc(undefined, body, (err, doc) => {
       if (err) {
         if (tries <= 1 && err.name == "no_db_file") {
           // create db
-          this.db.create((err) => {
+          this.db.create('CREATE_', (err) => {
             if (err)
               callback(err);
             else
@@ -32,38 +32,94 @@ export default class DbDoc
         else
           callback(err);
       }
-      else {
-        let doc = new Doc(this.db, body); 
-        doc.body['_id'] = result['id'];
-        doc.body['_rev'] = result['rev'];
+      else
         callback(undefined, doc); // created successfully
+    });
+  }
+  
+  write (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  {
+    this.read(id, (err, doc) => {
+      if (err) {
+        if (err.name == "not_found")
+          this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
+        else
+          callback(err);
+      }
+      else {
+        // attempt write
+        doc.write(body, (err) => {
+          if (err)
+            callback(err);
+          else
+            callback(undefined, doc);
+        });
       }
     });
   }
   
-  private _performCreate (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  update (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
   {
-    this.db.raw.insert(body, (err: any, result: any) => {
+    if (!id) {
+      callback(Err.missingId('doc'));
+      return;
+    }
+    this.read(id, (err, doc) => {
+      if (err) {
+        if (err.name == "not_found")
+          this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
+        else
+          callback(err);
+      }
+      else {
+        // attempt update
+        doc.update(body, (err) => {
+          if (err)
+            callback(err);
+          else
+            callback(undefined, doc); // successfully updated
+        });
+      }
+    });
+  }
+  
+  private _performWriteAndInstantiateDoc (id: string, body: { [index: string]: any }, callback: (err: Err, doc: Doc)=>any)
+  {
+    this._performWrite(id, body, (err, result) => {
+      if (err)
+        callback(err, undefined);
+      else {
+        let doc = new Doc(this.db, body);
+        doc.body['_id'] = result['id'];
+        doc.body['_rev'] = result['rev'];
+        callback(undefined, doc); // written successfully
+      }
+    });
+  }
+  
+  private _performWrite (id: string, body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  {
+    this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), (err: any, result: any) => {
       callback(Err.make('doc', err), result);
     });
   }
   
-  get (id: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  read (id: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
   {
     if (!id) {
-      callback(Err.missing('doc'));
+      callback(Err.missingId('doc'));
       return;
     }
     tries++;
-    this._performGet(id, (err, result) => {
+    this._performRead(id, (err, result) => {
       if (err)
         if (tries <= 1 && err.name == "no_db_file") {
           // create db
-          this.db.create((err) => {
+          this.db.create('CREATE_', (err) => {
             if (err)
               callback(err);
             else
-              this.get(id, callback, tries);
+              this.read(id, callback, tries);
           });
         }
         else
@@ -73,68 +129,32 @@ export default class DbDoc
     });
   }
   
-  private _performGet (id: string, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performRead (id: string, callback: (err: Err, result: { [index: string]: any })=>any)
   {
     this.db.raw.get(id, (err: any, result: any) => {
       callback(Err.make('doc', err), result);
     });
   }
   
-  overwrite (id: string, body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{})
+  head (id: string, callback: (err?: Err, data?: any)=>any = ()=>{})
   {
-    this.get(id, (err, doc) => {
-      if (err)
-        callback(err);
-      else
-        doc.overwrite(body, callback); // attempt overwrite
-    });
+    if (!id) {
+      callback(Err.missingId('doc'));
+      return;
+    }
+    this._performHead(id, callback);
   }
   
-  update (id: string, body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{})
+  private _performHead (id: string, callback: (err: Err, result: any)=>any)
   {
-    this.get(id, (err, doc) => {
-      if (err)
-        callback(err);
-      else
-        doc.update(body, callback); // attempt update
-    });
-  }
-  
-  updateOrCreate (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
-  {
-    this.get(id, (err, doc) => {
-      if (err)
-        this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
-      else {
-        doc.update(body, (err) => {
-          if (err)
-            callback(err);
-          else
-            callback(undefined, doc);
-        }); // attempt update
-      }
-    });
-  }
-  
-  overwriteOrCreate (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
-  {
-    this.get(id, (err, doc) => {
-      if (err)
-        this.create(deepExtend({}, body, { '_id': id }), callback); // attempt create
-      else {
-        doc.overwrite(body, (err) => {
-          if (err)
-            callback(err);
-          else
-            callback(undefined, doc);
-        }); // attempt overwrite
-      }
+    this.db.raw.head(id, (err: any, result: any) => {
+      callback(Err.make('doc', err), result);
     });
   }
   
   destroy (id: string, callback: (err?: Err)=>any = ()=>{})
   {
-    this.get(id, (err, doc) => {
+    this.read(id, (err, doc) => {
       if (err) {
         if (err.name == "not_found")
           callback(); // nothing to see here

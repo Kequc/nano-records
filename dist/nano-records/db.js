@@ -1,3 +1,4 @@
+"use strict";
 var err_1 = require('./err');
 var doc_1 = require('./db/doc');
 var design_1 = require('./db/design');
@@ -21,18 +22,38 @@ var Db = (function () {
         this.doc = new doc_1.default(this);
         this.design = new design_1.default(this);
     }
-    Db.prototype.create = function (callback) {
+    Db.prototype.reset = function (verify, callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        this._performCreate(callback);
+        if (verify != "RESET_")
+            callback(err_1.default.verifyFailed('db'));
+        else {
+            this.destroy("DESTROY_", function (err) {
+                if (!err || err.name == "no_db_file")
+                    _this.create("CREATE_", callback);
+                else
+                    callback(err);
+            });
+        }
+    };
+    Db.prototype.create = function (verify, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        if (verify != "CREATE_")
+            callback(err_1.default.verifyFailed('db'));
+        else
+            this._performCreate(callback);
     };
     Db.prototype._performCreate = function (callback) {
         this.nano.db.create(this.dbName, function (err) {
             callback(err_1.default.make('db', err));
         });
     };
-    Db.prototype.destroy = function (callback) {
+    Db.prototype.destroy = function (verify, callback) {
         if (callback === void 0) { callback = function () { }; }
-        this._performDestroy(callback);
+        if (verify != "DESTROY_")
+            callback(err_1.default.verifyFailed('db'));
+        else
+            this._performDestroy(callback);
     };
     Db.prototype._performDestroy = function (callback) {
         this.nano.db.destroy(this.dbName, function (err) {
@@ -40,6 +61,6 @@ var Db = (function () {
         });
     };
     return Db;
-})();
+}());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Db;
