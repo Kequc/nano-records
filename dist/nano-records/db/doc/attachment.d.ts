@@ -7,7 +7,7 @@ export default class DbDocAttachment {
     private _performWrite(id, name, data, mimeType, callback);
     read(id: string, name: string, callback?: (err?: Err, data?: any) => any): void;
     private _performRead(id, name, callback);
-    reader(id: string, name: string, callback?: (err?: Err) => any): any;
-    private _performReader(id, name, callback);
+    readStream(id: string, name: string, callback?: (err?: Err) => any): any;
+    private _performReadStream(id, name, callback);
     destroy(id: string, name: string, callback?: (err?: Err) => any): void;
 }

@@ -69,19 +69,19 @@ export default class DocAttachment
     this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  reader (name: string, callback: (err?: Err)=>any = ()=>{})
+  readStream (name: string, callback: (err?: Err)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    return this.doc.db.doc.attachment.reader(this.doc.getId(), name, callback);
+    return this.doc.db.doc.attachment.readStream(this.doc.getId(), name, callback);
   }
   
-  writer (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
+  writeStream (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.doc.getId()) {
       callback(Err.missingId('doc'));
       return devNull();
     }
-    return this._performWriter(name, null, mimetype, (err, result) => {
+    return this._performWriteStream(name, null, mimetype, (err, result) => {
       if (err)
         callback(err);
       else {
@@ -95,7 +95,7 @@ export default class DocAttachment
     });
   }
   
-  private _performWriter (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, (err: any, result: any) => {
       callback(Err.make('attachment', err), result);

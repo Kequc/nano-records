@@ -54,7 +54,7 @@ export default class DbDocAttachment
     });
   }
   
-  reader (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
+  readStream (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!id) {
       callback(Err.missingId('doc'));
@@ -64,10 +64,10 @@ export default class DbDocAttachment
       readable.push(null);
       return readable;
     }
-    return this._performReader(id, name, callback);
+    return this._performReadStream(id, name, callback);
   }
   
-  private _performReader (id: string, name: string, callback: (err?: Err)=>any)
+  private _performReadStream (id: string, name: string, callback: (err?: Err)=>any)
   {
     // TODO: truthfully this returns pretty ugly streams when there is an error
     // would be nice to clean this up

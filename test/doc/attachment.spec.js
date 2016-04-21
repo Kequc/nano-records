@@ -50,8 +50,8 @@ function assertWrite (doc, done) {
   });
 }
 
-function assertWriter (doc, done) {
-  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writer(fileName, "text/plain", (err) => {
+function assertWriteStream (doc, done) {
+  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writeStream(fileName, "text/plain", (err) => {
     expect(err).to.be.undefined;
     expect(doc.attachment.exists(fileName)).to.be.true;
     doc.read((err) => {
@@ -73,8 +73,8 @@ function assertRead (doc, done) {
   });
 }
 
-function assertReader (doc, done) {
-  streamToString(doc.attachment.reader(fileName, (err) => {
+function assertReadStream (doc, done) {
+  streamToString(doc.attachment.readStream(fileName, (err) => {
     expect(err).to.be.undefined;
     expect(doc.attachment.exists(fileName)).to.be.true;
     done();
@@ -131,9 +131,9 @@ describe('doc-attachment', () => {
         done();
       });
     });
-    it('writer', (done) => {
+    it('writeStream', (done) => {
       // should fail
-      fs.createReadStream('./test/attachment.txt').pipe(_doc.attachment.writer(fileName, "text/plain", (err) => {
+      fs.createReadStream('./test/attachment.txt').pipe(_doc.attachment.writeStream(fileName, "text/plain", (err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         expect(_doc.attachment.exists(fileName)).to.be.false;
@@ -151,9 +151,9 @@ describe('doc-attachment', () => {
         done();
       });
     });
-    it('reader', (done) => {
+    it('readStream', (done) => {
       // should fail
-      streamToString(_doc.attachment.reader(fileName, (err) => {
+      streamToString(_doc.attachment.readStream(fileName, (err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         done();
@@ -218,9 +218,9 @@ describe('doc-attachment', () => {
           }, db.maxTries); // tried x times
         });
       });
-      it('writer', (done) => {
+      it('writeStream', (done) => {
         // should be successful
-        assertWriter(_doc, done);
+        assertWriteStream(_doc, done);
       });
       it('read', (done) => {
         // should fail
@@ -232,9 +232,9 @@ describe('doc-attachment', () => {
           done();
         });
       });
-      it('reader', (done) => {
+      it('readStream', (done) => {
         // should fail
-        streamToString(_doc.attachment.reader(fileName, (err) => {
+        streamToString(_doc.attachment.readStream(fileName, (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("not_found");
           done();
@@ -266,17 +266,17 @@ describe('doc-attachment', () => {
         // should be successful
         assertWrite(_doc, done);
       });
-      it('writer', (done) => {
+      it('writeStream', (done) => {
         // should be successful
-        assertWriter(_doc, done);
+        assertWriteStream(_doc, done);
       });
       it('read', (done) => {
         // should be successful
         assertRead(_doc, done);
       });
-      it('reader', (done) => {
+      it('readStream', (done) => {
         // should be successful
-        assertReader(_doc, done);
+        assertReadStream(_doc, done);
       });
       it('destroy', (done) => {
         // should be successful

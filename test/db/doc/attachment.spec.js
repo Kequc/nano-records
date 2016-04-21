@@ -41,8 +41,8 @@ function assertRead (doc, done) {
   });
 }
 
-function assertReader (doc, done) {
-  streamToString(db.doc.attachment.reader(doc.getId(), fileName, (err) => {
+function assertReadStream (doc, done) {
+  streamToString(db.doc.attachment.readStream(doc.getId(), fileName, (err) => {
     expect(err).to.be.undefined;
     done();
   }), (result) => {
@@ -85,9 +85,9 @@ describe('db-doc-attachment', () => {
         done();
       });
     });
-    it('reader', (done) => {
+    it('readStream', (done) => {
       // should fail
-      streamToString(db.doc.attachment.reader("fake-id-doesnt-exist", fileName, (err) => {
+      streamToString(db.doc.attachment.readStream("fake-id-doesnt-exist", fileName, (err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("not_found");
         done();
@@ -130,9 +130,9 @@ describe('db-doc-attachment', () => {
           done();
         });
       });
-      it('reader', (done) => {
+      it('readStream', (done) => {
         // should fail
-        streamToString(db.doc.attachment.reader("fake-id-doesnt-exist", fileName, (err) => {
+        streamToString(db.doc.attachment.readStream("fake-id-doesnt-exist", fileName, (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("not_found");
           done();
@@ -181,9 +181,9 @@ describe('db-doc-attachment', () => {
             done();
           });
         });
-        it('reader', (done) => {
+        it('readStream', (done) => {
           // should fail
-          streamToString(db.doc.attachment.reader(_doc.getId(), fileName, (err) => {
+          streamToString(db.doc.attachment.readStream(_doc.getId(), fileName, (err) => {
             expect(err).to.be.ok;
             expect(err.name).to.equal("not_found");
             expect(_doc.getId()).to.be.ok;
@@ -212,9 +212,9 @@ describe('db-doc-attachment', () => {
           // should be successful
           assertRead(_doc, done);
         });
-        it('reader', (done) => {
+        it('readStream', (done) => {
           // should be successful
-          assertReader(_doc, done);
+          assertReadStream(_doc, done);
         });
         it('destroy', (done) => {
           // should be successful
