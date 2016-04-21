@@ -19,12 +19,12 @@ export default class Doc
   
   getId (): string
   {
-    return this.body['_id'] || null;
+    return this.body['_id'];
   }
   
   getRev (): string
   {
-    return this.body['_rev'] || null;
+    return this.body['_rev'];
   }
   
   getBody (): { [index: string]: any }
@@ -83,6 +83,7 @@ export default class Doc
       }
       else {
         this.body = body;
+        this.body['_id'] = result['id'];
         this.body['_rev'] = result['rev'];
         callback(); // success
       }

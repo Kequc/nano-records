@@ -10,10 +10,10 @@ var Doc = (function () {
         this.attachment = new attachment_1.default(this);
     }
     Doc.prototype.getId = function () {
-        return this.body['_id'] || null;
+        return this.body['_id'];
     };
     Doc.prototype.getRev = function () {
-        return this.body['_rev'] || null;
+        return this.body['_rev'];
     };
     Doc.prototype.getBody = function () {
         return deepExtend({}, this.body);
@@ -68,6 +68,7 @@ var Doc = (function () {
             }
             else {
                 _this.body = body;
+                _this.body['_id'] = result['id'];
                 _this.body['_rev'] = result['rev'];
                 callback(); // success
             }

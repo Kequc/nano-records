@@ -10,12 +10,12 @@ var Err = (function () {
         if (!err)
             return;
         else if (err.statusCode == 412) {
-            // database create requests when database exists
+            // database create requested when database exists
             return new Err(scope, "db_already_exists", "Database already exists.", err);
         }
         else if ((err.statusCode == 404 && scope == 'db') || err.reason == "no_db_file") {
-            // database destroy requests when database does not exist
-            // database missing errors
+            // database destroy requested when database does not exist
+            // database missing error
             return new Err(scope, "no_db_file", "Database missing.", err);
         }
         else if (err.statusCode == 404) {
@@ -31,13 +31,13 @@ var Err = (function () {
             return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
         }
         else if (err.statusCode == 500 && scope == 'design' && err.error == "TypeError") {
-            // FIXME: NANO that is one hell of an error
+            // NANO: that is one hell of an error, man crazy
             // seems to only occur when a show is missing
-            // views do not have this issue
+            // views do not report such a crazy error nor need this exception
             return this.missing(scope, err);
         }
         else if (err.code == 'ECONNREFUSED') {
-            // could not contact database
+            // could not connect to the database
             return new Err(scope, "connection_refused", "Could not connect to database.", err);
         }
         else {
