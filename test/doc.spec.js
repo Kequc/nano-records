@@ -12,7 +12,7 @@ var db = new NanoRecords(nano, dbName);
 
 var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["some", "values"] } };
 
-function forceUpdate (doc, data, callback) {
+function triggerBgUpdate (doc, data, callback) {
   forced.get(doc.getId(), (err, body) => {
     deepExtend(body, data);
     forced.insert(body, (err, body) => {
@@ -40,9 +40,18 @@ function assertBody (doc, asserts, done) {
   });
 }
 
+function assertHead (doc, done) {
+  doc.head((err, data) => {
+    expect(err).to.be.undefined;
+    expect(data).to.be.ok;
+    expect(data).to.include.keys('etag');
+    done();
+  });
+}
+
 function assertDestroy (doc, done) {
   let id = doc.getId();
-  doc.destroy(function (err) {
+  doc.destroy((err) => {
     expect(err).to.be.undefined;
     expect(doc.body).to.eql({});
     db.doc.read(id, (err, gotDoc) => {
@@ -72,12 +81,12 @@ describe('doc', () => {
     it('getId', () => {
       // should fail
       expect(_doc.body['_id']).to.be.undefined;
-      expect(_doc.getId()).to.be.null;
+      expect(_doc.getId()).to.be.undefined;
     });
     it('getRev', () => {
       // should fail
       expect(_doc.body['_rev']).to.be.undefined;
-      expect(_doc.getRev()).to.be.null;
+      expect(_doc.getRev()).to.be.undefined;
     });
     it('body', () => {
       // should fail
@@ -91,11 +100,28 @@ describe('doc', () => {
         done();
       });
     });
+    it('write', (done) => {
+      // should fail
+      _doc.write({ boo: "oorns" }, (err) => {
+        expect(err).to.be.ok;
+        expect(err.name).to.equal("missing_id");
+        done();
+      });
+    });
     it('update', (done) => {
       // should fail
       _doc.update({ boo: "oorns" }, (err) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
+        done();
+      });
+    });
+    it('head', (done) => {
+      // should fail
+      _doc.head((err, data) => {
+        expect(err).to.be.ok;
+        expect(err.name).to.equal("missing_id");
+        expect(data).to.be.undefined;
         done();
       });
     });
@@ -144,13 +170,52 @@ describe('doc', () => {
       // should be successful
       let changes = { anotheranother: "Yay!", complex: "cats and dogs" };
       let asserts = deepExtend({}, _doc.body, changes);
-      forceUpdate(_doc, changes, () => {
+      triggerBgUpdate(_doc, changes, () => {
         expect(_doc.body).to.not.have.keys('anotheranother');
         _doc.read((err) => {
           expect(err).to.be.undefined;
           expect(_doc.body).to.include.keys('complex', 'anotheranother', '_id', '_rev');
           assertBody(_doc, asserts, done);
         });
+      });
+    });
+    it('write', (done) => {
+      // should be successful
+      let changes = { more: "attributes", complex: "Samsonite" };
+      let asserts = deepExtend({}, changes);
+      expect(_doc.body).to.not.include.keys('more');
+      expect(_doc.body).to.include.keys('num');
+      _doc.write(changes, (err) => {
+        expect(err).to.be.undefined;
+        expect(_doc.body).to.include.keys('complex', 'more', '_id', '_rev');
+        expect(_doc.body).to.not.include.keys('num');
+        assertBody(_doc, asserts, done);
+      });
+    });
+    it('write retries', (done) => {
+      // should be successful
+      let changes1 = { anotheranother: "changed" };
+      let changes2 = { added: "attr-again", num: 20 };
+      let asserts = deepExtend({}, changes2);
+      triggerBgUpdate(_doc, changes1, () => {
+        expect(_doc.body).to.not.include.keys('anotheranother', 'added');
+        expect(_doc.body).to.include.keys('num');
+        _doc.write(changes2, (err) => {
+          expect(err).to.be.undefined;
+          expect(_doc.body).to.include.keys('added', 'num', '_id', '_rev');
+          expect(_doc.body).to.not.include.keys('anotheranother');
+          assertBody(_doc, asserts, done);
+        });
+      });
+    });
+    it('write more than maxTries', (done) => {
+      // should fail
+      triggerBgUpdate(_doc, { a: 'change' }, () => {
+        _doc.write({ boo: "oorns" }, (err) => {
+          expect(err).to.be.ok;
+          expect(err.name).to.equal("conflict");
+          done();
+        }, db.maxTries); // tried x times
       });
     });
     it('update', (done) => {
@@ -169,7 +234,7 @@ describe('doc', () => {
       let changes1 = { anotheranother: "changed" };
       let changes2 = { added: "attr-again", num: 20 };
       let asserts = deepExtend({}, _doc.body, changes1, changes2);
-      forceUpdate(_doc, changes1, () => {
+      triggerBgUpdate(_doc, changes1, () => {
         expect(_doc.body).to.not.have.keys('anotheranother', 'added');
         _doc.update(changes2, (err) => {
           expect(err).to.be.undefined;
@@ -180,7 +245,7 @@ describe('doc', () => {
     });
     it('update more than maxTries', (done) => {
       // should fail
-      forceUpdate(_doc, { a: 'change' }, () => {
+      triggerBgUpdate(_doc, { a: 'change' }, () => {
         _doc.update({ boo: "oorns" }, (err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("conflict");
@@ -188,19 +253,23 @@ describe('doc', () => {
         }, db.maxTries); // tried x times
       });
     });
+    it('head', (done) => {
+      // should be successful
+      assertHead(_doc, done);
+    });
     it('destroy', (done) => {
       // should be successful
       assertDestroy(_doc, done);
     });
     it('destroy retries', (done) => {
       // should be successful
-      forceUpdate(_doc, { deleteMe: true }, () => {
+      triggerBgUpdate(_doc, { deleteMe: true }, () => {
         assertDestroy(_doc, done);
       });
     });
     it('destroy more than maxTries', (done) => {
       // should fail
-      forceUpdate(_doc, { a: 'change' }, () => {
+      triggerBgUpdate(_doc, { a: 'change' }, () => {
         _doc.destroy((err) => {
           expect(err).to.be.ok;
           expect(err.name).to.equal("conflict");

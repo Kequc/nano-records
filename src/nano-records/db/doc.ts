@@ -158,7 +158,7 @@ export default class DbDoc
   
   private _performHead (id: string, callback: (err: Err, result: any)=>any)
   {
-    this.db.raw.head(id, (err: any, result: any) => {
+    this.db.raw.head(id, (err: any, body: any, result: any) => {
       callback(Err.make('doc', err), result);
     });
   }

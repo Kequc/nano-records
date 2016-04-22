@@ -145,7 +145,7 @@ var DbDoc = (function () {
         this._performHead(id, callback);
     };
     DbDoc.prototype._performHead = function (id, callback) {
-        this.db.raw.head(id, function (err, result) {
+        this.db.raw.head(id, function (err, body, result) {
             callback(err_1.default.make('doc', err), result);
         });
     };

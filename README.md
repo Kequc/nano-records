@@ -3,7 +3,7 @@ Nano Records
 
 A module for interacting with CouchDB through [nano](https://github.com/dscape/nano) with Nodejs.
 
-Conflicts are avoided with automated retries, errors are sanitised, designs are persisted on an as-needed basis, and so on. It is meant to make your life easier by abstracting away some of database busywork and is a simple way to get up and running with CouchDB quickly.
+Conflicts are avoided with automated retries, errors are sanitised, designs are persisted on an as-needed basis, and so on. Intended to make life easier by abstracting away some general database busywork and hopefully makes it easy to get up and running.
 
 ## &#8620; Install
 
@@ -20,7 +20,7 @@ var db = new NanoRecords(nano, dbName);
 
 Each NanoRecords instance represents one database.
 
-Provide NanoRecords with a running instance of nano and a chosen database name. This should be all you need to get up and running.
+Provide NanoRecords with a running instance of nano and a chosen database name. This should be all you need to get started.
 
 ## &#8620; Documents
 

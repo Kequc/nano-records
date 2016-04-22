@@ -127,7 +127,7 @@ describe('doc-attachment', () => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         expect(_doc.attachment.exists(fileName)).to.be.false;
-        expect(_doc.getId()).to.be.null;
+        expect(_doc.getId()).to.be.undefined;
         done();
       });
     });
@@ -137,7 +137,7 @@ describe('doc-attachment', () => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         expect(_doc.attachment.exists(fileName)).to.be.false;
-        expect(_doc.getId()).to.be.null;
+        expect(_doc.getId()).to.be.undefined;
         done();
       }));
     });
@@ -147,7 +147,7 @@ describe('doc-attachment', () => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         expect(data).to.be.undefined;
-        expect(_doc.getId()).to.be.null;
+        expect(_doc.getId()).to.be.undefined;
         done();
       });
     });
@@ -167,7 +167,7 @@ describe('doc-attachment', () => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
         expect(_doc.attachment.exists(fileName)).to.be.false;
-        expect(_doc.getId()).to.be.null;
+        expect(_doc.getId()).to.be.undefined;
         done();
       });
     });
