@@ -1,3 +1,13 @@
+/* class Db
+ * 
+ * Maintains a set of core settings for the database instance.
+ * Also offers some basic database functions such as create and
+ * destroy.
+ * 
+ * Delivers an entry point into all other classes.
+ * 
+ */
+
 import {default as Err} from './err';
 import {default as Doc} from './doc';
 import {default as DbDoc} from './db/doc';

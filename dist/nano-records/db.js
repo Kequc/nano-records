@@ -1,3 +1,12 @@
+/* class Db
+ *
+ * Maintains a set of core settings for the database instance.
+ * Also offers some basic database functions such as create and
+ * destroy.
+ *
+ * Delivers an entry point into all other classes.
+ *
+ */
 "use strict";
 var err_1 = require('./err');
 var doc_1 = require('./db/doc');

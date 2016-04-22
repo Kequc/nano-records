@@ -1,3 +1,13 @@
+/* class Doc
+ *
+ * Manages a single instance of a single document in the database.
+ * Methods called within this class do not take an `_id` parameter
+ * and in general will stop working if the document no longer has
+ * one. Ie. If the record was deleted.
+ *
+ * All methods assume that a database exists.
+ *
+ */
 "use strict";
 var err_1 = require('./err');
 var attachment_1 = require('./doc/attachment');

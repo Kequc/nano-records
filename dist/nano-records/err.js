@@ -1,3 +1,13 @@
+/* class Err
+ *
+ * This is a utility class for manufacturing errors returned from nano
+ * into a more structured format. Calling `make` and delivering the
+ * original error should result in something sane.
+ *
+ * This is used internally as well as delivered to the user it acts as
+ * a sanity check for nano erros.
+ *
+ */
 "use strict";
 var Err = (function () {
     function Err(scope, name, message, raw) {

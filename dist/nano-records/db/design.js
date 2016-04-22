@@ -1,14 +1,17 @@
+/* class DbDesign
+ *
+ * Responsible for manipulation and execution of CouchDB design
+ * documents. Will generally persist and update design documents
+ * in the database and returns raw data resulting from design
+ * queries.
+ *
+ */
 "use strict";
 var err_1 = require('../err');
 var DbDesign = (function () {
     function DbDesign(db) {
         this.db = db;
     }
-    // FIXME: might not be so useful.
-    // read (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
-    // {
-    //   this.db.doc.read('_design/' + designId, callback);
-    // }
     DbDesign.prototype.show = function (designId, showName, id, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }

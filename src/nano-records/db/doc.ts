@@ -1,3 +1,14 @@
+/* class DbDoc
+ * 
+ * Acts as an entry point to this library's document interfaces.
+ * Expects a id to be specified on every operation and generally
+ * returns a Doc instance.
+ * 
+ * Most methods mirror those which are available on the Doc
+ * class.
+ * 
+ */
+
 import {default as Err} from '../err';
 import {default as Db} from '../db';
 import {default as Doc} from '../doc';

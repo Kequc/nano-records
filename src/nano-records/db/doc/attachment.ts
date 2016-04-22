@@ -1,3 +1,15 @@
+/* class DbDocAttachment
+ * 
+ * Acts as an entry point to this library's document attachment
+ * interfaces. Expects a id to be specified on every operation
+ * and generally doesn't return anything. It may be nice in the
+ * future to return newly created Doc instances.
+ * 
+ * Most methods mirror those which are available on the
+ * DocAttachment class.
+ * 
+ */
+
 import {default as Err} from '../../err';
 import {default as Doc} from '../../doc';
 import {default as DbDoc} from '../doc';

@@ -1,3 +1,12 @@
+/* class DbDesign
+ * 
+ * Responsible for manipulation and execution of CouchDB design
+ * documents. Will generally persist and update design documents
+ * in the database and returns raw data resulting from design
+ * queries.
+ * 
+ */
+
 import {default as Err} from '../err';
 import {default as Db, iDesignInput} from '../db';
 import {default as Doc} from '../doc';
@@ -10,12 +19,6 @@ export default class DbDesign
   {
     this.db = db;
   }
-  
-  // FIXME: might not be so useful.
-  // read (designId: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
-  // {
-  //   this.db.doc.read('_design/' + designId, callback);
-  // }
   
   show (designId: string, showName: string, id: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {

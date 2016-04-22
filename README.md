@@ -1,9 +1,9 @@
 Nano Records
 ===
 
-A module for interacting with CouchDB through [nano](https://github.com/dscape/nano) with Nodejs. Each NanoRecords instance represents one database. This is a simple way to get up and running with CouchDB.
+A module for interacting with CouchDB through [nano](https://github.com/dscape/nano) with Nodejs.
 
-Abstract away some of the database busywork and make your life easier.
+Conflicts are avoided with automated retries, errors are sanitised, designs are persisted on an as-needed basis, and so on. It is meant to make your life easier by abstracting away some of database busywork and is a simple way to get up and running with CouchDB quickly.
 
 ## &#8620; Install
 
@@ -17,6 +17,8 @@ var NanoRecords = require('nano-records');
 var dbName = "my-database";
 var db = new NanoRecords(nano, dbName);
 ```
+
+Each NanoRecords instance represents one database.
 
 Provide NanoRecords with a running instance of nano and a chosen database name. This should be all you need to get up and running.
 
@@ -118,23 +120,15 @@ db.doc.head(id, (err, data) => {
 
 Retrieve header information.
 
-#### Body
+#### Get body get id and get rev
 
 ```javascript
-var clone = doc.getBody();
-clone == doc.body; // false
-```
-
-Method for deeply cloning your data. Data is available directly however it is not a good idea to accidentally make changes to it so I added this to help out.
-
-#### Get id and get rev
-
-```javascript
+doc.getBody() == doc.body; // false
 doc.getId() == doc.body['_id']; // true
 doc.getRev() == doc.body['_rev']; // true
 ```
 
-Methods for accessing the document's `_id` and `_rev` properties. Another way of writing `doc.body['_id']` and `doc.body['_rev']`.
+Methods for accessing a deep clone of the document body, the document's id, and rev properties. Another way of writing `deepExtend({}, doc.body)`<sup>[1](https://github.com/unclechu/node-deep-extend)</sup>, `doc.body['_id']`, and `doc.body['_rev']`.
 
 ## &#8620; Attachments
 
@@ -153,7 +147,7 @@ db.doc.attachment.read(id, name, (err, data) => {
 });
 ```
 
-Read attachment.
+Read an attachment.
 
 #### Write
 
@@ -168,7 +162,7 @@ db.doc.attachment.write(id, name, data, mimeType, (err) => {
 });
 ```
 
-Overwrite existing attachment with the same name, create a new attachment if one doesn't exist, create a new record if one doesn't exist.
+Overwrite an existing attachment with the same name, create a new attachment if one doesn't exist, create a new record if one doesn't exist.
 
 #### Destroy
 
@@ -188,8 +182,8 @@ Remove an attachment.
 #### List and exists
 
 ```javascript
-var list = doc.attachment.list();
-var hasAttachment = doc.attachment.exists(name);
+doc.attachment.list();
+doc.attachment.exists(name);
 ```
 
 Return attachment names as an array or whether a specific attachment exists.
@@ -200,17 +194,15 @@ Return attachment names as an array or whether a specific attachment exists.
 
 ```javascript
 var writer = fs.createWriteStream('./my-file.txt');
-var reader = doc.attachment.readStream(name, (err) => {
+doc.attachment.readStream(name, (err) => {
   if (!err)
     console.log('success!');
-});
-reader.pipe(writer);
+}).pipe(writer);
 var writer = fs.createWriteStream('./my-file.txt');
-var reader = db.doc.attachment.readStream(id, name, (err) => {
+db.doc.attachment.readStream(id, name, (err) => {
   if (!err)
     console.log('success!');
-});
-reader.pipe(writer);
+}).pipe(writer);
 ```
 
 Read the attachment as a stream. How convenient!
@@ -219,11 +211,10 @@ Read the attachment as a stream. How convenient!
 
 ```javascript
 var reader = fs.createReadStream('./my-file.txt');
-var writer = doc.attachment.writeStream(name, (err) => {
+reader.pipe(doc.attachment.writeStream(name, (err) => {
   if (!err)
     console.log('success!');
-});
-reader.pipe(writer);
+}));
 ```
 
 Write an attachment using a stream. It's important to note that streams cannot be retried, if there is an error you will have to pipe a new stream manually.
@@ -255,7 +246,7 @@ var designs = require('./designs.json');
 var db = new NanoRecords(nano, dbName, designs);
 ```
 
-When creating your NanoRecords instance optionally provide it a set of designs to use. You can read more about [views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [design documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
+When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [design documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 #### View
 
