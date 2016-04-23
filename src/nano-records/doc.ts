@@ -103,7 +103,7 @@ export default class Doc
           callback(err);
       }
       else {
-        this.body = body;
+        this.body = deepExtend({}, body);
         this.body['_id'] = result['id'];
         this.body['_rev'] = this._latestRev = result['rev'];
         callback(); // success

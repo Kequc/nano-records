@@ -87,7 +87,7 @@ var Doc = (function () {
                     callback(err);
             }
             else {
-                _this.body = body;
+                _this.body = deepExtend({}, body);
                 _this.body['_id'] = result['id'];
                 _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success

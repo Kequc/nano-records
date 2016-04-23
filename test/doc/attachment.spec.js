@@ -114,7 +114,7 @@ describe('doc-attachment', () => {
     });
     
     it('list', () => {
-      // should fail
+      // should be empty
       expect(_doc.attachment.list()).to.eql([]);
     });
     it('exists', () => {
@@ -189,7 +189,7 @@ describe('doc-attachment', () => {
       });
       
       it('list', () => {
-        // should fail
+        // should be empty
         expect(_doc.attachment.list()).to.eql([]);
       });
       it('exists', () => {
@@ -255,7 +255,7 @@ describe('doc-attachment', () => {
       });
       
       it('list', () => {
-        // should be successful
+        // should contain
         expect(_doc.attachment.list()).to.eql([fileName]);
       });
       it('exists', () => {
