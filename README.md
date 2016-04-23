@@ -156,9 +156,11 @@ doc.attachment.write(name, data, mimeType, (err) => {
   if (!err)
     console.log('success!');
 });
-db.doc.attachment.write(id, name, data, mimeType, (err) => {
-  if (!err)
-    console.log('success!');
+db.doc.attachment.write(id, name, data, mimeType, (err, doc) => {
+  if (err)
+    return;
+  // doc is a NanoRecords document
+  console.log(doc.body);
 });
 ```
 
