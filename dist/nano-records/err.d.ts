@@ -17,6 +17,7 @@ export default class Err {
     message: string;
     raw: iNanoError;
     constructor(scope: string, name?: string, message?: string, raw?: iNanoError);
+    static resultFunc(scope: string, callback: (err: Err, result?: any) => any): Function;
     static make(scope: string, err: iNanoError): Err;
     static missing(scope: string, err?: iNanoError): Err;
     static missingId(scope: string): Err;

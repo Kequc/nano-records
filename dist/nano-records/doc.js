@@ -15,9 +15,11 @@ var deepExtend = require('deep-extend');
 var Doc = (function () {
     function Doc(db, body) {
         if (body === void 0) { body = {}; }
+        this.body = {};
         this.db = db;
-        this.body = deepExtend({}, body);
         this.attachment = new attachment_1.default(this);
+        deepExtend(this.body, body);
+        this._latestRev = body['_rev'];
     }
     Doc.prototype.getId = function () {
         return this.body['_id'];
@@ -35,24 +37,32 @@ var Doc = (function () {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        this._performread(function (err, result) {
+        this._performRead(function (err, result) {
             if (err)
                 callback(err);
             else {
                 _this.body = result;
+                _this._latestRev = result['_rev'];
                 callback(); // up to date
             }
         });
     };
-    Doc.prototype._performread = function (callback) {
-        this.db.raw.get(this.getId(), function (err, result) {
-            callback(err_1.default.make('doc', err), result);
-        });
+    Doc.prototype._performRead = function (callback) {
+        this.db.raw.get(this.getId(), err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype.head = function (callback) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         // we have a method already available for this on the db object
-        this.db.doc.head(this.getId(), callback);
+        this.db.doc.head(this.getId(), function (err, data) {
+            if (data) {
+                // we have new rev data available
+                // nano puts it in the format '"etag"' so we need to
+                // strip erroneous quotes
+                _this._latestRev = data['etag'].replace(/"/g, "");
+            }
+            callback(err, data);
+        });
     };
     Doc.prototype.write = function (body, callback, tries) {
         var _this = this;
@@ -66,7 +76,7 @@ var Doc = (function () {
         this._performWrite(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
-                    _this.read(function (err) {
+                    _this.head(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -79,15 +89,13 @@ var Doc = (function () {
             else {
                 _this.body = body;
                 _this.body['_id'] = result['id'];
-                _this.body['_rev'] = result['rev'];
+                _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success
             }
         });
     };
     Doc.prototype._performWrite = function (body, callback) {
-        this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this.getRev() }), function (err, result) {
-            callback(err_1.default.make('doc', err), result);
-        });
+        this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev }), err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype.update = function (body, callback, tries) {
         var _this = this;
@@ -113,15 +121,13 @@ var Doc = (function () {
             }
             else {
                 _this.body = _this._extendBody(body);
-                _this.body['_rev'] = result['rev'];
+                _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success
             }
         });
     };
     Doc.prototype._performUpdate = function (body, callback) {
-        this.db.raw.insert(this._extendBody(body), function (err, result) {
-            callback(err_1.default.make('doc', err), result);
-        });
+        this.db.raw.insert(this._extendBody(body), err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype._extendBody = function (body) {
         return deepExtend({}, this.body, body);
@@ -138,7 +144,7 @@ var Doc = (function () {
         this._performDestroy(function (err) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
-                    _this.read(function (err) {
+                    _this.head(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -155,9 +161,7 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performDestroy = function (callback) {
-        this.db.raw.destroy(this.getId(), this.getRev(), function (err) {
-            callback(err_1.default.make('doc', err));
-        });
+        this.db.raw.destroy(this.getId(), this._latestRev, err_1.default.resultFunc('doc', callback));
     };
     return Doc;
 }());

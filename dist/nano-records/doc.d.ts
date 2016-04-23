@@ -5,6 +5,7 @@ export default class Doc {
     body: {
         [index: string]: any;
     };
+    _latestRev: string;
     db: Db;
     attachment: DocAttachment;
     constructor(db: Db, body?: {
@@ -16,7 +17,7 @@ export default class Doc {
         [index: string]: any;
     };
     read(callback?: (err?: Err) => any): void;
-    private _performread(callback);
+    private _performRead(callback);
     head(callback?: (err?: Err, data?: any) => any): void;
     write(body: {
         [index: string]: any;

@@ -16,6 +16,16 @@ var Err = (function () {
         this.message = message || "No additional information available.";
         this.raw = raw || {};
     }
+    Err.resultFunc = function (scope, callback) {
+        var _this = this;
+        return function (raw, result) {
+            var err = _this.make(scope, raw);
+            if (err)
+                callback(err);
+            else
+                callback(undefined, result);
+        };
+    };
     Err.make = function (scope, err) {
         if (!err)
             return;
@@ -55,6 +65,7 @@ var Err = (function () {
             return new Err(scope, err.reason, err.description, err);
         }
     };
+    // common ones
     Err.missing = function (scope, err) {
         return new Err(scope, "not_found", "Not found.", err);
     };

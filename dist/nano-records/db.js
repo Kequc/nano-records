@@ -50,9 +50,7 @@ var Db = (function () {
         this._performCreate(callback);
     };
     Db.prototype._performCreate = function (callback) {
-        this.nano.db.create(this.dbName, function (err) {
-            callback(err_1.default.make('db', err));
-        });
+        this.nano.db.create(this.dbName, err_1.default.resultFunc('db', callback));
     };
     Db.prototype.destroy = function (verify, callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -62,9 +60,7 @@ var Db = (function () {
             this._performDestroy(callback);
     };
     Db.prototype._performDestroy = function (callback) {
-        this.nano.db.destroy(this.dbName, function (err) {
-            callback(err_1.default.make('db', err));
-        });
+        this.nano.db.destroy(this.dbName, err_1.default.resultFunc('db', callback));
     };
     return Db;
 }());

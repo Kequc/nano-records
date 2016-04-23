@@ -95,15 +95,13 @@ var DbDoc = (function () {
             else {
                 var doc = new doc_1.default(_this.db, body);
                 doc.body['_id'] = result['id'];
-                doc.body['_rev'] = result['rev'];
+                doc.body['_rev'] = doc._latestRev = result['rev'];
                 callback(undefined, doc); // written successfully
             }
         });
     };
     DbDoc.prototype._performWrite = function (id, body, callback) {
-        this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), function (err, result) {
-            callback(err_1.default.make('doc', err), result);
-        });
+        this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), err_1.default.resultFunc('doc', callback));
     };
     DbDoc.prototype.read = function (id, callback, tries) {
         var _this = this;
@@ -132,9 +130,7 @@ var DbDoc = (function () {
         });
     };
     DbDoc.prototype._performRead = function (id, callback) {
-        this.db.raw.get(id, function (err, result) {
-            callback(err_1.default.make('doc', err), result);
-        });
+        this.db.raw.get(id, err_1.default.resultFunc('doc', callback));
     };
     DbDoc.prototype.head = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -145,8 +141,12 @@ var DbDoc = (function () {
         this._performHead(id, callback);
     };
     DbDoc.prototype._performHead = function (id, callback) {
-        this.db.raw.head(id, function (err, body, result) {
-            callback(err_1.default.make('doc', err), result);
+        this.db.raw.head(id, function (raw, body, result) {
+            var err = err_1.default.make('doc', raw);
+            if (err)
+                callback(err);
+            else
+                callback(undefined, result);
         });
     };
     DbDoc.prototype.destroy = function (id, callback) {

@@ -47,11 +47,9 @@ export default class DbDesign
     });
   }
   
-  private _performShow (designId: string, showName: string, id: string, callback: (err: Err, data: any)=>any)
+  private _performShow (designId: string, showName: string, id: string, callback: (err: Err, data?: any)=>any)
   {
-    this.db.raw.show(designId, showName, id, (err: any, data: any) => {
-      callback(Err.make('design', err), data);
-    });
+    this.db.raw.show(designId, showName, id, Err.resultFunc('design', callback));
   }
   
   view (designId: string, viewName: string, params: Object, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
@@ -81,18 +79,14 @@ export default class DbDesign
     });
   }
   
-  private _performView (designId: string, viewName: string, params: Object, callback: (err: Err, data: any)=>any)
+  private _performView (designId: string, viewName: string, params: Object, callback: (err: Err, data?: any)=>any)
   {
-    this.db.raw.view(designId, viewName, params, (err: any, data: any) => {
-      callback(Err.make('design', err), data);
-    });
+    this.db.raw.view(designId, viewName, params, Err.resultFunc('design', callback));
   }
   
-  private _performRetrieveLatest (designId: string, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performRetrieveLatest (designId: string, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.get('_design/' + designId, (err: any, result: any) => {
-      callback(Err.make('design', err), result);
-    });
+    this.db.raw.get('_design/' + designId, Err.resultFunc('design', callback));
   }
   
   private _updateDesign (designId: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)

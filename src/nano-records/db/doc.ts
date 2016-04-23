@@ -94,7 +94,7 @@ export default class DbDoc
     });
   }
   
-  private _performWriteAndInstantiateDoc (id: string, body: { [index: string]: any }, callback: (err: Err, doc: Doc)=>any)
+  private _performWriteAndInstantiateDoc (id: string, body: { [index: string]: any }, callback: (err: Err, doc?: Doc)=>any)
   {
     this._performWrite(id, body, (err, result) => {
       if (err)
@@ -102,17 +102,15 @@ export default class DbDoc
       else {
         let doc = new Doc(this.db, body);
         doc.body['_id'] = result['id'];
-        doc.body['_rev'] = result['rev'];
+        doc.body['_rev'] = doc._latestRev = result['rev'];
         callback(undefined, doc); // written successfully
       }
     });
   }
   
-  private _performWrite (id: string, body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performWrite (id: string, body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), (err: any, result: any) => {
-      callback(Err.make('doc', err), result);
-    });
+    this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), Err.resultFunc('doc', callback));
   }
   
   read (id: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
@@ -140,11 +138,9 @@ export default class DbDoc
     });
   }
   
-  private _performRead (id: string, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performRead (id: string, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.get(id, (err: any, result: any) => {
-      callback(Err.make('doc', err), result);
-    });
+    this.db.raw.get(id, Err.resultFunc('doc', callback));
   }
   
   head (id: string, callback: (err?: Err, data?: any)=>any = ()=>{})
@@ -156,10 +152,14 @@ export default class DbDoc
     this._performHead(id, callback);
   }
   
-  private _performHead (id: string, callback: (err: Err, result: any)=>any)
+  private _performHead (id: string, callback: (err: Err, result?: any)=>any)
   {
-    this.db.raw.head(id, (err: any, body: any, result: any) => {
-      callback(Err.make('doc', err), result);
+    this.db.raw.head(id, (raw: any, body: any, result: any) => {
+      let err = Err.make('doc', raw);
+      if (err)
+        callback(err);
+      else
+        callback(undefined, result);
     });
   }
   

@@ -61,17 +61,15 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        this.doc.body['_rev'] = result['rev'];
+        this.doc.body['_rev'] = this.doc._latestRev = result['rev'];
         callback();
       }
     });
   }
   
-  private _performWrite (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performWrite (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, (err: any, result: any) => {
-      callback(Err.make('attachment', err), result);
-    });
+    this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
   }
   
   read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
@@ -100,17 +98,15 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        this.doc.body['_rev'] = result['rev'];
+        this.doc.body['_rev'] = this.doc._latestRev = result['rev'];
         callback();
       }
     });
   }
   
-  private _performWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, (err: any, result: any) => {
-      callback(Err.make('attachment', err), result);
-    });
+    return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
   }
   
   destroy (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -137,16 +133,14 @@ export default class DocAttachment
         // attachment removed
         if (this.doc.body['_attachments'])
           delete this.doc.body['_attachments'][name];
-        this.doc.body['_rev'] = result['rev'];
+        this.doc.body['_rev'] = this.doc._latestRev = result['rev'];
         callback();
       }
     });
   }
   
-  private _performDestroy (name: string, callback: (err: Err, result: { [index: string]: string })=>any)
+  private _performDestroy (name: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, (err: any, result: any) => {
-      callback(Err.make('attachment', err), result);
-    });
+    this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
   }
 }

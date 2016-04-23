@@ -44,9 +44,7 @@ export default class DbDocAttachment
   
   private _performWrite (id: string, name: string, data: any, mimeType: string, callback: (err: Err)=>any)
   {
-    this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, (err: any) => {
-      callback(Err.make('attachment', err));
-    });
+    this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, Err.resultFunc('attachment', callback));
   }
   
   read (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
@@ -59,11 +57,9 @@ export default class DbDocAttachment
     this._performRead(id, name, callback);
   }
   
-  private _performRead (id: string, name: string, callback: (err: Err, data: any)=>any)
+  private _performRead (id: string, name: string, callback: (err: Err, data?: any)=>any)
   {
-    this.doc.db.raw.attachment.get(id, name, {}, (err: any, data: any) => {
-      callback(Err.make('attachment', err), data);
-    });
+    this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
   }
   
   readStream (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
@@ -83,9 +79,7 @@ export default class DbDocAttachment
   {
     // TODO: truthfully this returns pretty ugly streams when there is an error
     // would be nice to clean this up
-    return this.doc.db.raw.attachment.get(id, name, {}, (err: any) => {
-      callback(Err.make('attachment', err));
-    });
+    return this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
   }
   
   destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{})

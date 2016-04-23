@@ -16,7 +16,8 @@ import deepExtend = require('deep-extend');
 
 export default class Doc
 {
-  body: { [index: string]: any };
+  body: { [index: string]: any } = {};
+  _latestRev: string;
   
   db: Db;
   attachment: DocAttachment;
@@ -24,8 +25,10 @@ export default class Doc
   constructor (db: Db, body: { [index: string]: any } = {})
   {
     this.db = db;
-    this.body = deepExtend({}, body);
     this.attachment = new DocAttachment(this);
+
+    deepExtend(this.body, body);
+    this._latestRev = body['_rev'];
   }
   
   getId (): string
@@ -49,27 +52,34 @@ export default class Doc
       callback(Err.missingId('doc'));
       return;
     }
-    this._performread((err, result) => {
+    this._performRead((err, result) => {
       if (err)
         callback(err);
       else {
         this.body = result;
+        this._latestRev = result['_rev'];
         callback(); // up to date
       }
     });
   }
   
-  private _performread (callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performRead (callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.get(this.getId(), (err: any, result: any) => {
-      callback(Err.make('doc', err), result);
-    });
+    this.db.raw.get(this.getId(), Err.resultFunc('doc', callback));
   }
   
   head (callback: (err?: Err, data?: any)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    this.db.doc.head(this.getId(), callback);
+    this.db.doc.head(this.getId(), (err, data) => {
+      if (data) {
+        // we have new rev data available
+        // nano puts it in the format '"etag"' so we need to
+        // strip erroneous quotes
+        this._latestRev = data['etag'].replace(/"/g, "");
+      }
+      callback(err, data);
+    });
   }
   
   write (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -82,7 +92,7 @@ export default class Doc
     this._performWrite(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
-          this.read((err) => {
+          this.head((err) => {
             if (err)
               callback(err);
             else
@@ -95,17 +105,15 @@ export default class Doc
       else {
         this.body = body;
         this.body['_id'] = result['id'];
-        this.body['_rev'] = result['rev'];
+        this.body['_rev'] = this._latestRev = result['rev'];
         callback(); // success
       }
     });
   }
   
-  private _performWrite (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performWrite (body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this.getRev() }), (err: any, result: any) => {
-      callback(Err.make('doc', err), result);
-    });
+    this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev }), Err.resultFunc('doc', callback));
   }
   
   update (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -130,17 +138,15 @@ export default class Doc
       }
       else {
         this.body = this._extendBody(body);
-        this.body['_rev'] = result['rev'];
+        this.body['_rev'] = this._latestRev = result['rev'];
         callback(); // success
       }
     });
   }
   
-  private _performUpdate (body: { [index: string]: any }, callback: (err: Err, result: { [index: string]: any })=>any)
+  private _performUpdate (body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.insert(this._extendBody(body), (err: any, result: any) => {
-      callback(Err.make('doc', err), result);
-    });
+    this.db.raw.insert(this._extendBody(body), Err.resultFunc('doc', callback));
   }
   
   private _extendBody (body: { [index: string]: any }): { [index: string]: any }
@@ -158,7 +164,7 @@ export default class Doc
     this._performDestroy((err) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
-          this.read((err) => {
+          this.head((err) => {
             if (err)
               callback(err);
             else
@@ -177,8 +183,6 @@ export default class Doc
   
   private _performDestroy (callback: (err: Err)=>any)
   {
-    this.db.raw.destroy(this.getId(), this.getRev(), (err: any) => {
-      callback(Err.make('doc', err));
-    });
+    this.db.raw.destroy(this.getId(), this._latestRev, Err.resultFunc('doc', callback));
   }
 }

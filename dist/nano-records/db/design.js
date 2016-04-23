@@ -41,9 +41,7 @@ var DbDesign = (function () {
         });
     };
     DbDesign.prototype._performShow = function (designId, showName, id, callback) {
-        this.db.raw.show(designId, showName, id, function (err, data) {
-            callback(err_1.default.make('design', err), data);
-        });
+        this.db.raw.show(designId, showName, id, err_1.default.resultFunc('design', callback));
     };
     DbDesign.prototype.view = function (designId, viewName, params, callback, tries) {
         var _this = this;
@@ -74,14 +72,10 @@ var DbDesign = (function () {
         });
     };
     DbDesign.prototype._performView = function (designId, viewName, params, callback) {
-        this.db.raw.view(designId, viewName, params, function (err, data) {
-            callback(err_1.default.make('design', err), data);
-        });
+        this.db.raw.view(designId, viewName, params, err_1.default.resultFunc('design', callback));
     };
     DbDesign.prototype._performRetrieveLatest = function (designId, callback) {
-        this.db.raw.get('_design/' + designId, function (err, result) {
-            callback(err_1.default.make('design', err), result);
-        });
+        this.db.raw.get('_design/' + designId, err_1.default.resultFunc('design', callback));
     };
     DbDesign.prototype._updateDesign = function (designId, kinds, callback) {
         var design = this.db.designs[designId];

@@ -38,6 +38,17 @@ export default class Err
     this.raw = raw || {};
   }
   
+  static resultFunc (scope: string, callback: (err: Err, result?: any)=>any): Function
+  {
+    return (raw: iNanoError, result: any) => {
+      let err = this.make(scope, raw);
+      if (err)
+        callback(err);
+      else
+        callback(undefined, result);
+    }
+  }
+  
   static make (scope: string, err: iNanoError): Err {
     if (!err)
       return;
@@ -77,6 +88,8 @@ export default class Err
       return new Err(scope, err.reason, err.description, err);
     }
   }
+  
+  // common ones
   
   static missing (scope: string, err?: iNanoError): Err {
     return new Err(scope, "not_found", "Not found.", err);
