@@ -36,7 +36,7 @@ var DbDocAttachment = (function () {
                         if (err)
                             callback(err);
                         else {
-                            var doc_2 = new doc_1.default(_this.doc.db, {}, result);
+                            var doc_2 = new doc_1.default(_this.doc.db, { '_id': result['id'] });
                             doc_2.body['_attachments'] = {};
                             doc_2.body['_attachments'][name] = {};
                             callback(undefined, doc_2);

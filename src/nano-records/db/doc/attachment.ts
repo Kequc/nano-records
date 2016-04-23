@@ -42,7 +42,7 @@ export default class DbDocAttachment
             if (err)
               callback(err);
             else {
-              let doc = new Doc(this.doc.db, {}, result);
+              let doc = new Doc(this.doc.db, { '_id': result['id'] });
               doc.body['_attachments'] = {};
               doc.body['_attachments'][name] = {};
               callback(undefined, doc);

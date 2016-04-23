@@ -11,6 +11,7 @@ var forced = nano.use(dbName);
 var db = new NanoRecords(nano, dbName);
 
 var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["some", "values"] } };
+var fileName = "attachment-doesnt-exist.txt";
 
 function triggerBgUpdate (doc, data, callback) {
   forced.get(doc.getId(), (err, body) => {
@@ -46,6 +47,30 @@ function assertHead (doc, done) {
     expect(data).to.be.ok;
     expect(data).to.include.keys('etag');
     done();
+  });
+}
+
+function assertWrite (doc, done) {
+  let changes = { more: "attributes", complex: "Samsonite" };
+  let asserts = deepExtend({}, changes);
+  expect(doc.body).to.not.include.keys('more');
+  expect(doc.body).to.include.keys('num');
+  doc.write(changes, (err) => {
+    expect(err).to.be.undefined;
+    expect(doc.body).to.include.keys('complex', 'more', '_id', '_rev');
+    expect(doc.body).to.not.include.keys('num');
+    assertBody(doc, asserts, done);
+  });
+}
+
+function assertUpdate (doc, done, asserts) {
+  let changes = { more: "attributes", complex: "Samsonite" };
+  asserts = deepExtend({}, asserts || doc.body, changes);
+  expect(doc.body).to.not.have.keys('more');
+  doc.update(changes, (err) => {
+    expect(err).to.be.undefined;
+    expect(doc.body).to.include.keys('complex', 'more', '_id', '_rev');
+    assertBody(doc, asserts, done);
   });
 }
 
@@ -141,7 +166,9 @@ describe('doc', () => {
       _doc = undefined;
       db.doc.create(complexBody, (err, doc) => {
         _doc = doc;
-        done();
+        _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", () => {
+          _doc.read(() => { done(); });
+        });
       });
     });
     
@@ -181,31 +208,13 @@ describe('doc', () => {
     });
     it('write', (done) => {
       // should be successful
-      let changes = { more: "attributes", complex: "Samsonite" };
-      let asserts = deepExtend({}, changes);
-      expect(_doc.body).to.not.include.keys('more');
-      expect(_doc.body).to.include.keys('num');
-      _doc.write(changes, (err) => {
-        expect(err).to.be.undefined;
-        expect(_doc.body).to.include.keys('complex', 'more', '_id', '_rev');
-        expect(_doc.body).to.not.include.keys('num');
-        assertBody(_doc, asserts, done);
-      });
+      assertWrite(_doc, done);
     });
     it('write retries', (done) => {
       // should be successful
-      let changes1 = { anotheranother: "changed" };
-      let changes2 = { added: "attr-again", num: 20 };
-      let asserts = deepExtend({}, changes2);
-      triggerBgUpdate(_doc, changes1, () => {
-        expect(_doc.body).to.not.include.keys('anotheranother', 'added');
-        expect(_doc.body).to.include.keys('num');
-        _doc.write(changes2, (err) => {
-          expect(err).to.be.undefined;
-          expect(_doc.body).to.include.keys('added', 'num', '_id', '_rev');
-          expect(_doc.body).to.not.include.keys('anotheranother');
-          assertBody(_doc, asserts, done);
-        });
+      let changes = { anotheranother: "changed" };
+      triggerBgUpdate(_doc, changes, () => {
+        assertWrite(_doc, done);
       });
     });
     it('write more than maxTries', (done) => {
@@ -220,27 +229,14 @@ describe('doc', () => {
     });
     it('update', (done) => {
       // should be successful
-      let changes = { more: "attributes", complex: "Samsonite" };
-      let asserts = deepExtend({}, _doc.body, changes);
-      expect(_doc.body).to.not.have.keys('more');
-      _doc.update(changes, (err) => {
-        expect(err).to.be.undefined;
-        expect(_doc.body).to.include.keys('complex', 'more', '_id', '_rev');
-        assertBody(_doc, asserts, done);
-      });
+      assertUpdate(_doc, done);
     });
     it('update retries', (done) => {
       // should be successful
-      let changes1 = { anotheranother: "changed" };
-      let changes2 = { added: "attr-again", num: 20 };
-      let asserts = deepExtend({}, _doc.body, changes1, changes2);
-      triggerBgUpdate(_doc, changes1, () => {
-        expect(_doc.body).to.not.have.keys('anotheranother', 'added');
-        _doc.update(changes2, (err) => {
-          expect(err).to.be.undefined;
-          expect(_doc.body).to.include.keys('added', 'anotheranother', 'num', '_id', '_rev');
-          assertBody(_doc, asserts, done);
-        });
+      let changes = { anotheranother: "changed" };
+      let asserts = deepExtend({}, _doc.body, changes);
+      triggerBgUpdate(_doc, changes, () => {
+        assertUpdate(_doc, done, asserts);
       });
     });
     it('update more than maxTries', (done) => {

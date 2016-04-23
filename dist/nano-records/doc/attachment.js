@@ -53,12 +53,7 @@ var DocAttachment = (function () {
                 // TODO: Is there more information available here?
                 _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
                 _this.doc.body['_attachments'][name] = {};
-                // we are intentionally not storing the new rev as the document
-                // may not reflect the latest version since we performed a
-                // head request
-                if (tries <= 1)
-                    _this.doc.body['_rev'] = result['rev'];
-                _this.doc._latestRev = result['rev'];
+                // we are intentionally not storing the new rev of the document
                 callback();
             }
         });
@@ -91,7 +86,7 @@ var DocAttachment = (function () {
                 // TODO: Is there more information available here?
                 _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
                 _this.doc.body['_attachments'][name] = {};
-                _this.doc.body['_rev'] = _this.doc._latestRev = result['rev'];
+                // we are intentionally not storing the new rev of the document
                 callback();
             }
         });

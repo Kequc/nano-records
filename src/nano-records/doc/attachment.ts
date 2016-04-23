@@ -61,12 +61,7 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        // we are intentionally not storing the new rev as the document
-        // may not reflect the latest version since we performed a
-        // head request
-        if (tries <= 1)
-          this.doc.body['_rev'] = result['rev'];
-        this.doc._latestRev = result['rev'];
+        // we are intentionally not storing the new rev of the document
         callback();
       }
     });
@@ -103,7 +98,7 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        this.doc.body['_rev'] = this.doc._latestRev = result['rev'];
+        // we are intentionally not storing the new rev of the document
         callback();
       }
     });
