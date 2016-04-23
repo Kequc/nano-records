@@ -8,6 +8,7 @@ var NanoRecords = require('../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
+var simpleBody = { hi: "there" };
 var fileName = "attachment-doesnt-exist.txt";
 
 function streamToString (stream, callback) {
@@ -21,26 +22,30 @@ function streamToString (stream, callback) {
   });
 }
 
+function assertBody (doc, done) {
+  db.doc.read(doc.getId(), (err, gotDoc) => {
+    expect(err).to.be.undefined;
+    expect(gotDoc).to.be.ok;
+    for (let key in doc.body) {
+      if (key == "_attachments")
+        expect(Object.keys(doc.body[key])).to.eql(Object.keys(gotDoc.body[key]));
+      else if (key != "_rev")
+        expect(doc.body[key]).to.eql(gotDoc.body[key]);
+    }
+    done();
+  });
+}
+
 function assertWrite (id, done) {
   db.doc.attachment.write(id, fileName, "Can write here.", "text/plain", (err, doc) => {
-    expect(err).to.be.undefined;
-    expect(doc).to.be.ok;
-    db.doc.read(id, (err, gotDoc) => {
-      expect(err).to.be.undefined;
-      expect(gotDoc.attachment.exists(fileName)).to.be.true;
-      expect(Object.keys(gotDoc.body)).to.eql(Object.keys(doc.body));
-      done();
-    });
+    expect(doc.attachment.exists(fileName)).to.be.true;
+    expect(doc.body).to.include.keys('_attachments', '_id', '_rev');
+    assertBody(doc, done);
   });
 }
 
 function assertRead (doc, done) {
-  db.doc.attachment.read(doc.getId(), fileName, (err, data) => {
-    expect(err).to.be.undefined;
-    expect(data).to.be.ok;
-    expect(doc.getId()).to.be.ok;
-    done();
-  });
+  assertBody(doc, done);
 }
 
 function assertReadStream (doc, done) {
@@ -154,18 +159,15 @@ describe('db-doc-attachment', () => {
     
     describe('document exists', () => {
       var _doc;
-      before((done) => {
+      beforeEach((done) => {
         _doc = undefined;
-        db.doc.create({ hi: "there" }, (err, doc) => {
+        db.doc.create(simpleBody, (err, doc) => {
           _doc = doc;
           done();
         });
       });
       
       describe('attachment does not exist', () => {
-        beforeEach((done) => {
-          _doc.attachment.destroy(fileName, () => { done(); });
-        });
         
         it('write', (done) => {
           // should be successful
@@ -201,7 +203,9 @@ describe('db-doc-attachment', () => {
       });
       describe('attachment exists', () => {
         beforeEach((done) => {
-          _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", (err) => { done(); });
+          _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", () => {
+            _doc.read(() => { done(); });
+          });
         });
         
         it('write', (done) => {
