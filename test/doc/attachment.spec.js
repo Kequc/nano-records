@@ -97,19 +97,22 @@ function assertDestroy (doc, done) {
 }
 
 describe('doc-attachment', () => {
+  var _doc;
+  beforeEach((done) => {
+    _doc = undefined;
+    db.doc.create({ hi: "there" }, (err, doc) => {
+      _doc = doc;
+      done();
+    });
+  });
   after((done) => {
     db.destroy('_DESTROY_', () => { done(); });
   });
   
   describe('document does not exist', () => {
-    var _doc;
-    before((done) => {
-      _doc = undefined;
-      db.doc.create({ hi: "there" }, (err, doc) => {
-        _doc = doc;
-        _doc.attachment.write(fileName, "Oops!", "text/plain", () => {
-          _doc.destroy(() => { done(); })
-        });
+    beforeEach((done) => {
+      _doc.attachment.write(fileName, "Oops!", "text/plain", () => {
+        _doc.destroy(() => { done(); })
       });
     });
     
@@ -174,19 +177,8 @@ describe('doc-attachment', () => {
   });
   
   describe('document exists', () => {
-    var _doc;
-    beforeEach((done) => {
-      _doc = undefined;
-      db.doc.create({ hi: "there" }, (err, doc) => {
-        _doc = doc;
-        done();
-      });
-    });
     
     describe('attachment does not exist', () => {
-      beforeEach((done) => {
-        _doc.attachment.destroy(fileName, () => { done(); });
-      });
       
       it('list', () => {
         // should be empty
@@ -251,56 +243,98 @@ describe('doc-attachment', () => {
     
     describe('attachment exists', () => {
       beforeEach((done) => {
-        _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", () => {
-          _doc.read(() => { done(); });
-        });
+        _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", () => { done(); });
       });
       
-      it('list', () => {
-        // should contain
-        expect(_doc.attachment.list()).to.eql([fileName]);
-      });
-      it('exists', () => {
-        // should be successful
-        expect(_doc.attachment.exists(fileName)).to.be.true;
-      });
-      it('write', (done) => {
-        // should be successful
-        assertWrite(_doc, done);
-      });
-      it('writeStream', (done) => {
-        // should be successful
-        assertWriteStream(_doc, done);
-      });
-      it('read', (done) => {
-        // should be successful
-        assertRead(_doc, done);
-      });
-      it('readStream', (done) => {
-        // should be successful
-        assertReadStream(_doc, done);
-      });
-      it('destroy', (done) => {
-        // should be successful
-        assertDestroy(_doc, done);
-      });
-      it('destroy retries', (done) => {
-        // should be successful
-        forceUpdate(_doc, { changed: "batty" }, () => {
-          assertDestroy(_doc, done);
+      describe('just persisted', () => {
+        
+        it('list', () => {
+          // should contain
+          expect(_doc.attachment.list()).to.eql([fileName]);
         });
-      });
-      it('destroy more than maxTries', (done) => {
-        // should fail
-        forceUpdate(_doc, { a: 'change' }, () => {
-          _doc.attachment.destroy(fileName, (err) => {
+        it('exists', () => {
+          // should be successful
+          expect(_doc.attachment.exists(fileName)).to.be.true;
+        });
+        it('write', (done) => {
+          // should be successful
+          assertWrite(_doc, done);
+        });
+        it('writeStream', (done) => {
+          // should fail
+          fs.createReadStream('./test/attachment.txt').pipe(_doc.attachment.writeStream(fileName, "text/plain", (err) => {
             expect(err).to.be.ok;
             expect(err.name).to.equal("conflict");
-            expect(_doc.attachment.exists(fileName)).to.be.true;
-            expect(_doc.getId()).to.be.ok;
+            expect(_doc.attachment.exists(fileName)).to.be.true; // although it does have it
             done();
-          }, db.maxTries); // tried x times
+          }));
         });
+        it('read', (done) => {
+          // should be successful
+          assertRead(_doc, done);
+        });
+        it('readStream', (done) => {
+          // should be successful
+          assertReadStream(_doc, done);
+        });
+        it('destroy', (done) => {
+          // should be successful
+          assertDestroy(_doc, done);
+        });
+        
+      });
+      describe('aleady read from the database again', () => {
+        beforeEach((done) => {
+          _doc.read(() => { done(); });
+        });
+        
+        it('list', () => {
+          // should contain
+          expect(_doc.attachment.list()).to.eql([fileName]);
+        });
+        it('exists', () => {
+          // should be successful
+          expect(_doc.attachment.exists(fileName)).to.be.true;
+        });
+        it('write', (done) => {
+          // should be successful
+          assertWrite(_doc, done);
+        });
+        it('writeStream', (done) => {
+          // should be successful
+          assertWriteStream(_doc, done);
+        });
+        it('read', (done) => {
+          // should be successful
+          assertRead(_doc, done);
+        });
+        it('readStream', (done) => {
+          // should be successful
+          assertReadStream(_doc, done);
+        });
+        it('destroy', (done) => {
+          // should be successful
+          assertDestroy(_doc, done);
+        });
+        it('destroy retries', (done) => {
+          // should be successful
+          forceUpdate(_doc, { changed: "batty" }, () => {
+            assertDestroy(_doc, done);
+          });
+        });
+        it('destroy more than maxTries', (done) => {
+          // should fail
+          forceUpdate(_doc, { a: 'change' }, () => {
+            _doc.attachment.destroy(fileName, (err) => {
+              expect(err).to.be.ok;
+              expect(err.name).to.equal("conflict");
+              expect(_doc.attachment.exists(fileName)).to.be.true;
+              expect(_doc.getId()).to.be.ok;
+              done();
+            }, db.maxTries); // tried x times
+          });
+        });
+        
       });
     });
     

@@ -14,7 +14,9 @@ var complexBody = { complex: 'document', num: 11, deep: { hi: "again.", arr: ["s
 
 function assertBody (doc, asserts, done) {
   for (let key in asserts) {
-    if (key != "_rev")
+    if (key == "_attachments")
+      expect(Object.keys(doc.body[key])).to.eql(Object.keys(asserts[key]));
+    else if (key != "_rev")
       expect(doc.body[key]).to.eql(asserts[key]);
   }
   expect(asserts['_rev']).to.not.equal(doc.getRev());

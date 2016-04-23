@@ -147,7 +147,10 @@ export default class Doc
   
   private _performUpdate (body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.insert(this._extendBody(body), Err.resultFunc('doc', callback));
+    if (this.getRev() !== this._latestRev)
+      callback(Err.conflict('doc'));
+    else
+      this.db.raw.insert(this._extendBody(body), Err.resultFunc('doc', callback));
   }
   
   private _extendBody (body: { [index: string]: any }): { [index: string]: any }

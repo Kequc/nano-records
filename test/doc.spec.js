@@ -29,7 +29,9 @@ function triggerBgUpdate (doc, data, callback) {
 
 function assertBody (doc, asserts, done) {
   for (let key in asserts) {
-    if (key != "_rev")
+    if (key == "_attachments")
+      expect(Object.keys(doc.body[key])).to.eql(Object.keys(asserts[key]));
+    else if (key != "_rev")
       expect(doc.body[key]).to.eql(asserts[key]);
   }
   expect(asserts['_rev']).to.not.equal(doc.getRev());
@@ -38,6 +40,19 @@ function assertBody (doc, asserts, done) {
     expect(gotDoc).to.be.ok;
     expect(gotDoc.body).to.eql(doc.body);
     done();
+  });
+}
+
+function assertRead (doc, done) {
+  let changes = { anotheranother: "Yay!", complex: "cats and dogs" };
+  let asserts = deepExtend({}, doc.body, changes);
+  triggerBgUpdate(doc, changes, () => {
+    expect(doc.body).to.not.have.keys('anotheranother');
+    doc.read((err) => {
+      expect(err).to.be.undefined;
+      expect(doc.body).to.include.keys('complex', 'anotheranother', '_id', '_rev');
+      assertBody(doc, asserts, done);
+    });
   });
 }
 
@@ -89,18 +104,21 @@ function assertDestroy (doc, done) {
 }
 
 describe('doc', () => {
+  var _doc;
+  beforeEach((done) => {
+    _doc = undefined;
+    db.doc.create(complexBody, (err, doc) => {
+      _doc = doc;
+      done();
+    });
+  });
   after((done) => {
     db.destroy('_DESTROY_', () => { done(); });
   });
   
   describe('document does not exist', () => {
-    var _doc;
-    before((done) => {
-      _doc = undefined;
-      db.doc.write("fake-id-doesnt-exist", complexBody, (err, doc) => {
-        _doc = doc;
-        doc.destroy(() => { done(); })
-      });
+    beforeEach((done) => {
+      _doc.destroy(() => { done(); })
     });
     
     it('getId', () => {
@@ -161,118 +179,138 @@ describe('doc', () => {
   });
   
   describe('document exists', () => {
-    var _doc;
-    beforeEach((done) => {
-      _doc = undefined;
-      db.doc.create(complexBody, (err, doc) => {
-        _doc = doc;
-        _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", () => {
+    
+    describe('attachment does not exist', () => {
+      
+      it('getId', () => {
+        // should be successful
+        expect(_doc.body['_id']).to.be.ok;
+        expect(_doc.getId()).to.equal(_doc.body['_id']);
+      });
+      it('getRev', () => {
+        // should be successful
+        expect(_doc.body['_rev']).to.be.ok;
+        expect(_doc.getRev()).to.equal(_doc.body['_rev']);
+      });
+      it('getBody', () => {
+        // should be successful
+        let copy = _doc.getBody();
+        expect(copy).to.include.keys('_id', '_rev', 'complex', 'num', 'deep');
+        expect(copy['deep']).to.include.keys('hi', 'arr');
+        expect(copy['deep']['arr']).to.eql(["some", "values"]);
+        expect(copy['deep']).to.eql(_doc.body['deep']);
+        expect(copy['deep']).to.not.equal(_doc.body['deep']);
+        expect(copy).to.eql(_doc.body);
+        expect(copy).to.not.equal(_doc.body);
+      });
+      it('read', (done) => {
+        // should be successful
+        assertRead(_doc, done);
+      });
+      
+    });
+    describe('attachment exists', () => {
+      beforeEach((done) => {
+        _doc.attachment.write(fileName, "This is an example attachment.", "text/plain", () => { done(); });
+      });
+      
+      describe('just persisted', () => {
+        
+        it('write', (done) => {
+          // should be successful
+          assertWrite(_doc, done);
+        });
+        it('update', (done) => {
+          // should be successful
+          assertUpdate(_doc, done);
+        });
+        it('head', (done) => {
+          // should be successful
+          assertHead(_doc, done);
+        });
+        it('destroy', (done) => {
+          // should be successful
+          assertDestroy(_doc, done);
+        });
+        
+      });
+      describe('aleady read from the database again', () => {
+        beforeEach((done) => {
           _doc.read(() => { done(); });
         });
+        
+        it('write', (done) => {
+          // should be successful
+          assertWrite(_doc, done);
+        });
+        it('write retries', (done) => {
+          // should be successful
+          let changes = { anotheranother: "changed" };
+          triggerBgUpdate(_doc, changes, () => {
+            assertWrite(_doc, done);
+          });
+        });
+        it('write more than maxTries', (done) => {
+          // should fail
+          triggerBgUpdate(_doc, { a: 'change' }, () => {
+            _doc.write({ boo: "oorns" }, (err) => {
+              expect(err).to.be.ok;
+              expect(err.name).to.equal("conflict");
+              done();
+            }, db.maxTries); // tried x times
+          });
+        });
+        it('update', (done) => {
+          // should be successful
+          assertUpdate(_doc, done);
+        });
+        it('update retries', (done) => {
+          // should be successful
+          let changes = { anotheranother: "changed" };
+          let asserts = deepExtend({}, _doc.body, changes);
+          triggerBgUpdate(_doc, changes, () => {
+            assertUpdate(_doc, done, asserts);
+          });
+        });
+        it('update more than maxTries', (done) => {
+          // should fail
+          triggerBgUpdate(_doc, { a: 'change' }, () => {
+            _doc.update({ boo: "oorns" }, (err) => {
+              expect(err).to.be.ok;
+              expect(err.name).to.equal("conflict");
+              done();
+            }, db.maxTries); // tried x times
+          });
+        });
+        it('head', (done) => {
+          // should be successful
+          assertHead(_doc, done);
+        });
+        it('destroy', (done) => {
+          // should be successful
+          assertDestroy(_doc, done);
+        });
+        it('destroy retries', (done) => {
+          // should be successful
+          triggerBgUpdate(_doc, { deleteMe: true }, () => {
+            assertDestroy(_doc, done);
+          });
+        });
+        it('destroy more than maxTries', (done) => {
+          // should fail
+          triggerBgUpdate(_doc, { a: 'change' }, () => {
+            _doc.destroy((err) => {
+              expect(err).to.be.ok;
+              expect(err.name).to.equal("conflict");
+              done();
+            }, db.maxTries); // tried x times
+          });
+        });
+                
       });
+      
     });
     
-    it('getId', () => {
-      // should be successful
-      expect(_doc.body['_id']).to.be.ok;
-      expect(_doc.getId()).to.equal(_doc.body['_id']);
-    });
-    it('getRev', () => {
-      // should be successful
-      expect(_doc.body['_rev']).to.be.ok;
-      expect(_doc.getRev()).to.equal(_doc.body['_rev']);
-    });
-    it('getBody', () => {
-      // should be successful
-      let copy = _doc.getBody();
-      expect(copy).to.include.keys('_id', '_rev', 'complex', 'num', 'deep');
-      expect(copy['deep']).to.include.keys('hi', 'arr');
-      expect(copy['deep']['arr']).to.eql(["some", "values"]);
-      expect(copy['deep']).to.eql(_doc.body['deep']);
-      expect(copy['deep']).to.not.equal(_doc.body['deep']);
-      expect(copy).to.eql(_doc.body);
-      expect(copy).to.not.equal(_doc.body);
-    });
-    it('read', (done) => {
-      // should be successful
-      let changes = { anotheranother: "Yay!", complex: "cats and dogs" };
-      let asserts = deepExtend({}, _doc.body, changes);
-      triggerBgUpdate(_doc, changes, () => {
-        expect(_doc.body).to.not.have.keys('anotheranother');
-        _doc.read((err) => {
-          expect(err).to.be.undefined;
-          expect(_doc.body).to.include.keys('complex', 'anotheranother', '_id', '_rev');
-          assertBody(_doc, asserts, done);
-        });
-      });
-    });
-    it('write', (done) => {
-      // should be successful
-      assertWrite(_doc, done);
-    });
-    it('write retries', (done) => {
-      // should be successful
-      let changes = { anotheranother: "changed" };
-      triggerBgUpdate(_doc, changes, () => {
-        assertWrite(_doc, done);
-      });
-    });
-    it('write more than maxTries', (done) => {
-      // should fail
-      triggerBgUpdate(_doc, { a: 'change' }, () => {
-        _doc.write({ boo: "oorns" }, (err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("conflict");
-          done();
-        }, db.maxTries); // tried x times
-      });
-    });
-    it('update', (done) => {
-      // should be successful
-      assertUpdate(_doc, done);
-    });
-    it('update retries', (done) => {
-      // should be successful
-      let changes = { anotheranother: "changed" };
-      let asserts = deepExtend({}, _doc.body, changes);
-      triggerBgUpdate(_doc, changes, () => {
-        assertUpdate(_doc, done, asserts);
-      });
-    });
-    it('update more than maxTries', (done) => {
-      // should fail
-      triggerBgUpdate(_doc, { a: 'change' }, () => {
-        _doc.update({ boo: "oorns" }, (err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("conflict");
-          done();
-        }, db.maxTries); // tried x times
-      });
-    });
-    it('head', (done) => {
-      // should be successful
-      assertHead(_doc, done);
-    });
-    it('destroy', (done) => {
-      // should be successful
-      assertDestroy(_doc, done);
-    });
-    it('destroy retries', (done) => {
-      // should be successful
-      triggerBgUpdate(_doc, { deleteMe: true }, () => {
-        assertDestroy(_doc, done);
-      });
-    });
-    it('destroy more than maxTries', (done) => {
-      // should fail
-      triggerBgUpdate(_doc, { a: 'change' }, () => {
-        _doc.destroy((err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("conflict");
-          done();
-        }, db.maxTries); // tried x times
-      });
-    });
   });
 
 });

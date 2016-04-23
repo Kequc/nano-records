@@ -21,5 +21,6 @@ export default class Err {
     static make(scope: string, err: iNanoError): Err;
     static missing(scope: string, err?: iNanoError): Err;
     static missingId(scope: string): Err;
+    static conflict(scope: string, err?: iNanoError): Err;
     static verifyFailed(scope: string): Err;
 }

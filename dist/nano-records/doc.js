@@ -129,7 +129,10 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performUpdate = function (body, callback) {
-        this.db.raw.insert(this._extendBody(body), err_1.default.resultFunc('doc', callback));
+        if (this.getRev() !== this._latestRev)
+            callback(err_1.default.conflict('doc'));
+        else
+            this.db.raw.insert(this._extendBody(body), err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype._extendBody = function (body) {
         return deepExtend({}, this.body, body);

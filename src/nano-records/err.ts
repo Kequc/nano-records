@@ -67,7 +67,7 @@ export default class Err
     }
     else if (err.statusCode == 409) {
       // revision mismatch
-      return new Err(scope, "conflict", "There was a conflict.", err);
+      return this.conflict(scope, err);
     }
     else if (err.statusCode == 500 && ['function_clause', 'case_clause'].indexOf(err.reason) > -1) {
       // design broken somehow
@@ -97,6 +97,10 @@ export default class Err
   
   static missingId (scope: string): Err {
     return new Err(scope, "missing_id", "Id parameter required.");
+  }
+  
+  static conflict (scope: string, err?: iNanoError): Err {
+    return new Err(scope, "conflict", "There was a conflict.", err);
   }
   
   static verifyFailed (scope: string): Err {

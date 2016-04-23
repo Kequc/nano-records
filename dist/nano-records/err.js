@@ -44,7 +44,7 @@ var Err = (function () {
         }
         else if (err.statusCode == 409) {
             // revision mismatch
-            return new Err(scope, "conflict", "There was a conflict.", err);
+            return this.conflict(scope, err);
         }
         else if (err.statusCode == 500 && ['function_clause', 'case_clause'].indexOf(err.reason) > -1) {
             // design broken somehow
@@ -71,6 +71,9 @@ var Err = (function () {
     };
     Err.missingId = function (scope) {
         return new Err(scope, "missing_id", "Id parameter required.");
+    };
+    Err.conflict = function (scope, err) {
+        return new Err(scope, "conflict", "There was a conflict.", err);
     };
     Err.verifyFailed = function (scope) {
         return new Err(scope, "verify_failed", "Verify code mismatch.");

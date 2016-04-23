@@ -62,6 +62,7 @@ export default class DocAttachment
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
         // we are intentionally not storing the new rev of the document
+        this.doc._latestRev = result['rev'];
         callback();
       }
     });
@@ -99,6 +100,7 @@ export default class DocAttachment
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
         // we are intentionally not storing the new rev of the document
+        this.doc._latestRev = result['rev'];
         callback();
       }
     });
@@ -106,7 +108,12 @@ export default class DocAttachment
   
   private _performWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
+    if (this.doc.getRev() !== this.doc._latestRev) {
+      callback(Err.conflict('doc'));
+      return devNull();
+    }
+    else
+      return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
   }
   
   destroy (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -133,11 +140,7 @@ export default class DocAttachment
         // attachment removed
         if (this.doc.body['_attachments'])
           delete this.doc.body['_attachments'][name];
-        // we are intentionally not storing the new rev as the document
-        // may not reflect the latest version since we performed a
-        // head request
-        if (tries <= 1)
-          this.doc.body['_rev'] = result['rev'];
+        // we are intentionally not storing the new rev of the document
         this.doc._latestRev = result['rev'];
         callback();
       }
