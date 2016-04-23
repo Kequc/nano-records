@@ -13,13 +13,15 @@ var err_1 = require('./err');
 var attachment_1 = require('./doc/attachment');
 var deepExtend = require('deep-extend');
 var Doc = (function () {
-    function Doc(db, body) {
+    function Doc(db, body, result) {
         if (body === void 0) { body = {}; }
+        if (result === void 0) { result = {}; }
         this.body = {};
         this.db = db;
         this.attachment = new attachment_1.default(this);
         deepExtend(this.body, body);
-        this._latestRev = body['_rev'];
+        this.body['_id'] = result['id'] || this.body['_id'];
+        this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];
     }
     Doc.prototype.getId = function () {
         return this.body['_id'];

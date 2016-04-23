@@ -11,6 +11,7 @@
  */
 "use strict";
 var err_1 = require('../../err');
+var doc_1 = require('../../doc');
 var stream = require('stream');
 var DbDocAttachment = (function () {
     function DbDocAttachment(doc) {
@@ -23,15 +24,36 @@ var DbDocAttachment = (function () {
             callback(err_1.default.missingId('doc'));
             return;
         }
+        // TODO: this is also inefficient since we might attempt to
+        // write the attachment first without looking up the document
+        // if the document doesn't exist the operation would be
+        // successful
         this.doc.read(id, function (err, doc) {
             if (err) {
                 if (err.name == "not_found")
-                    _this._performWrite(id, name, data, mimeType, callback); // we'll do it live!
+                    // we'll do it live!
+                    _this._performWrite(id, name, data, mimeType, function (err, result) {
+                        if (err)
+                            callback(err);
+                        else {
+                            var doc_2 = new doc_1.default(_this.doc.db, {}, result);
+                            doc_2.body['_attachments'] = {};
+                            doc_2.body['_attachments'][name] = {};
+                            callback(undefined, doc_2);
+                        }
+                    });
                 else
                     callback(err);
             }
-            else
-                doc.attachment.write(name, data, mimeType, callback); // attempt write
+            else {
+                // attempt write
+                doc.attachment.write(name, data, mimeType, function (err) {
+                    if (err)
+                        callback(err);
+                    else
+                        callback(undefined, doc); // success
+                });
+            }
         });
     };
     DbDocAttachment.prototype._performWrite = function (id, name, data, mimeType, callback) {
@@ -72,9 +94,14 @@ var DbDocAttachment = (function () {
             callback(err_1.default.missingId('doc'));
             return;
         }
+        // TODO: this is inefficiant and could probably be done with only
+        // a head request probably
         this.doc.read(id, function (err, doc) {
             if (err)
-                callback(err);
+                if (err.name == "not_found")
+                    callback(); // nothing to see here
+                else
+                    callback(err);
             else
                 doc.attachment.destroy(name, callback); // attempt destroy
         });

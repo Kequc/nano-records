@@ -38,7 +38,7 @@ var DocAttachment = (function () {
         this._performWrite(name, data, mimeType, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
-                    _this.doc.read(function (err) {
+                    _this.doc.head(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -53,13 +53,18 @@ var DocAttachment = (function () {
                 // TODO: Is there more information available here?
                 _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
                 _this.doc.body['_attachments'][name] = {};
-                _this.doc.body['_rev'] = _this.doc._latestRev = result['rev'];
+                // we are intentionally not storing the new rev as the document
+                // may not reflect the latest version since we performed a
+                // head request
+                if (tries <= 1)
+                    _this.doc.body['_rev'] = result['rev'];
+                _this.doc._latestRev = result['rev'];
                 callback();
             }
         });
     };
     DocAttachment.prototype._performWrite = function (name, data, mimeType, callback) {
-        this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, err_1.default.resultFunc('attachment', callback));
+        this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, err_1.default.resultFunc('attachment', callback));
     };
     DocAttachment.prototype.read = function (name, callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -106,7 +111,7 @@ var DocAttachment = (function () {
         this._performDestroy(name, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
-                    _this.doc.read(function (err) {
+                    _this.doc.head(function (err) {
                         if (err)
                             callback(err);
                         else
@@ -120,13 +125,18 @@ var DocAttachment = (function () {
                 // attachment removed
                 if (_this.doc.body['_attachments'])
                     delete _this.doc.body['_attachments'][name];
-                _this.doc.body['_rev'] = _this.doc._latestRev = result['rev'];
+                // we are intentionally not storing the new rev as the document
+                // may not reflect the latest version since we performed a
+                // head request
+                if (tries <= 1)
+                    _this.doc.body['_rev'] = result['rev'];
+                _this.doc._latestRev = result['rev'];
                 callback();
             }
         });
     };
     DocAttachment.prototype._performDestroy = function (name, callback) {
-        this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, err_1.default.resultFunc('attachment', callback));
+        this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc._latestRev }, err_1.default.resultFunc('attachment', callback));
     };
     return DocAttachment;
 }());

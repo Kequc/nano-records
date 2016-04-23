@@ -92,12 +92,8 @@ var DbDoc = (function () {
         this._performWrite(id, body, function (err, result) {
             if (err)
                 callback(err, undefined);
-            else {
-                var doc = new doc_1.default(_this.db, body);
-                doc.body['_id'] = result['id'];
-                doc.body['_rev'] = doc._latestRev = result['rev'];
-                callback(undefined, doc); // written successfully
-            }
+            else
+                callback(undefined, new doc_1.default(_this.db, body, result)); // written successfully
         });
     };
     DbDoc.prototype._performWrite = function (id, body, callback) {
@@ -141,6 +137,8 @@ var DbDoc = (function () {
         this._performHead(id, callback);
     };
     DbDoc.prototype._performHead = function (id, callback) {
+        // here we need the third parameter
+        // not the second
         this.db.raw.head(id, function (raw, body, result) {
             var err = err_1.default.make('doc', raw);
             if (err)

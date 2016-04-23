@@ -99,12 +99,8 @@ export default class DbDoc
     this._performWrite(id, body, (err, result) => {
       if (err)
         callback(err, undefined);
-      else {
-        let doc = new Doc(this.db, body);
-        doc.body['_id'] = result['id'];
-        doc.body['_rev'] = doc._latestRev = result['rev'];
-        callback(undefined, doc); // written successfully
-      }
+      else
+        callback(undefined, new Doc(this.db, body, result)); // written successfully
     });
   }
   
@@ -154,6 +150,8 @@ export default class DbDoc
   
   private _performHead (id: string, callback: (err: Err, result?: any)=>any)
   {
+    // here we need the third parameter
+    // not the second
     this.db.raw.head(id, (raw: any, body: any, result: any) => {
       let err = Err.make('doc', raw);
       if (err)

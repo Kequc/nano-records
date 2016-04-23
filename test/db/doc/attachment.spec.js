@@ -22,11 +22,13 @@ function streamToString (stream, callback) {
 }
 
 function assertWrite (id, done) {
-  db.doc.attachment.write(id, fileName, "Can write here.", "text/plain", (err) => {
+  db.doc.attachment.write(id, fileName, "Can write here.", "text/plain", (err, doc) => {
     expect(err).to.be.undefined;
-    db.doc.read(id, (err, doc) => {
+    expect(doc).to.be.ok;
+    db.doc.read(id, (err, gotDoc) => {
       expect(err).to.be.undefined;
-      expect(doc.attachment.exists(fileName)).to.be.true;
+      expect(gotDoc.attachment.exists(fileName)).to.be.true;
+      expect(Object.keys(gotDoc.body)).to.eql(Object.keys(doc.body));
       done();
     });
   });
@@ -97,10 +99,9 @@ describe('db-doc-attachment', () => {
       });
     });
     it('destroy', (done) => {
-      // should fail
+      // should be successful
       db.doc.attachment.destroy("fake-id-doesnt-exist", fileName, (err) => {
-        expect(err).to.be.ok;
-        expect(err.name).to.equal("not_found");
+        expect(err).to.be.undefined;
         done();
       });
     });
@@ -142,10 +143,9 @@ describe('db-doc-attachment', () => {
         });
       });
       it('destroy', (done) => {
-        // should fail
+        // should be successful
         db.doc.attachment.destroy("fake-id-doesnt-exist", fileName, (err) => {
-          expect(err).to.be.ok;
-          expect(err.name).to.equal("not_found");
+          expect(err).to.be.undefined;
           done();
         });
       });

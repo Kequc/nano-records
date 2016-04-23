@@ -22,13 +22,14 @@ export default class Doc
   db: Db;
   attachment: DocAttachment;
   
-  constructor (db: Db, body: { [index: string]: any } = {})
+  constructor (db: Db, body: { [index: string]: any } = {}, result: { [index: string]: any } = {})
   {
     this.db = db;
     this.attachment = new DocAttachment(this);
 
     deepExtend(this.body, body);
-    this._latestRev = body['_rev'];
+    this.body['_id'] = result['id'] || this.body['_id'];
+    this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];
   }
   
   getId (): string

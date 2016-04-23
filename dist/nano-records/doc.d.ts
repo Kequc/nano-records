@@ -10,6 +10,8 @@ export default class Doc {
     attachment: DocAttachment;
     constructor(db: Db, body?: {
         [index: string]: any;
+    }, result?: {
+        [index: string]: any;
     });
     getId(): string;
     getRev(): string;

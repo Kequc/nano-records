@@ -52,6 +52,7 @@ function assertWrite (doc, done) {
 
 function assertWriteStream (doc, done) {
   fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writeStream(fileName, "text/plain", (err) => {
+    console.log(err);
     expect(err).to.be.undefined;
     expect(doc.attachment.exists(fileName)).to.be.true;
     doc.read((err) => {
@@ -175,7 +176,7 @@ describe('doc-attachment', () => {
   
   describe('document exists', () => {
     var _doc;
-    before((done) => {
+    beforeEach((done) => {
       _doc = undefined;
       db.doc.create({ hi: "there" }, (err, doc) => {
         _doc = doc;

@@ -46,7 +46,7 @@ export default class DocAttachment
     this._performWrite(name, data, mimeType, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
-          this.doc.read((err) => {
+          this.doc.head((err) => {
             if (err)
               callback(err);
             else
@@ -61,7 +61,12 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        this.doc.body['_rev'] = this.doc._latestRev = result['rev'];
+        // we are intentionally not storing the new rev as the document
+        // may not reflect the latest version since we performed a
+        // head request
+        if (tries <= 1)
+          this.doc.body['_rev'] = result['rev'];
+        this.doc._latestRev = result['rev'];
         callback();
       }
     });
@@ -69,7 +74,7 @@ export default class DocAttachment
   
   private _performWrite (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
+    this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
   }
   
   read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
@@ -119,7 +124,7 @@ export default class DocAttachment
     this._performDestroy(name, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
-          this.doc.read((err) => {
+          this.doc.head((err) => {
             if (err)
               callback(err);
             else
@@ -133,7 +138,12 @@ export default class DocAttachment
         // attachment removed
         if (this.doc.body['_attachments'])
           delete this.doc.body['_attachments'][name];
-        this.doc.body['_rev'] = this.doc._latestRev = result['rev'];
+        // we are intentionally not storing the new rev as the document
+        // may not reflect the latest version since we performed a
+        // head request
+        if (tries <= 1)
+          this.doc.body['_rev'] = result['rev'];
+        this.doc._latestRev = result['rev'];
         callback();
       }
     });
@@ -141,6 +151,6 @@ export default class DocAttachment
   
   private _performDestroy (name: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
+    this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
   }
 }
