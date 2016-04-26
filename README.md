@@ -168,7 +168,18 @@ db.doc.attachment.write(id, name, data, mimeType, (err, doc) => {
 });
 ```
 
-Overwrite an existing attachment with the same name, create a new attachment if one doesn't exist, create a new record if one doesn't exist.
+Overwrite an existing attachment with the same name, create a new attachment if one doesn't exist.
+
+```javascript
+db.doc.attachment.forcedWrite(id, name, data, mimeType, (err, doc) => {
+  if (err)
+    return;
+  // doc is a NanoRecords document
+  console.log(doc.body);
+});
+```
+
+Same as above but creates a new record if one doesn't exist.
 
 ```javascript
 doc.attachment.destroy(name, (err) => {

@@ -61,31 +61,9 @@ export default class DbDocAttachment
   
   write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
   {
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
-    // TODO: this is also inefficient since we might attempt to
-    // write the attachment first without looking up the document
-    // if the document doesn't exist the operation would be
-    // successful
     this.doc.read(id, (err, doc) => {
-      if (err) {
-        if (err.name == "not_found")
-          // we'll do it live!
-          this._performWrite(id, name, data, mimeType, (err, result) => {
-            if (err)
-              callback(err);
-            else {
-              let doc = new Doc(this.doc.db, { '_id': result['id'] });
-              doc.body['_attachments'] = {};
-              doc.body['_attachments'][name] = {};
-              callback(undefined, doc);
-            }
-          });
-        else
-          callback(err);
-      }
+      if (err)
+        callback(err);
       else {
         // attempt write
         doc.attachment.write(name, data, mimeType, (err) => {
@@ -94,6 +72,38 @@ export default class DbDocAttachment
           else
             callback(undefined, doc); // success
         });
+      }
+    });
+  }
+  
+  forcedWrite (id: string, name: string, data: any, mimeType: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  {
+    // TODO: this is inefficient since we might attempt to
+    // write the attachment first without looking up the document
+    // if the document doesn't exist the operation would be
+    // successful
+    this.write(id, name, data, mimeType, (err, doc) => {
+      if (err) {
+        if (err.name == "not_found")
+          this._performWriteAndInstantiateDoc(id, name, data, mimeType, callback); // we'll do it live!
+        else
+          callback(err);
+      }
+      else
+        callback(undefined, doc);
+    });
+  }
+  
+  private _performWriteAndInstantiateDoc (id: string, name: string, data: any, mimeType: string, callback: (err: Err, doc?: Doc)=>any)
+  {
+    this._performWrite(id, name, data, mimeType, (err, result) => {
+      if (err)
+        callback(err);
+      else {
+        let doc = new Doc(this.doc.db, { '_id': result['id'] });
+        doc.body['_attachments'] = {};
+        doc.body['_attachments'][name] = {};
+        callback(undefined, doc);
       }
     });
   }

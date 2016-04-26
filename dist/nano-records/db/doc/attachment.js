@@ -47,33 +47,10 @@ var DbDocAttachment = (function () {
         return this.doc.db.raw.attachment.get(id, name, {}, err_1.default.resultFunc('attachment', callback));
     };
     DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback) {
-        var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
-        // TODO: this is also inefficient since we might attempt to
-        // write the attachment first without looking up the document
-        // if the document doesn't exist the operation would be
-        // successful
         this.doc.read(id, function (err, doc) {
-            if (err) {
-                if (err.name == "not_found")
-                    // we'll do it live!
-                    _this._performWrite(id, name, data, mimeType, function (err, result) {
-                        if (err)
-                            callback(err);
-                        else {
-                            var doc_2 = new doc_1.default(_this.doc.db, { '_id': result['id'] });
-                            doc_2.body['_attachments'] = {};
-                            doc_2.body['_attachments'][name] = {};
-                            callback(undefined, doc_2);
-                        }
-                    });
-                else
-                    callback(err);
-            }
+            if (err)
+                callback(err);
             else {
                 // attempt write
                 doc.attachment.write(name, data, mimeType, function (err) {
@@ -82,6 +59,37 @@ var DbDocAttachment = (function () {
                     else
                         callback(undefined, doc); // success
                 });
+            }
+        });
+    };
+    DbDocAttachment.prototype.forcedWrite = function (id, name, data, mimeType, callback) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        // TODO: this is inefficient since we might attempt to
+        // write the attachment first without looking up the document
+        // if the document doesn't exist the operation would be
+        // successful
+        this.write(id, name, data, mimeType, function (err, doc) {
+            if (err) {
+                if (err.name == "not_found")
+                    _this._performWriteAndInstantiateDoc(id, name, data, mimeType, callback); // we'll do it live!
+                else
+                    callback(err);
+            }
+            else
+                callback(undefined, doc);
+        });
+    };
+    DbDocAttachment.prototype._performWriteAndInstantiateDoc = function (id, name, data, mimeType, callback) {
+        var _this = this;
+        this._performWrite(id, name, data, mimeType, function (err, result) {
+            if (err)
+                callback(err);
+            else {
+                var doc = new doc_1.default(_this.doc.db, { '_id': result['id'] });
+                doc.body['_attachments'] = {};
+                doc.body['_attachments'][name] = {};
+                callback(undefined, doc);
             }
         });
     };

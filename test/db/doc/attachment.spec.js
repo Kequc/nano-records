@@ -44,6 +44,14 @@ function assertWrite (id, done) {
   });
 }
 
+function assertForcedWrite (id, done) {
+  db.doc.attachment.forcedWrite(id, fileName, "Can write here.", "text/plain", (err, doc) => {
+    expect(doc.attachment.exists(fileName)).to.be.true;
+    expect(doc.body).to.include.keys('_attachments', '_id', '_rev');
+    assertBody(doc, done);
+  });
+}
+
 function assertRead (doc, done) {
   assertBody(doc, done);
 }
@@ -80,8 +88,17 @@ describe('db-doc-attachment', () => {
     });
     
     it('write', (done) => {
+      // should fail
+      db.doc.attachment.write("fake-id-doesnt-exist", fileName, "Cannot write here.", "text/plain", (err, doc) => {
+        expect(err).to.be.ok;
+        expect(err.name).to.equal("not_found");
+        expect(doc).to.be.undefined;
+        done();
+      });
+    });
+    it('forcedWrite', (done) => {
       // should be successful
-      assertWrite("fake-id-doesnt-exist", done);
+      assertForcedWrite("fake-id-doesnt-exist", done);
     });
     it('read', (done) => {
       // should fail
@@ -124,8 +141,17 @@ describe('db-doc-attachment', () => {
       });
       
       it('write', (done) => {
+        // should fail
+        db.doc.attachment.write("fake-id-doesnt-exist", fileName, "Cannot write here.", "text/plain", (err, doc) => {
+          expect(err).to.be.ok;
+          expect(err.name).to.equal("not_found");
+          expect(doc).to.be.undefined;
+          done();
+        });
+      });
+      it('forcedWrite', (done) => {
         // should be successful
-        assertWrite("fake-id-doesnt-exist", done);
+        assertForcedWrite("fake-id-doesnt-exist", done);
       });
       it('read', (done) => {
         // should fail
@@ -173,6 +199,10 @@ describe('db-doc-attachment', () => {
           // should be successful
           assertWrite(_doc.getId(), done);
         });
+        it('forcedWrite', (done) => {
+          // should be successful
+          assertForcedWrite(_doc.getId(), done);
+        });
         it('read', (done) => {
           // should fail
           db.doc.attachment.read(_doc.getId(), fileName, (err, data) => {
@@ -211,6 +241,10 @@ describe('db-doc-attachment', () => {
         it('write', (done) => {
           // should be successful
           assertWrite(_doc.getId(), done);
+        });
+        it('forcedWrite', (done) => {
+          // should be successful
+          assertForcedWrite(_doc.getId(), done);
         });
         it('read', (done) => {
           // should be successful
