@@ -13,14 +13,8 @@ export default class Doc {
     }, result?: {
         [index: string]: any;
     });
-    getId(): string;
-    getRev(): string;
-    getBody(): {
-        [index: string]: any;
-    };
     read(callback?: (err?: Err) => any): void;
     private _performRead(callback);
-    head(callback?: (err?: Err, data?: any) => any): void;
     write(body: {
         [index: string]: any;
     }, callback?: (err?: Err) => any, tries?: number): void;
@@ -32,4 +26,10 @@ export default class Doc {
     private _extendBody(body);
     destroy(callback?: (err?: Err) => any, tries?: number): void;
     private _performDestroy(callback);
+    head(callback?: (err?: Err, data?: any) => any): void;
+    getId(): string;
+    getRev(): string;
+    getBody(): {
+        [index: string]: any;
+    };
 }

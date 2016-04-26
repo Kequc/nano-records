@@ -50,20 +50,6 @@ export default class Db
     this.design = new DbDesign(this);
   }
   
-  reset (verify: string, callback: (err?: Err)=>any = ()=>{})
-  {
-    if (verify !== "_RESET_")
-      callback(Err.verifyFailed('db'));
-    else {
-      this.destroy("_DESTROY_", (err) => {
-        if (!err || err.name == "no_db_file")
-          this.create(callback);
-        else
-          callback(err);
-      });
-    }
-  }
-  
   create (callback: (err?: Err)=>any = ()=>{})
   {
     this._performCreate(callback);
@@ -85,5 +71,19 @@ export default class Db
   private _performDestroy (callback: (err: Err)=>any)
   {
     this.nano.db.destroy(this.dbName, Err.resultFunc('db', callback));
+  }
+  
+  reset (verify: string, callback: (err?: Err)=>any = ()=>{})
+  {
+    if (verify !== "_RESET_")
+      callback(Err.verifyFailed('db'));
+    else {
+      this.destroy("_DESTROY_", (err) => {
+        if (!err || err.name == "no_db_file")
+          this.create(callback);
+        else
+          callback(err);
+      });
+    }
   }
 }

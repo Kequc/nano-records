@@ -24,6 +24,41 @@ export default class DbDocAttachment
     this.doc = doc;
   }
   
+  read (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
+  {
+    if (!id) {
+      callback(Err.missingId('doc'));
+      return;
+    }
+    // doesn't need `_rev` so we can skip `doc.get`
+    this._performRead(id, name, callback);
+  }
+  
+  private _performRead (id: string, name: string, callback: (err: Err, data?: any)=>any)
+  {
+    this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
+  }
+  
+  readStream (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
+  {
+    if (!id) {
+      callback(Err.missingId('doc'));
+      // return empty stream
+      let readable = new stream.Readable();
+      readable._read = ()=>{};
+      readable.push(null);
+      return readable;
+    }
+    return this._performReadStream(id, name, callback);
+  }
+  
+  private _performReadStream (id: string, name: string, callback: (err?: Err)=>any)
+  {
+    // TODO: truthfully this returns pretty ugly streams when there is an error
+    // would be nice to clean this up
+    return this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
+  }
+  
   write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
   {
     if (!id) {
@@ -66,41 +101,6 @@ export default class DbDocAttachment
   private _performWrite (id: string, name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, Err.resultFunc('attachment', callback));
-  }
-  
-  read (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
-  {
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
-    // doesn't need `_rev` so we can skip `doc.get`
-    this._performRead(id, name, callback);
-  }
-  
-  private _performRead (id: string, name: string, callback: (err: Err, data?: any)=>any)
-  {
-    this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
-  }
-  
-  readStream (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
-  {
-    if (!id) {
-      callback(Err.missingId('doc'));
-      // return empty stream
-      let readable = new stream.Readable();
-      readable._read = ()=>{};
-      readable.push(null);
-      return readable;
-    }
-    return this._performReadStream(id, name, callback);
-  }
-  
-  private _performReadStream (id: string, name: string, callback: (err?: Err)=>any)
-  {
-    // TODO: truthfully this returns pretty ugly streams when there is an error
-    // would be nice to clean this up
-    return this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
   }
   
   destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{})

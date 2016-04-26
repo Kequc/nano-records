@@ -23,15 +23,6 @@ var Doc = (function () {
         this.body['_id'] = result['id'] || this.body['_id'];
         this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];
     }
-    Doc.prototype.getId = function () {
-        return this.body['_id'];
-    };
-    Doc.prototype.getRev = function () {
-        return this.body['_rev'];
-    };
-    Doc.prototype.getBody = function () {
-        return deepExtend({}, this.body);
-    };
     Doc.prototype.read = function (callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
@@ -51,20 +42,6 @@ var Doc = (function () {
     };
     Doc.prototype._performRead = function (callback) {
         this.db.raw.get(this.getId(), err_1.default.resultFunc('doc', callback));
-    };
-    Doc.prototype.head = function (callback) {
-        var _this = this;
-        if (callback === void 0) { callback = function () { }; }
-        // we have a method already available for this on the db object
-        this.db.doc.head(this.getId(), function (err, data) {
-            if (data) {
-                // we have new rev data available
-                // nano puts it in the format '"etag"' so we need to
-                // strip erroneous quotes
-                _this._latestRev = data['etag'].replace(/"/g, "");
-            }
-            callback(err, data);
-        });
     };
     Doc.prototype.write = function (body, callback, tries) {
         var _this = this;
@@ -167,6 +144,29 @@ var Doc = (function () {
     };
     Doc.prototype._performDestroy = function (callback) {
         this.db.raw.destroy(this.getId(), this._latestRev, err_1.default.resultFunc('doc', callback));
+    };
+    Doc.prototype.head = function (callback) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        // we have a method already available for this on the db object
+        this.db.doc.head(this.getId(), function (err, data) {
+            if (data) {
+                // we have new rev data available
+                // nano puts it in the format '"etag"' so we need to
+                // strip erroneous quotes
+                _this._latestRev = data['etag'].replace(/"/g, "");
+            }
+            callback(err, data);
+        });
+    };
+    Doc.prototype.getId = function () {
+        return this.body['_id'];
+    };
+    Doc.prototype.getRev = function () {
+        return this.body['_rev'];
+    };
+    Doc.prototype.getBody = function () {
+        return deepExtend({}, this.body);
     };
     return Doc;
 }());

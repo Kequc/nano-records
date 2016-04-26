@@ -22,18 +22,16 @@ export default class DocAttachment
     this.doc = doc;
   }
   
-  list (): string[]
+  read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
   {
-    let attachments: string[] = [];
-    for (let name in (this.doc.body['_attachments'] || {})) {
-      attachments.push(name);
-    };
-    return attachments;
+    // we have a method already available for this on the db object
+    this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  exists (name: string): boolean
+  readStream (name: string, callback: (err?: Err)=>any = ()=>{})
   {
-    return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
+    // we have a method already available for this on the db object
+    return this.doc.db.doc.attachment.readStream(this.doc.getId(), name, callback);
   }
   
   write (name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -71,18 +69,6 @@ export default class DocAttachment
   private _performWrite (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
-  }
-  
-  read (name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
-  {
-    // we have a method already available for this on the db object
-    this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
-  }
-  
-  readStream (name: string, callback: (err?: Err)=>any = ()=>{})
-  {
-    // we have a method already available for this on the db object
-    return this.doc.db.doc.attachment.readStream(this.doc.getId(), name, callback);
   }
   
   writeStream (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
@@ -150,5 +136,19 @@ export default class DocAttachment
   private _performDestroy (name: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
     this.doc.db.raw.attachment.destroy(this.doc.getId(), name, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
+  }
+  
+  list (): string[]
+  {
+    let attachments: string[] = [];
+    for (let name in (this.doc.body['_attachments'] || {})) {
+      attachments.push(name);
+    };
+    return attachments;
+  }
+  
+  exists (name: string): boolean
+  {
+    return !!(this.doc.body['_attachments'] && this.doc.body['_attachments'][name]);
   }
 }

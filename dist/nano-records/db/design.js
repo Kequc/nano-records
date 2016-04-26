@@ -12,6 +12,10 @@ var DbDesign = (function () {
     function DbDesign(db) {
         this.db = db;
     }
+    // TODO: we need a way to force persist individual views and shows
+    // in cases where they have been changed
+    // TODO: we probably need a separate interface for interacting with
+    // the results from this class
     DbDesign.prototype.show = function (designId, showName, id, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }

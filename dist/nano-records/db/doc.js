@@ -41,9 +41,40 @@ var DbDoc = (function () {
                 callback(undefined, doc); // created successfully
         });
     };
+    DbDoc.prototype.read = function (id, callback, tries) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        if (tries === void 0) { tries = 0; }
+        if (!id) {
+            callback(err_1.default.missingId('doc'));
+            return;
+        }
+        tries++;
+        this._performRead(id, function (err, result) {
+            if (err)
+                if (tries <= 1 && err.name == "no_db_file") {
+                    // create db
+                    _this.db.create(function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.read(id, callback, tries);
+                    });
+                }
+                else
+                    callback(err);
+            else
+                callback(undefined, new doc_1.default(_this.db, result)); // document found!
+        });
+    };
+    DbDoc.prototype._performRead = function (id, callback) {
+        this.db.raw.get(id, err_1.default.resultFunc('doc', callback));
+    };
     DbDoc.prototype.write = function (id, body, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
+        // TODO: this can probably be done with only a head request to get
+        // the latest rev
         this.read(id, function (err, doc) {
             if (err) {
                 if (err.name == "not_found")
@@ -99,34 +130,20 @@ var DbDoc = (function () {
     DbDoc.prototype._performWrite = function (id, body, callback) {
         this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), err_1.default.resultFunc('doc', callback));
     };
-    DbDoc.prototype.read = function (id, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.destroy = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (tries === void 0) { tries = 0; }
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
-        tries++;
-        this._performRead(id, function (err, result) {
-            if (err)
-                if (tries <= 1 && err.name == "no_db_file") {
-                    // create db
-                    _this.db.create(function (err) {
-                        if (err)
-                            callback(err);
-                        else
-                            _this.read(id, callback, tries);
-                    });
-                }
+        // TODO: this can probably be done with only a head request to get
+        // the latest rev
+        this.read(id, function (err, doc) {
+            if (err) {
+                if (err.name == "not_found")
+                    callback(); // nothing to see here
                 else
                     callback(err);
+            }
             else
-                callback(undefined, new doc_1.default(_this.db, result)); // document found!
+                doc.destroy(callback); // attempt destroy
         });
-    };
-    DbDoc.prototype._performRead = function (id, callback) {
-        this.db.raw.get(id, err_1.default.resultFunc('doc', callback));
     };
     DbDoc.prototype.head = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -145,19 +162,6 @@ var DbDoc = (function () {
                 callback(err);
             else
                 callback(undefined, result);
-        });
-    };
-    DbDoc.prototype.destroy = function (id, callback) {
-        if (callback === void 0) { callback = function () { }; }
-        this.read(id, function (err, doc) {
-            if (err) {
-                if (err.name == "not_found")
-                    callback(); // nothing to see here
-                else
-                    callback(err);
-            }
-            else
-                doc.destroy(callback); // attempt destroy
         });
     };
     return DbDoc;

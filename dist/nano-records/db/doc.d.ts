@@ -9,6 +9,8 @@ export default class DbDoc {
     create(body: {
         [index: string]: any;
     }, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
+    read(id: string, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
+    private _performRead(id, callback);
     write(id: string, body: {
         [index: string]: any;
     }, callback?: (err?: Err, doc?: Doc) => any): void;
@@ -17,9 +19,7 @@ export default class DbDoc {
     }, callback?: (err?: Err, doc?: Doc) => any): void;
     private _performWriteAndInstantiateDoc(id, body, callback);
     private _performWrite(id, body, callback);
-    read(id: string, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
-    private _performRead(id, callback);
+    destroy(id: string, callback?: (err?: Err) => any): void;
     head(id: string, callback?: (err?: Err, data?: any) => any): void;
     private _performHead(id, callback);
-    destroy(id: string, callback?: (err?: Err) => any): void;
 }

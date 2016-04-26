@@ -31,20 +31,6 @@ var Db = (function () {
         this.doc = new doc_1.default(this);
         this.design = new design_1.default(this);
     }
-    Db.prototype.reset = function (verify, callback) {
-        var _this = this;
-        if (callback === void 0) { callback = function () { }; }
-        if (verify !== "_RESET_")
-            callback(err_1.default.verifyFailed('db'));
-        else {
-            this.destroy("_DESTROY_", function (err) {
-                if (!err || err.name == "no_db_file")
-                    _this.create(callback);
-                else
-                    callback(err);
-            });
-        }
-    };
     Db.prototype.create = function (callback) {
         if (callback === void 0) { callback = function () { }; }
         this._performCreate(callback);
@@ -61,6 +47,20 @@ var Db = (function () {
     };
     Db.prototype._performDestroy = function (callback) {
         this.nano.db.destroy(this.dbName, err_1.default.resultFunc('db', callback));
+    };
+    Db.prototype.reset = function (verify, callback) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        if (verify !== "_RESET_")
+            callback(err_1.default.verifyFailed('db'));
+        else {
+            this.destroy("_DESTROY_", function (err) {
+                if (!err || err.name == "no_db_file")
+                    _this.create(callback);
+                else
+                    callback(err);
+            });
+        }
     };
     return Db;
 }());

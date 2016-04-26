@@ -32,21 +32,6 @@ export default class Doc
     this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];
   }
   
-  getId (): string
-  {
-    return this.body['_id'];
-  }
-  
-  getRev (): string
-  {
-    return this.body['_rev'];
-  }
-  
-  getBody (): { [index: string]: any }
-  {
-    return deepExtend({}, this.body);
-  }
-  
   read (callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.getId()) {
@@ -67,20 +52,6 @@ export default class Doc
   private _performRead (callback: (err: Err, result?: { [index: string]: any })=>any)
   {
     this.db.raw.get(this.getId(), Err.resultFunc('doc', callback));
-  }
-  
-  head (callback: (err?: Err, data?: any)=>any = ()=>{})
-  {
-    // we have a method already available for this on the db object
-    this.db.doc.head(this.getId(), (err, data) => {
-      if (data) {
-        // we have new rev data available
-        // nano puts it in the format '"etag"' so we need to
-        // strip erroneous quotes
-        this._latestRev = data['etag'].replace(/"/g, "");
-      }
-      callback(err, data);
-    });
   }
   
   write (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -188,5 +159,34 @@ export default class Doc
   private _performDestroy (callback: (err: Err)=>any)
   {
     this.db.raw.destroy(this.getId(), this._latestRev, Err.resultFunc('doc', callback));
+  }
+  
+  head (callback: (err?: Err, data?: any)=>any = ()=>{})
+  {
+    // we have a method already available for this on the db object
+    this.db.doc.head(this.getId(), (err, data) => {
+      if (data) {
+        // we have new rev data available
+        // nano puts it in the format '"etag"' so we need to
+        // strip erroneous quotes
+        this._latestRev = data['etag'].replace(/"/g, "");
+      }
+      callback(err, data);
+    });
+  }
+  
+  getId (): string
+  {
+    return this.body['_id'];
+  }
+  
+  getRev (): string
+  {
+    return this.body['_rev'];
+  }
+  
+  getBody (): { [index: string]: any }
+  {
+    return deepExtend({}, this.body);
   }
 }

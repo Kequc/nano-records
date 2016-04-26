@@ -19,6 +19,10 @@ export default class DbDesign
   {
     this.db = db;
   }
+  // TODO: we need a way to force persist individual views and shows
+  // in cases where they have been changed
+  // TODO: we probably need a separate interface for interacting with
+  // the results from this class
   
   show (designId: string, showName: string, id: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {

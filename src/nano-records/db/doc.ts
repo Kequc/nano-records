@@ -48,8 +48,40 @@ export default class DbDoc
     });
   }
   
+  read (id: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  {
+    if (!id) {
+      callback(Err.missingId('doc'));
+      return;
+    }
+    tries++;
+    this._performRead(id, (err, result) => {
+      if (err)
+        if (tries <= 1 && err.name == "no_db_file") {
+          // create db
+          this.db.create((err) => {
+            if (err)
+              callback(err);
+            else
+              this.read(id, callback, tries);
+          });
+        }
+        else
+          callback(err);
+      else
+        callback(undefined, new Doc(this.db, result)); // document found!
+    });
+  }
+  
+  private _performRead (id: string, callback: (err: Err, result?: { [index: string]: any })=>any)
+  {
+    this.db.raw.get(id, Err.resultFunc('doc', callback));
+  }
+  
   write (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
   {
+    // TODO: this can probably be done with only a head request to get
+    // the latest rev
     this.read(id, (err, doc) => {
       if (err) {
         if (err.name == "not_found")
@@ -109,34 +141,20 @@ export default class DbDoc
     this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), Err.resultFunc('doc', callback));
   }
   
-  read (id: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  destroy (id: string, callback: (err?: Err)=>any = ()=>{})
   {
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
-    tries++;
-    this._performRead(id, (err, result) => {
-      if (err)
-        if (tries <= 1 && err.name == "no_db_file") {
-          // create db
-          this.db.create((err) => {
-            if (err)
-              callback(err);
-            else
-              this.read(id, callback, tries);
-          });
-        }
+    // TODO: this can probably be done with only a head request to get
+    // the latest rev
+    this.read(id, (err, doc) => {
+      if (err) {
+        if (err.name == "not_found")
+          callback(); // nothing to see here
         else
           callback(err);
+      }
       else
-        callback(undefined, new Doc(this.db, result)); // document found!
+        doc.destroy(callback); // attempt destroy
     });
-  }
-  
-  private _performRead (id: string, callback: (err: Err, result?: { [index: string]: any })=>any)
-  {
-    this.db.raw.get(id, Err.resultFunc('doc', callback));
   }
   
   head (id: string, callback: (err?: Err, data?: any)=>any = ()=>{})
@@ -158,20 +176,6 @@ export default class DbDoc
         callback(err);
       else
         callback(undefined, result);
-    });
-  }
-  
-  destroy (id: string, callback: (err?: Err)=>any = ()=>{})
-  {
-    this.read(id, (err, doc) => {
-      if (err) {
-        if (err.name == "not_found")
-          callback(); // nothing to see here
-        else
-          callback(err);
-      }
-      else
-        doc.destroy(callback); // attempt destroy
     });
   }
 }
