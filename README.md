@@ -63,7 +63,7 @@ db.doc.write(id, body, (err, doc) => {
 });
 ```
 
-Overwrite an existing document with the content of body, create a new record if one doesn't exist.
+Overwrite an existing document with the content of body.
 
 ```javascript
 doc.update(body, (err) => {
@@ -78,7 +78,24 @@ db.doc.update(id, body, (err, doc) => {
 });
 ```
 
-Merge the content of body with an existing document, create a new record if one doesn't exist.
+Merge the content of body with an existing document.
+
+```javascript
+db.doc.forcedWrite(id, body, (err, doc) => {
+  if (err)
+    return;
+  // doc is a NanoRecords document
+  console.log(doc.body);
+});
+db.doc.forcedUpdate(id, body, (err, doc) => {
+  if (err)
+    return;
+  // doc is a NanoRecords document
+  console.log(doc.body);
+});
+```
+
+Similar to the two methods above but will create a new record if one doesn't exist.
 
 ```javascript
 doc.destroy((err) => {
@@ -94,14 +111,16 @@ db.doc.destroy(id, (err) => {
 Remove a document.
 
 ```javascript
-doc.head((err, data) => {
+doc.head((err, rev, data) => {
   if (err)
     return;
+  // rev is the most up to date document revision
   console.log(data);
 });
-db.doc.head(id, (err, data) => {
+db.doc.head(id, (err, rev, data) => {
   if (err)
     return;
+  // rev is the most up to date document revision
   console.log(data);
 });
 ```
@@ -228,17 +247,17 @@ var db = new NanoRecords(nano, dbName, designs);
 When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [design documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 ```javascript
-db.design.view(designId, viewName, params, (err, data) => {
+db.design.view(id, name, params, (err, data) => {
   if (err)
     return;
   console.log(data);
 });
 ```
 
-Persist the given view using the provided design id (ie. 'foo') and view name if it's not already there, then return the result of the query.
+Persist the given view using the provided id (ie. 'foo') and name if it's not already there, then return the result of the query.
 
 ```javascript
-db.design.show(designId, showName, id, (err, data) => {
+db.design.show(id, name, docId, (err, data) => {
   if (err)
     return;
   console.log(data);

@@ -57,8 +57,9 @@ function assertRead (doc, done) {
 }
 
 function assertHead (doc, done) {
-  doc.head((err, data) => {
+  doc.head((err, rev, data) => {
     expect(err).to.be.undefined;
+    expect(rev).to.be.ok;
     expect(data).to.be.ok;
     expect(data).to.include.keys('etag');
     done();
@@ -161,9 +162,10 @@ describe('doc', () => {
     });
     it('head', (done) => {
       // should fail
-      _doc.head((err, data) => {
+      _doc.head((err, rev, data) => {
         expect(err).to.be.ok;
         expect(err.name).to.equal("missing_id");
+        expect(rev).to.be.undefined;
         expect(data).to.be.undefined;
         done();
       });

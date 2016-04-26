@@ -161,17 +161,13 @@ export default class Doc
     this.db.raw.destroy(this.getId(), this._latestRev, Err.resultFunc('doc', callback));
   }
   
-  head (callback: (err?: Err, data?: any)=>any = ()=>{})
+  head (callback: (err?: Err, rev?: string, data?: any)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    this.db.doc.head(this.getId(), (err, data) => {
-      if (data) {
-        // we have new rev data available
-        // nano puts it in the format '"etag"' so we need to
-        // strip erroneous quotes
-        this._latestRev = data['etag'].replace(/"/g, "");
-      }
-      callback(err, data);
+    this.db.doc.head(this.getId(), (err, rev, data) => {
+      if (rev)
+        this._latestRev = rev;
+      callback(err, rev, data);
     });
   }
   

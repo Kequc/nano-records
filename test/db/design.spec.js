@@ -84,7 +84,6 @@ describe('db-design', () => {
     });
     
     describe('document does not exist', () => {
-      var _doc;
       beforeEach((done) => {
         db.doc.destroy("_design/foo", () => { done(); })
       });

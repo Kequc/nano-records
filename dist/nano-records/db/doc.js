@@ -71,17 +71,12 @@ var DbDoc = (function () {
         this.db.raw.get(id, err_1.default.resultFunc('doc', callback));
     };
     DbDoc.prototype.write = function (id, body, callback) {
-        var _this = this;
         if (callback === void 0) { callback = function () { }; }
         // TODO: this can probably be done with only a head request to get
         // the latest rev
         this.read(id, function (err, doc) {
-            if (err) {
-                if (err.name == "not_found")
-                    _this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
-                else
-                    callback(err);
-            }
+            if (err)
+                callback(err);
             else {
                 // attempt write
                 doc.write(body, function (err) {
@@ -93,20 +88,25 @@ var DbDoc = (function () {
             }
         });
     };
-    DbDoc.prototype.update = function (id, body, callback) {
+    DbDoc.prototype.forcedWrite = function (id, body, callback) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
-        this.read(id, function (err, doc) {
+        this.write(id, body, function (err, doc) {
             if (err) {
                 if (err.name == "not_found")
                     _this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
                 else
                     callback(err);
             }
+            else
+                callback(undefined, doc);
+        });
+    };
+    DbDoc.prototype.update = function (id, body, callback) {
+        if (callback === void 0) { callback = function () { }; }
+        this.read(id, function (err, doc) {
+            if (err)
+                callback(err);
             else {
                 // attempt update
                 doc.update(body, function (err) {
@@ -116,6 +116,20 @@ var DbDoc = (function () {
                         callback(undefined, doc); // successfully updated
                 });
             }
+        });
+    };
+    DbDoc.prototype.forcedUpdate = function (id, body, callback) {
+        var _this = this;
+        if (callback === void 0) { callback = function () { }; }
+        this.update(id, body, function (err, doc) {
+            if (err) {
+                if (err.name == "not_found")
+                    _this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
+                else
+                    callback(err);
+            }
+            else
+                callback(undefined, doc);
         });
     };
     DbDoc.prototype._performWriteAndInstantiateDoc = function (id, body, callback) {
@@ -160,8 +174,12 @@ var DbDoc = (function () {
             var err = err_1.default.make('doc', raw);
             if (err)
                 callback(err);
-            else
-                callback(undefined, result);
+            else {
+                // we have new rev data available
+                // nano puts it in the format '"etag"' so we need to
+                // strip erroneous quotes
+                callback(undefined, result['etag'].replace(/"/g, ""), result);
+            }
         });
     };
     return DbDoc;

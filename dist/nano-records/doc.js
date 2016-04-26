@@ -149,14 +149,10 @@ var Doc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         // we have a method already available for this on the db object
-        this.db.doc.head(this.getId(), function (err, data) {
-            if (data) {
-                // we have new rev data available
-                // nano puts it in the format '"etag"' so we need to
-                // strip erroneous quotes
-                _this._latestRev = data['etag'].replace(/"/g, "");
-            }
-            callback(err, data);
+        this.db.doc.head(this.getId(), function (err, rev, data) {
+            if (rev)
+                _this._latestRev = rev;
+            callback(err, rev, data);
         });
     };
     Doc.prototype.getId = function () {

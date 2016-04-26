@@ -24,25 +24,23 @@ export default class DbDesign
   // TODO: we probably need a separate interface for interacting with
   // the results from this class
   
-  show (designId: string, showName: string, id: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
+  show (id: string, name: string, docId: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {
-    if (!designId) {
+    if (!id) {
       callback(Err.missingId('design'));
       return;
     }
     tries++;
-    this._performShow(designId, showName, id, (err, result) => {
+    this._performShow(id, name, docId, (err, result) => {
       if (err) {
-        let _afterResolve = (err: Err) => {
-          if (err)
-            callback(err);
-          else
-            this.show(designId, showName, id, callback, tries);
-        };
-        if (tries <= 1 && err.name == "no_db_file")
-          this.db.create(_afterResolve);
-        else if (tries <= 2 && err.name == "not_found")
-          this._updateDesign(designId, { 'shows': [showName] }, _afterResolve);
+        if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+          this._updateDesign(id, { 'shows': [name] }, (err: Err) => {
+            if (err)
+              callback(err);
+            else
+              this.show(id, name, docId, callback, tries);
+          });
+        }
         else
           callback(err);
       }
@@ -51,30 +49,28 @@ export default class DbDesign
     });
   }
   
-  private _performShow (designId: string, showName: string, id: string, callback: (err: Err, data?: any)=>any)
+  private _performShow (id: string, name: string, docId: string, callback: (err: Err, data?: any)=>any)
   {
-    this.db.raw.show(designId, showName, id, Err.resultFunc('design', callback));
+    this.db.raw.show(id, name, docId, Err.resultFunc('design', callback));
   }
   
-  view (designId: string, viewName: string, params: Object, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
+  view (id: string, name: string, params: Object, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
   {
-    if (!designId) {
+    if (!id) {
       callback(Err.missingId('doc'));
       return;
     }
     tries++;
-    this._performView(designId, viewName, params, (err, result) => {
+    this._performView(id, name, params, (err, result) => {
       if (err) {
-        let _afterResolve = (err: Err) => {
-          if (err)
-            callback(err);
-          else
-            this.view(designId, viewName, params, callback, tries);
-        };
-        if (tries <= 1 && err.name == "no_db_file")
-          this.db.create(_afterResolve);
-        else if (tries <= 2 && err.name == "not_found")
-          this._updateDesign(designId, { 'views': [viewName] }, _afterResolve);
+        if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+          this._updateDesign(id, { 'views': [name] }, (err: Err) => {
+            if (err)
+              callback(err);
+            else
+              this.view(id, name, params, callback, tries);
+          });
+        }
         else
           callback(err);
       }
@@ -83,21 +79,21 @@ export default class DbDesign
     });
   }
   
-  private _performView (designId: string, viewName: string, params: Object, callback: (err: Err, data?: any)=>any)
+  private _performView (id: string, name: string, params: Object, callback: (err: Err, data?: any)=>any)
   {
-    this.db.raw.view(designId, viewName, params, Err.resultFunc('design', callback));
+    this.db.raw.view(id, name, params, Err.resultFunc('design', callback));
   }
   
-  private _performRetrieveLatest (designId: string, callback: (err: Err, result?: { [index: string]: any })=>any)
+  private _performRetrieveLatest (id: string, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.get('_design/' + designId, Err.resultFunc('design', callback));
+    this.db.raw.get('_design/' + id, Err.resultFunc('design', callback));
   }
   
-  private _updateDesign (designId: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)
+  private _updateDesign (id: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)
   {
-    let design = this.db.designs[designId];
+    let design = this.db.designs[id];
     if (!design) {
-      callback(new Err('design', "not_defined", "No design specified for: " + designId));
+      callback(new Err('design', "not_defined", "No design specified for: " + id));
       return;
     }
     
@@ -131,6 +127,6 @@ export default class DbDesign
     }
     
     // update design
-    this.db.doc.update('_design/' + designId, body, callback);
+    this.db.doc.forcedUpdate('_design/' + id, body, callback);
   }
 }

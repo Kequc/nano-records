@@ -16,27 +16,25 @@ var DbDesign = (function () {
     // in cases where they have been changed
     // TODO: we probably need a separate interface for interacting with
     // the results from this class
-    DbDesign.prototype.show = function (designId, showName, id, callback, tries) {
+    DbDesign.prototype.show = function (id, name, docId, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
-        if (!designId) {
+        if (!id) {
             callback(err_1.default.missingId('design'));
             return;
         }
         tries++;
-        this._performShow(designId, showName, id, function (err, result) {
+        this._performShow(id, name, docId, function (err, result) {
             if (err) {
-                var _afterResolve = function (err) {
-                    if (err)
-                        callback(err);
-                    else
-                        _this.show(designId, showName, id, callback, tries);
-                };
-                if (tries <= 1 && err.name == "no_db_file")
-                    _this.db.create(_afterResolve);
-                else if (tries <= 2 && err.name == "not_found")
-                    _this._updateDesign(designId, { 'shows': [showName] }, _afterResolve);
+                if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+                    _this._updateDesign(id, { 'shows': [name] }, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.show(id, name, docId, callback, tries);
+                    });
+                }
                 else
                     callback(err);
             }
@@ -44,30 +42,28 @@ var DbDesign = (function () {
                 callback(undefined, result); // executed successfully
         });
     };
-    DbDesign.prototype._performShow = function (designId, showName, id, callback) {
-        this.db.raw.show(designId, showName, id, err_1.default.resultFunc('design', callback));
+    DbDesign.prototype._performShow = function (id, name, docId, callback) {
+        this.db.raw.show(id, name, docId, err_1.default.resultFunc('design', callback));
     };
-    DbDesign.prototype.view = function (designId, viewName, params, callback, tries) {
+    DbDesign.prototype.view = function (id, name, params, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
-        if (!designId) {
+        if (!id) {
             callback(err_1.default.missingId('doc'));
             return;
         }
         tries++;
-        this._performView(designId, viewName, params, function (err, result) {
+        this._performView(id, name, params, function (err, result) {
             if (err) {
-                var _afterResolve = function (err) {
-                    if (err)
-                        callback(err);
-                    else
-                        _this.view(designId, viewName, params, callback, tries);
-                };
-                if (tries <= 1 && err.name == "no_db_file")
-                    _this.db.create(_afterResolve);
-                else if (tries <= 2 && err.name == "not_found")
-                    _this._updateDesign(designId, { 'views': [viewName] }, _afterResolve);
+                if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+                    _this._updateDesign(id, { 'views': [name] }, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this.view(id, name, params, callback, tries);
+                    });
+                }
                 else
                     callback(err);
             }
@@ -75,16 +71,16 @@ var DbDesign = (function () {
                 callback(undefined, result); // executed successfully
         });
     };
-    DbDesign.prototype._performView = function (designId, viewName, params, callback) {
-        this.db.raw.view(designId, viewName, params, err_1.default.resultFunc('design', callback));
+    DbDesign.prototype._performView = function (id, name, params, callback) {
+        this.db.raw.view(id, name, params, err_1.default.resultFunc('design', callback));
     };
-    DbDesign.prototype._performRetrieveLatest = function (designId, callback) {
-        this.db.raw.get('_design/' + designId, err_1.default.resultFunc('design', callback));
+    DbDesign.prototype._performRetrieveLatest = function (id, callback) {
+        this.db.raw.get('_design/' + id, err_1.default.resultFunc('design', callback));
     };
-    DbDesign.prototype._updateDesign = function (designId, kinds, callback) {
-        var design = this.db.designs[designId];
+    DbDesign.prototype._updateDesign = function (id, kinds, callback) {
+        var design = this.db.designs[id];
         if (!design) {
-            callback(new err_1.default('design', "not_defined", "No design specified for: " + designId));
+            callback(new err_1.default('design', "not_defined", "No design specified for: " + id));
             return;
         }
         // generate design document
@@ -118,7 +114,7 @@ var DbDesign = (function () {
             }
         }
         // update design
-        this.db.doc.update('_design/' + designId, body, callback);
+        this.db.doc.forcedUpdate('_design/' + id, body, callback);
     };
     return DbDesign;
 }());

@@ -83,12 +83,8 @@ export default class DbDoc
     // TODO: this can probably be done with only a head request to get
     // the latest rev
     this.read(id, (err, doc) => {
-      if (err) {
-        if (err.name == "not_found")
-          this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
-        else
-          callback(err);
-      }
+      if (err)
+        callback(err);
       else {
         // attempt write
         doc.write(body, (err) => {
@@ -101,19 +97,25 @@ export default class DbDoc
     });
   }
   
-  update (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  forcedWrite (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
   {
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
-    this.read(id, (err, doc) => {
+    this.write(id, body, (err, doc) => {
       if (err) {
         if (err.name == "not_found")
           this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
         else
           callback(err);
       }
+      else
+        callback(undefined, doc);
+    });
+  }
+  
+  update (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  {
+    this.read(id, (err, doc) => {
+      if (err)
+        callback(err);
       else {
         // attempt update
         doc.update(body, (err) => {
@@ -123,6 +125,20 @@ export default class DbDoc
             callback(undefined, doc); // successfully updated
         });
       }
+    });
+  }
+  
+  forcedUpdate (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  {
+    this.update(id, body, (err, doc) => {
+      if (err) {
+        if (err.name == "not_found")
+          this._performWriteAndInstantiateDoc(id, body, callback); // we'll do it live!
+        else
+          callback(err);
+      }
+      else
+        callback(undefined, doc);
     });
   }
   
@@ -157,7 +173,7 @@ export default class DbDoc
     });
   }
   
-  head (id: string, callback: (err?: Err, data?: any)=>any = ()=>{})
+  head (id: string, callback: (err?: Err, rev?: string, data?: any)=>any = ()=>{})
   {
     if (!id) {
       callback(Err.missingId('doc'));
@@ -166,7 +182,7 @@ export default class DbDoc
     this._performHead(id, callback);
   }
   
-  private _performHead (id: string, callback: (err: Err, result?: any)=>any)
+  private _performHead (id: string, callback: (err: Err, rev?: string, result?: any)=>any)
   {
     // here we need the third parameter
     // not the second
@@ -174,8 +190,12 @@ export default class DbDoc
       let err = Err.make('doc', raw);
       if (err)
         callback(err);
-      else
-        callback(undefined, result);
+      else {
+        // we have new rev data available
+        // nano puts it in the format '"etag"' so we need to
+        // strip erroneous quotes
+        callback(undefined, result['etag'].replace(/"/g, ""), result);
+      }
     });
   }
 }
