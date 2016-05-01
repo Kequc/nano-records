@@ -127,18 +127,26 @@ describe('db-doc', () => {
         it('write', (done) => {
           assert.write(db, _doc.getId(), done);
         });
+        it('write retries');
+        it('write more than maxTries');
         it('forcedWrite', (done) => {
           assert.forcedWrite(db, _doc.getId(), done);
         });
+        it('forcedWrite retries');
+        it('forcedWrite more than maxTries');
         it('update', (done) => {
           assert.update(db, _doc.getId(), done);
         });
         it('forcedUpdate', (done) => {
           assert.forcedUpdate(db, _doc.getId(), done);
         });
+        it('forcedUpdate retries');
+        it('forcedUpdate more than maxTries');
         it('destroy', (done) => {
           assert.destroy(db, _doc.getId(), done);
         });
+        it('destroy retries');
+        it('destroy more than maxTries');
         
       });
       describe('attachment exists', () => {
@@ -157,18 +165,26 @@ describe('db-doc', () => {
         it('write', (done) => {
           assert.write(db, _doc.getId(), done);
         });
+        it('write retries');
+        it('write more than maxTries');
         it('forcedWrite', (done) => {
           assert.forcedWrite(db, _doc.getId(), done);
         });
+        it('forcedWrite retries');
+        it('forcedWrite more than maxTries');
         it('update', (done) => {
           assert.update(db, _doc.getId(), done);
         });
         it('forcedUpdate', (done) => {
           assert.forcedUpdate(db, _doc.getId(), done);
         });
+        it('forcedUpdate retries');
+        it('forcedUpdate more than maxTries');
         it('destroy', (done) => {
           assert.destroy(db, _doc.getId(), done);
         });
+        it('destroy retries');
+        it('destroy more than maxTries');
         
       });
       

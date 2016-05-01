@@ -79,9 +79,13 @@ describe('db-doc-attachment', () => {
         it('write', (done) => {
           assert.write(db, _doc.getId(), done);
         });
+        it('write retries');
+        it('write more than maxTries');
         it('destroy', (done) => {
           assert.destroy(db, _doc.getId(), done);
         });
+        it('destroy retries');
+        it('destroy more than maxTries');
         
       });
       describe('attachment exists', () => {
@@ -98,9 +102,13 @@ describe('db-doc-attachment', () => {
         it('write', (done) => {
           assert.write(db, _doc.getId(), done);
         });
+        it('write retries');
+        it('write more than maxTries');
         it('destroy', (done) => {
           assert.destroy(db, _doc.getId(), done);
         });
+        it('destroy retries');
+        it('destroy more than maxTries');
         
       });
       

@@ -39,9 +39,13 @@ describe('db-design', () => {
     it('view', (done) => {
       assert.view(db, id, "comments", done);
     });
+    it('view retries');
+    it('view more than maxTries');
     it('show', (done) => {
       assert.show(db, id, "post", "Hello world!", done);
     });
+    it('show retries');
+    it('show more than maxTries');
     
   });
   
@@ -82,9 +86,13 @@ describe('db-design', () => {
         it('view', (done) => {
           assert.view(db, id, "comments", done);
         });
+        it('view retries');
+        it('view more than maxTries');
         it('show', (done) => {
           assert.show(db, id, "post", "Hello world!", done);
         });
+        it('show retries');
+        it('show more than maxTries');
         
       });
       
@@ -111,21 +119,25 @@ describe('db-design', () => {
         it('view', (done) => {
           assert.view(db, id, "comments", done);
         });
-        it('view retries', (done) => {
-          assert.view_Retries(db, id, "comments", done);
-        });
-        it('view more than maxTries', (done) => {
-          assert.view_Retries_Fail(db, id, "comments", done);
-        });
+        it('view retries');
+        it('view more than maxTries');
+        // it('view retries', (done) => {
+        //   assert.view_Retries(db, id, "comments", done);
+        // });
+        // it('view more than maxTries', (done) => {
+        //   assert.view_Retries_Fail(db, id, "comments", done);
+        // });
         it('show', (done) => {
           assert.show(db, id, "post", "Hello world!", done);
         });
-        it('show retries', (done) => {
-          assert.show_Retries(db, id, "post", "Hello world!", done);
-        });
-        it('show more than maxTries', (done) => {
-          assert.show_Retries_Fail(db, id, "post", done);
-        });
+        it('show retries');
+        it('show more than maxTries');
+        // it('show retries', (done) => {
+        //   assert.show_Retries(db, id, "post", "Hello world!", done);
+        // });
+        // it('show more than maxTries', (done) => {
+        //   assert.show_Retries_Fail(db, id, "post", done);
+        // });
         
       });
     });

@@ -6,9 +6,9 @@ var deepExtend = require('deep-extend');
 var Util = require('../util');
 
 // TODO: not currently in use
-// var triggerBgUpdate = (db, callback) => {
-//   Util.triggerBgUpdate(db, "_design/foo", { shows: { cats: "function (doc, req) { return 'yo'; }" } }, callback);
-// }
+var triggerBgDesignUpdate = (db, callback) => {
+  Util.triggerBgUpdate(db, "_design/foo", { shows: { cats: "function (doc, req) { return 'yo'; }" } }, callback);
+}
 
 var DbDesignAssert = {};
 
@@ -30,25 +30,23 @@ DbDesignAssert.view = (db, id, name, done) => {
   });
 };
 
+// TODO: not currently a way to test this
 DbDesignAssert.view_Retries = (db, id, name, done) => {
-  // TODO: not currently a way to test this
-  // triggerBgUpdate(db, () => {
-  //   DbDesign.view(db, name, done);
-  // });
-  done();
+  triggerBgDesignUpdate(db, () => {
+    DbDesign.view(db, name, done);
+  });
 };
 
+// TODO: not currently a way to test this
 DbDesignAssert.view_Retries_Fail = (db, id, name, done) => {
-  // TODO: not currently a way to test this
-  // triggerBgUpdate(db, () => {
-  //   db.design.view(id, name, {}, (err, result) => {
-  //     expect(err).to.be.ok;
-  //     expect(err.name).to.equal("conflict");
-  //     expect(result).to.be.undefined;
-  //     done();
-  //   }, db.maxTries); // tried x times
-  // });
-  done();
+  triggerBgDesignUpdate(db, () => {
+    db.design.view(id, name, {}, (err, result) => {
+      expect(err).to.be.ok;
+      expect(err.name).to.equal("conflict");
+      expect(result).to.be.undefined;
+      done();
+    }, db.maxTries); // tried x times
+  });
 };
 
 DbDesignAssert.show_Fail = (db, id, name, errorName, done) => {
@@ -69,25 +67,23 @@ DbDesignAssert.show = (db, id, name, asserts, done) => {
   });
 };
 
+// TODO: not currently a way to test this
 DbDesignAssert.show_Retries = (db, id, name, asserts, done) => {
-  // TODO: not currently a way to test this
-  // triggerBgUpdate(db, () => {
-  //   DbDesign.show(db, name, asserts, done);
-  // });
-  done();
+  triggerBgDesignUpdate(db, () => {
+    DbDesign.show(db, name, asserts, done);
+  });
 };
 
+// TODO: not currently a way to test this
 DbDesignAssert.show_Retries_Fail = (db, id, name, done) => {
-  // TODO: not currently a way to test this
-  // triggerBgUpdate(db, () => {
-  //   db.design.show(id, name, "fake-id-doesnt-exist", (err, result) => {
-  //     expect(err).to.be.ok;
-  //     expect(err.name).to.equal("conflict");
-  //     expect(result).to.be.undefined;
-  //     done();
-  //   }, db.maxTries); // tried x times
-  // });
-  done();
+  triggerBgDesignUpdate(db, () => {
+    db.design.show(id, name, "fake-id-doesnt-exist", (err, result) => {
+      expect(err).to.be.ok;
+      expect(err.name).to.equal("conflict");
+      expect(result).to.be.undefined;
+      done();
+    }, db.maxTries); // tried x times
+  });
 };
 
 module.exports = DbDesignAssert;
