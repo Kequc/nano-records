@@ -3,8 +3,6 @@ var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
 
-var fileName = "attachment-doesnt-exist.txt";
-
 var Util = {
   fileName: "attachment-doesnt-exist.txt",
   fileContent: "This is an example attachment.",
