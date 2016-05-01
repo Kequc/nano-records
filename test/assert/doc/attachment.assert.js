@@ -34,8 +34,8 @@ DocAttachmentAssert.read = (doc, done) => {
   });
 };
 
-DocAttachmentAssert.readStream_Fail = (doc, errorName, done) => {
-  Util.streamToString(doc.attachment.readStream(Util.fileName, (err) => {
+DocAttachmentAssert.createReadStream_Fail = (doc, errorName, done) => {
+  Util.streamToString(doc.attachment.createReadStream(Util.fileName, (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     done();
@@ -47,8 +47,8 @@ DocAttachmentAssert.readStream_Fail = (doc, errorName, done) => {
   });
 };
 
-DocAttachmentAssert.readStream = (doc, done) => {
-  Util.streamToString(doc.attachment.readStream(Util.fileName, (err) => {
+DocAttachmentAssert.createReadStream = (doc, done) => {
+  Util.streamToString(doc.attachment.createReadStream(Util.fileName, (err) => {
     expect(err).to.be.undefined;
     DocAttachmentAssert.exists(doc, true);
     done();
@@ -102,9 +102,9 @@ DocAttachmentAssert.write_Retries_Fail = (doc, exists, done) => {
   });
 };
 
-DocAttachmentAssert.writeStream_Fail = (doc, errorName, exists, done) => {
+DocAttachmentAssert.createWriteStream_Fail = (doc, errorName, exists, done) => {
   let oldRev = doc.getRev();
-  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writeStream(Util.fileName, "text/plain", (err) => {
+  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.createWriteStream(Util.fileName, "text/plain", (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     DocAttachmentAssert.exists(doc, exists);
@@ -113,9 +113,9 @@ DocAttachmentAssert.writeStream_Fail = (doc, errorName, exists, done) => {
   }));
 };
 
-DocAttachmentAssert.writeStream = (doc, done) => {
+DocAttachmentAssert.createWriteStream = (doc, done) => {
   let oldRev = doc.getRev();
-  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writeStream(Util.fileName, "text/plain", (err) => {
+  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.createWriteStream(Util.fileName, "text/plain", (err) => {
     expect(err).to.be.undefined;
     DocAttachmentAssert.exists(doc, true);
     expect(doc.getRev()).to.equal(oldRev);

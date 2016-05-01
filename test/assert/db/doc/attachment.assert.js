@@ -25,8 +25,8 @@ DbDocAttachmentAssert.read = (db, id, done) => {
   });
 };
 
-DbDocAttachmentAssert.readStream_Fail = (db, id, errorName, done) => {
-  Util.streamToString(db.doc.attachment.readStream(id, Util.fileName, (err) => {
+DbDocAttachmentAssert.createReadStream_Fail = (db, id, errorName, done) => {
+  Util.streamToString(db.doc.attachment.createReadStream(id, Util.fileName, (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     done();
@@ -38,8 +38,8 @@ DbDocAttachmentAssert.readStream_Fail = (db, id, errorName, done) => {
   });
 };
 
-DbDocAttachmentAssert.readStream = (db, id, done) => {
-  Util.streamToString(db.doc.attachment.readStream(id, Util.fileName, (err) => {
+DbDocAttachmentAssert.createReadStream = (db, id, done) => {
+  Util.streamToString(db.doc.attachment.createReadStream(id, Util.fileName, (err) => {
     expect(err).to.be.undefined;
     done();
   }), (result) => {

@@ -37,14 +37,14 @@ describe('doc-attachment', () => {
     it('read', (done) => {
       assert.read_Fail(_doc, "missing_id", done);
     });
-    it('readStream', (done) => {
-      assert.readStream_Fail(_doc, "missing_id", done);
+    it('createReadStream', (done) => {
+      assert.createReadStream_Fail(_doc, "missing_id", done);
     });
     it('write', (done) => {
       assert.write_Fail(_doc, "missing_id", false, done);
     });
-    it('writeStream', (done) => {
-      assert.writeStream_Fail(_doc, "missing_id", false, done);
+    it('createWriteStream', (done) => {
+      assert.createWriteStream_Fail(_doc, "missing_id", false, done);
     });
     it('destroy', (done) => {
       assert.destroy_Fail(_doc, "missing_id", false, done);
@@ -64,8 +64,8 @@ describe('doc-attachment', () => {
       it('read', (done) => {
         assert.read_Fail(_doc, "not_found", done);
       });
-      it('readStream', (done) => {
-        assert.readStream_Fail(_doc, "not_found", done);
+      it('createReadStream', (done) => {
+        assert.createReadStream_Fail(_doc, "not_found", done);
       });
       it('write', (done) => {
         assert.write(_doc, done);
@@ -76,8 +76,8 @@ describe('doc-attachment', () => {
       it('write more than maxTries', (done) => {
         assert.write_Retries_Fail(_doc, false, done);
       });
-      it('writeStream', (done) => {
-        assert.writeStream(_doc, done);
+      it('createWriteStream', (done) => {
+        assert.createWriteStream(_doc, done);
       });
       it('destroy', (done) => {
         assert.destroy(_doc, done);
@@ -106,8 +106,8 @@ describe('doc-attachment', () => {
         it('read', (done) => {
           assert.read(_doc, done);
         });
-        it('readStream', (done) => {
-          assert.readStream(_doc, done);
+        it('createReadStream', (done) => {
+          assert.createReadStream(_doc, done);
         });
         it('write', (done) => {
           assert.write(_doc, done);
@@ -118,8 +118,8 @@ describe('doc-attachment', () => {
         it('write more than maxTries', (done) => {
           assert.write_Retries_Fail(_doc, true, done);
         });
-        it('writeStream', (done) => {
-          assert.writeStream(_doc, done);
+        it('createWriteStream', (done) => {
+          assert.createWriteStream(_doc, done);
         });
         it('destroy', (done) => {
           assert.destroy(_doc, done);
@@ -152,14 +152,14 @@ describe('doc-attachment', () => {
         it('write more than maxTries', (done) => {
           assert.write_Retries_Fail(_doc, true, done);
         });
-        it('writeStream', (done) => {
-          assert.writeStream(_doc, done);
+        it('createWriteStream', (done) => {
+          assert.createWriteStream(_doc, done);
         });
         it('read', (done) => {
           assert.read(_doc, done);
         });
-        it('readStream', (done) => {
-          assert.readStream(_doc, done);
+        it('createReadStream', (done) => {
+          assert.createReadStream(_doc, done);
         });
         it('destroy', (done) => {
           assert.destroy(_doc, done);

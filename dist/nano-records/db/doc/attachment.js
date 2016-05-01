@@ -27,7 +27,7 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype._performRead = function (id, name, callback) {
         this.doc.db.raw.attachment.get(id, name, {}, err_1.default.resultFunc('attachment', callback));
     };
-    DbDocAttachment.prototype.readStream = function (id, name, callback) {
+    DbDocAttachment.prototype.createReadStream = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id) {
             callback(err_1.default.missingId('doc'));
@@ -37,9 +37,9 @@ var DbDocAttachment = (function () {
             readable.push(null);
             return readable;
         }
-        return this._performReadStream(id, name, callback);
+        return this._performCreateReadStream(id, name, callback);
     };
-    DbDocAttachment.prototype._performReadStream = function (id, name, callback) {
+    DbDocAttachment.prototype._performCreateReadStream = function (id, name, callback) {
         // TODO: truthfully this returns pretty ugly streams when there is an error
         // would be nice to clean up
         return this.doc.db.raw.attachment.get(id, name, {}, err_1.default.resultFunc('attachment', callback));

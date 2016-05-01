@@ -28,10 +28,10 @@ export default class DocAttachment
     this.doc.db.doc.attachment.read(this.doc.getId(), name, callback);
   }
   
-  readStream (name: string, callback: (err?: Err)=>any = ()=>{})
+  createReadStream (name: string, callback: (err?: Err)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    return this.doc.db.doc.attachment.readStream(this.doc.getId(), name, callback);
+    return this.doc.db.doc.attachment.createReadStream(this.doc.getId(), name, callback);
   }
   
   write (name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
@@ -71,13 +71,13 @@ export default class DocAttachment
     this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
   }
   
-  writeStream (name: string, mimetype: string, callback: (err?: Err)=>any = ()=>{})
+  createWriteStream (name: string, mimeType: string, callback: (err?: Err)=>any = ()=>{})
   {
     if (!this.doc.getId()) {
       callback(Err.missingId('doc'));
       return devNull();
     }
-    return this._performWriteStream(name, undefined, mimetype, (err, result) => {
+    return this._performCreateWriteStream(name, undefined, mimeType, (err, result) => {
       if (err)
         callback(err);
       else {
@@ -92,7 +92,7 @@ export default class DocAttachment
     });
   }
   
-  private _performWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
+  private _performCreateWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
     return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
   }

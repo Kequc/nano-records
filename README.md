@@ -17,6 +17,10 @@ var NanoRecords = require('nano-records');
 var dbName = "my-database";
 var db = new NanoRecords(nano, dbName);
 ```
+```typescript
+// typescript
+import NanoRecords = require('nano-records');
+```
 
 Each NanoRecords instance represents one database.
 
@@ -191,23 +195,20 @@ Return attachment names as an array and whether or not a specific attachment exi
 ## Streams
 
 ```javascript
-var writer = fs.createWriteStream('./my-file.txt');
-doc.attachment.readStream(name, (err) => {
+doc.attachment.createReadStream(name, (err) => {
   if (!err)
     console.log('success!');
-}).pipe(writer);
-var writer = fs.createWriteStream('./my-file.txt');
-db.doc.attachment.readStream(id, name, (err) => {
+}).pipe(fs.createWriteStream('./my-file.txt'));
+db.doc.attachment.createReadStream(id, name, (err) => {
   if (!err)
     console.log('success!');
-}).pipe(writer);
+}).pipe(fs.createWriteStream('./my-file.txt'));
 ```
 
 Read the attachment as a stream. How convenient!
 
 ```javascript
-var reader = fs.createReadStream('./my-file.txt');
-reader.pipe(doc.attachment.writeStream(name, (err) => {
+fs.createReadStream('./my-file.txt').pipe(doc.attachment.createWriteStream(name, mimeType, (err) => {
   if (!err)
     console.log('success!');
 }));

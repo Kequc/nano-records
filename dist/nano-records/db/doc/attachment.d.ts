@@ -5,8 +5,8 @@ export default class DbDocAttachment {
     constructor(doc: DbDoc);
     read(id: string, name: string, callback?: (err?: Err, data?: any) => any): void;
     private _performRead(id, name, callback);
-    readStream(id: string, name: string, callback?: (err?: Err) => any): any;
-    private _performReadStream(id, name, callback);
+    createReadStream(id: string, name: string, callback?: (err?: Err) => any): any;
+    private _performCreateReadStream(id, name, callback);
     write(id: string, name: string, data: any, mimeType: string, callback?: (err?: Err) => any, tries?: number): void;
     private _performWrite(id, rev, name, data, mimeType, callback);
     destroy(id: string, name: string, callback?: (err?: Err) => any, tries?: number): void;

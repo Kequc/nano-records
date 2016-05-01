@@ -21,8 +21,8 @@ describe('db-doc-attachment', () => {
     it('read', (done) => {
       assert.read_Fail(db, Util.id, "not_found", done);
     });
-    it('readStream', (done) => {
-      assert.readStream_Fail(db, Util.id, "not_found", done);
+    it('createReadStream', (done) => {
+      assert.createReadStream_Fail(db, Util.id, "not_found", done);
     });
     it('write', (done) => {
       assert.write_Fail(db, Util.id, "not_found", done);
@@ -46,8 +46,8 @@ describe('db-doc-attachment', () => {
       it('read', (done) => {
         assert.read_Fail(db, Util.id, "not_found", done);
       });
-      it('readStream', (done) => {
-        assert.readStream_Fail(db, Util.id, "not_found", done);
+      it('createReadStream', (done) => {
+        assert.createReadStream_Fail(db, Util.id, "not_found", done);
       });
       it('write', (done) => {
         assert.write_Fail(db, Util.id, "not_found", done);
@@ -73,8 +73,8 @@ describe('db-doc-attachment', () => {
         it('read', (done) => {
           assert.read_Fail(db, _doc.getId(), "not_found", done);
         });
-        it('readStream', (done) => {
-          assert.readStream_Fail(db, _doc.getId(), "not_found", done);
+        it('createReadStream', (done) => {
+          assert.createReadStream_Fail(db, _doc.getId(), "not_found", done);
         });
         it('write', (done) => {
           assert.write(db, _doc.getId(), done);
@@ -96,8 +96,8 @@ describe('db-doc-attachment', () => {
         it('read', (done) => {
           assert.read(db, _doc.getId(), done);
         });
-        it('readStream', (done) => {
-          assert.readStream(db, _doc.getId(), done);
+        it('createReadStream', (done) => {
+          assert.createReadStream(db, _doc.getId(), done);
         });
         it('write', (done) => {
           assert.write(db, _doc.getId(), done);
