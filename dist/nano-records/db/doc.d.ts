@@ -8,24 +8,25 @@ export default class DbDoc {
     constructor(db: Db);
     create(body: {
         [index: string]: any;
-    }, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
+    }, callback?: (err?: Err, doc?: Doc) => any): void;
     read(id: string, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
     private _performRead(id, callback);
     write(id: string, body: {
         [index: string]: any;
-    }, callback?: (err?: Err, doc?: Doc) => any): void;
+    }, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
     forcedWrite(id: string, body: {
         [index: string]: any;
-    }, callback?: (err?: Err, doc?: Doc) => any): void;
+    }, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
     update(id: string, body: {
         [index: string]: any;
     }, callback?: (err?: Err, doc?: Doc) => any): void;
     forcedUpdate(id: string, body: {
         [index: string]: any;
-    }, callback?: (err?: Err, doc?: Doc) => any): void;
-    private _performWriteAndInstantiateDoc(id, body, callback);
-    private _performWrite(id, body, callback);
-    destroy(id: string, callback?: (err?: Err) => any): void;
-    head(id: string, callback?: (err?: Err, rev?: string, data?: any) => any): void;
+    }, callback?: (err?: Err, doc?: Doc) => any, tries?: number): void;
+    private _performWriteAndInstantiateDoc(id, rev, body, callback, tries?);
+    private _performWrite(id, rev, body, callback);
+    destroy(id: string, callback?: (err?: Err) => any, tries?: number): void;
+    private _performDestroy(id, rev, callback);
+    head(id: string, callback?: (err?: Err, rev?: string, result?: any) => any, tries?: number): void;
     private _performHead(id, callback);
 }

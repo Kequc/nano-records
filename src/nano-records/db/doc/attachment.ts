@@ -30,7 +30,6 @@ export default class DbDocAttachment
       callback(Err.missingId('doc'));
       return;
     }
-    // doesn't need `_rev` so we can skip `doc.get`
     this._performRead(id, name, callback);
   }
   
@@ -55,80 +54,65 @@ export default class DbDocAttachment
   private _performReadStream (id: string, name: string, callback: (err?: Err)=>any)
   {
     // TODO: truthfully this returns pretty ugly streams when there is an error
-    // would be nice to clean this up
+    // would be nice to clean up
     return this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
   }
   
-  write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
-    this.doc.read(id, (err, doc) => {
+    tries++;
+    this.doc.head(id, (err, rev) => {
       if (err)
         callback(err);
       else {
-        // attempt write
-        doc.attachment.write(name, data, mimeType, (err) => {
-          if (err)
-            callback(err);
+        this._performWrite(id, rev, name, data, mimeType, (err) => {
+          if (err) {
+            if (tries <= this.doc.db.maxTries && err.name == "conflict")
+              this.write(id, name, data, mimeType, callback, tries);
+            else
+              callback(err);
+          }
           else
-            callback(undefined, doc); // success
+            callback(); // successfully written
         });
       }
     });
   }
   
-  forcedWrite (id: string, name: string, data: any, mimeType: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  private _performWrite (id: string, rev: string, name: string, data: any, mimeType: string, callback: (err: Err)=>any)
   {
-    // TODO: this is inefficient since we might attempt to
-    // write the attachment first without looking up the document
-    // if the document doesn't exist the operation would be
-    // successful
-    this.write(id, name, data, mimeType, (err, doc) => {
+    this.doc.db.raw.attachment.insert(id, name, data, mimeType, { rev: rev }, Err.resultFunc('attachment', callback));
+  }
+  
+  destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  {
+    tries++;
+    this.doc.head(id, (err, rev) => {
       if (err) {
-        if (err.name == "not_found")
-          this._performWriteAndInstantiateDoc(id, name, data, mimeType, callback); // we'll do it live!
-        else
-          callback(err);
-      }
-      else
-        callback(undefined, doc);
-    });
-  }
-  
-  private _performWriteAndInstantiateDoc (id: string, name: string, data: any, mimeType: string, callback: (err: Err, doc?: Doc)=>any)
-  {
-    this._performWrite(id, name, data, mimeType, (err, result) => {
-      if (err)
-        callback(err);
-      else {
-        let doc = new Doc(this.doc.db, { '_id': result['id'] });
-        doc.body['_attachments'] = {};
-        doc.body['_attachments'][name] = {};
-        callback(undefined, doc);
-      }
-    });
-  }
-  
-  private _performWrite (id: string, name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
-  {
-    this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, Err.resultFunc('attachment', callback));
-  }
-  
-  destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
-  {
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
-    // TODO: this is inefficiant and could probably be done with only
-    // a head request probably
-    this.doc.read(id, (err, doc) => {
-      if (err)
         if (err.name == "not_found")
           callback(); // nothing to see here
         else
           callback(err);
-      else
-        doc.attachment.destroy(name, callback); // attempt destroy
+      }
+      else {
+        this._performDestroy(id, rev, name, (err) => {
+          if (err) {
+            if (err.name == "not_found")
+              callback(); // nothing to see here
+            else if (tries <= this.doc.db.maxTries && err.name == "conflict")
+              this.destroy(id, name, callback, tries);
+            else
+              callback(err);
+          }
+          else
+            callback(); // successfully destroyed
+        });
+      }
     });
+  }
+  
+  private _performDestroy (id: string, rev: string, name: string, callback: (err: Err)=>any)
+  {
+    this.doc.db.raw.attachment.destroy(id, name, { rev: rev }, Err.resultFunc('attachment', callback));
   }
 }

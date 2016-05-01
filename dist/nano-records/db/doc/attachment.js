@@ -11,7 +11,6 @@
  */
 "use strict";
 var err_1 = require('../../err');
-var doc_1 = require('../../doc');
 var stream = require('stream');
 var DbDocAttachment = (function () {
     function DbDocAttachment(doc) {
@@ -23,7 +22,6 @@ var DbDocAttachment = (function () {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        // doesn't need `_rev` so we can skip `doc.get`
         this._performRead(id, name, callback);
     };
     DbDocAttachment.prototype._performRead = function (id, name, callback) {
@@ -43,76 +41,64 @@ var DbDocAttachment = (function () {
     };
     DbDocAttachment.prototype._performReadStream = function (id, name, callback) {
         // TODO: truthfully this returns pretty ugly streams when there is an error
-        // would be nice to clean this up
+        // would be nice to clean up
         return this.doc.db.raw.attachment.get(id, name, {}, err_1.default.resultFunc('attachment', callback));
     };
-    DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback) {
+    DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback, tries) {
+        var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        this.doc.read(id, function (err, doc) {
+        if (tries === void 0) { tries = 0; }
+        tries++;
+        this.doc.head(id, function (err, rev) {
             if (err)
                 callback(err);
             else {
-                // attempt write
-                doc.attachment.write(name, data, mimeType, function (err) {
-                    if (err)
-                        callback(err);
+                _this._performWrite(id, rev, name, data, mimeType, function (err) {
+                    if (err) {
+                        if (tries <= _this.doc.db.maxTries && err.name == "conflict")
+                            _this.write(id, name, data, mimeType, callback, tries);
+                        else
+                            callback(err);
+                    }
                     else
-                        callback(undefined, doc); // success
+                        callback(); // successfully written
                 });
             }
         });
     };
-    DbDocAttachment.prototype.forcedWrite = function (id, name, data, mimeType, callback) {
+    DbDocAttachment.prototype._performWrite = function (id, rev, name, data, mimeType, callback) {
+        this.doc.db.raw.attachment.insert(id, name, data, mimeType, { rev: rev }, err_1.default.resultFunc('attachment', callback));
+    };
+    DbDocAttachment.prototype.destroy = function (id, name, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        // TODO: this is inefficient since we might attempt to
-        // write the attachment first without looking up the document
-        // if the document doesn't exist the operation would be
-        // successful
-        this.write(id, name, data, mimeType, function (err, doc) {
+        if (tries === void 0) { tries = 0; }
+        tries++;
+        this.doc.head(id, function (err, rev) {
             if (err) {
-                if (err.name == "not_found")
-                    _this._performWriteAndInstantiateDoc(id, name, data, mimeType, callback); // we'll do it live!
-                else
-                    callback(err);
-            }
-            else
-                callback(undefined, doc);
-        });
-    };
-    DbDocAttachment.prototype._performWriteAndInstantiateDoc = function (id, name, data, mimeType, callback) {
-        var _this = this;
-        this._performWrite(id, name, data, mimeType, function (err, result) {
-            if (err)
-                callback(err);
-            else {
-                var doc = new doc_1.default(_this.doc.db, { '_id': result['id'] });
-                doc.body['_attachments'] = {};
-                doc.body['_attachments'][name] = {};
-                callback(undefined, doc);
-            }
-        });
-    };
-    DbDocAttachment.prototype._performWrite = function (id, name, data, mimeType, callback) {
-        this.doc.db.raw.attachment.insert(id, name, data, mimeType, {}, err_1.default.resultFunc('attachment', callback));
-    };
-    DbDocAttachment.prototype.destroy = function (id, name, callback) {
-        if (callback === void 0) { callback = function () { }; }
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
-        // TODO: this is inefficiant and could probably be done with only
-        // a head request probably
-        this.doc.read(id, function (err, doc) {
-            if (err)
                 if (err.name == "not_found")
                     callback(); // nothing to see here
                 else
                     callback(err);
-            else
-                doc.attachment.destroy(name, callback); // attempt destroy
+            }
+            else {
+                _this._performDestroy(id, rev, name, function (err) {
+                    if (err) {
+                        if (err.name == "not_found")
+                            callback(); // nothing to see here
+                        else if (tries <= _this.doc.db.maxTries && err.name == "conflict")
+                            _this.destroy(id, name, callback, tries);
+                        else
+                            callback(err);
+                    }
+                    else
+                        callback(); // successfully destroyed
+                });
+            }
         });
+    };
+    DbDocAttachment.prototype._performDestroy = function (id, rev, name, callback) {
+        this.doc.db.raw.attachment.destroy(id, name, { rev: rev }, err_1.default.resultFunc('attachment', callback));
     };
     return DbDocAttachment;
 }());

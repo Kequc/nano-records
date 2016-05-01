@@ -22,7 +22,7 @@ var designs = {
 };
 var dbName = 'nano-records-db-test';
 
-var NanoRecords = require('../dist/nano-records');
+var NanoRecords = require('../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db;
 

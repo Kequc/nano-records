@@ -47,11 +47,11 @@ var Doc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!this.getId()) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        tries++;
         this._performWrite(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
@@ -80,11 +80,11 @@ var Doc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!this.getId()) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        tries++;
         this._performUpdate(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
@@ -107,7 +107,7 @@ var Doc = (function () {
     };
     Doc.prototype._performUpdate = function (body, callback) {
         if (this.getRev() !== this._latestRev)
-            callback(err_1.default.conflict('doc'));
+            callback(err_1.default.conflict('doc')); // we know we are out of date
         else
             this.db.raw.insert(this._extendBody(body), err_1.default.resultFunc('doc', callback));
     };
@@ -118,11 +118,11 @@ var Doc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!this.getId()) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        tries++;
         this._performDestroy(function (err) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
@@ -149,10 +149,10 @@ var Doc = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         // we have a method already available for this on the db object
-        this.db.doc.head(this.getId(), function (err, rev, data) {
+        this.db.doc.head(this.getId(), function (err, rev, result) {
             if (rev)
                 _this._latestRev = rev;
-            callback(err, rev, data);
+            callback(err, rev, result);
         });
     };
     Doc.prototype.getId = function () {

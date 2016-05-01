@@ -5,9 +5,9 @@
   "author": "mr.kequc@gmail.com",
   "license": "ISC",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "mocha --recursive"
+    "build": "tsc -p ./src",
+    "watch": "tsc -w -p ./src",
+    "test": "mocha --recursive ./test/spec"
   },
   "files": [
     "dist/"

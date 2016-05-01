@@ -4,9 +4,9 @@
 		"module": "commonjs",
 		"target": "es5",
 		"noImplicitAny": true,
-		"outDir": "dist"
+		"outDir": "../dist"
 	},
 	"files": [
-		"src/nano-records.ts"
+		"nano-records.ts"
 	]
 }

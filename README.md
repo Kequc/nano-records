@@ -111,17 +111,17 @@ db.doc.destroy(id, (err) => {
 Remove a document.
 
 ```javascript
-doc.head((err, rev, data) => {
+doc.head((err, rev, result) => {
   if (err)
     return;
   // rev is the most up to date document revision
-  console.log(data);
+  console.log(result);
 });
-db.doc.head(id, (err, rev, data) => {
+db.doc.head(id, (err, rev, result) => {
   if (err)
     return;
   // rev is the most up to date document revision
-  console.log(data);
+  console.log(result);
 });
 ```
 
@@ -131,10 +131,10 @@ Retrieve header information.
 doc.getId() == doc.body['_id']; // true
 doc.getRev() == doc.body['_rev']; // true
 
-doc.getBody() == doc.body; // false
+doc.getBody(); // {}
 ```
 
-Methods for accessing the document's id and rev properties. Another way of writing `doc.body['_id']` and `doc.body['_rev']`.
+Methods for accessing the document's _id and _rev properties. Another way of writing `doc.body['_id']` and `doc.body['_rev']`.
 
 And one for creating a deep clone of the document body `deepExtend({}, doc.body)`<sup>[1](https://github.com/unclechu/node-deep-extend)</sup>.
 
@@ -160,26 +160,13 @@ doc.attachment.write(name, data, mimeType, (err) => {
   if (!err)
     console.log('success!');
 });
-db.doc.attachment.write(id, name, data, mimeType, (err, doc) => {
-  if (err)
-    return;
-  // doc is a NanoRecords document
-  console.log(doc.body);
+db.doc.attachment.write(id, name, data, mimeType, (err) => {
+  if (!err)
+    console.log('success!');
 });
 ```
 
 Overwrite an existing attachment with the same name, create a new attachment if one doesn't exist.
-
-```javascript
-db.doc.attachment.forcedWrite(id, name, data, mimeType, (err, doc) => {
-  if (err)
-    return;
-  // doc is a NanoRecords document
-  console.log(doc.body);
-});
-```
-
-Same as above but creates a new record if one doesn't exist.
 
 ```javascript
 doc.attachment.destroy(name, (err) => {
@@ -258,20 +245,20 @@ var db = new NanoRecords(nano, dbName, designs);
 When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [design documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 ```javascript
-db.design.view(id, name, params, (err, data) => {
+db.design.view(id, name, params, (err, result) => {
   if (err)
     return;
-  console.log(data);
+  console.log(result);
 });
 ```
 
 Persist the given view using the provided id (ie. 'foo') and name if it's not already there, then return the result of the query.
 
 ```javascript
-db.design.show(id, name, docId, (err, data) => {
+db.design.show(id, name, docId, (err, result) => {
   if (err)
     return;
-  console.log(data);
+  console.log(result);
 });
 ```
 

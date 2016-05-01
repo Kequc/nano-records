@@ -20,14 +20,14 @@ var DbDesign = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!id) {
             callback(err_1.default.missingId('design'));
             return;
         }
-        tries++;
         this._performShow(id, name, docId, function (err, result) {
             if (err) {
-                if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+                if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     _this._updateDesign(id, { 'shows': [name] }, function (err) {
                         if (err)
                             callback(err);
@@ -49,14 +49,14 @@ var DbDesign = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!id) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        tries++;
         this._performView(id, name, params, function (err, result) {
             if (err) {
-                if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+                if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     _this._updateDesign(id, { 'views': [name] }, function (err) {
                         if (err)
                             callback(err);

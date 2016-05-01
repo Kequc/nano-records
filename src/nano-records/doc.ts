@@ -56,11 +56,11 @@ export default class Doc
   
   write (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!this.getId()) {
       callback(Err.missingId('doc'));
       return;
     }
-    tries++;
     this._performWrite(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
@@ -90,11 +90,11 @@ export default class Doc
   
   update (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!this.getId()) {
       callback(Err.missingId('doc'));
       return;
     }
-    tries++;
     this._performUpdate(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
@@ -119,7 +119,7 @@ export default class Doc
   private _performUpdate (body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
     if (this.getRev() !== this._latestRev)
-      callback(Err.conflict('doc'));
+      callback(Err.conflict('doc')); // we know we are out of date
     else
       this.db.raw.insert(this._extendBody(body), Err.resultFunc('doc', callback));
   }
@@ -131,11 +131,11 @@ export default class Doc
   
   destroy (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!this.getId()) {
       callback(Err.missingId('doc'));
       return;
     }
-    tries++;
     this._performDestroy((err) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
@@ -161,13 +161,13 @@ export default class Doc
     this.db.raw.destroy(this.getId(), this._latestRev, Err.resultFunc('doc', callback));
   }
   
-  head (callback: (err?: Err, rev?: string, data?: any)=>any = ()=>{})
+  head (callback: (err?: Err, rev?: string, result?: any)=>any = ()=>{})
   {
     // we have a method already available for this on the db object
-    this.db.doc.head(this.getId(), (err, rev, data) => {
+    this.db.doc.head(this.getId(), (err, rev, result) => {
       if (rev)
         this._latestRev = rev;
-      callback(err, rev, data);
+      callback(err, rev, result);
     });
   }
   

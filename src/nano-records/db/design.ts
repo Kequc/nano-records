@@ -24,16 +24,16 @@ export default class DbDesign
   // TODO: we probably need a separate interface for interacting with
   // the results from this class
   
-  show (id: string, name: string, docId: string, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
+  show (id: string, name: string, docId: string, callback: (err?: Err, result?: any)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!id) {
       callback(Err.missingId('design'));
       return;
     }
-    tries++;
     this._performShow(id, name, docId, (err, result) => {
       if (err) {
-        if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+        if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           this._updateDesign(id, { 'shows': [name] }, (err: Err) => {
             if (err)
               callback(err);
@@ -49,21 +49,21 @@ export default class DbDesign
     });
   }
   
-  private _performShow (id: string, name: string, docId: string, callback: (err: Err, data?: any)=>any)
+  private _performShow (id: string, name: string, docId: string, callback: (err: Err, result?: any)=>any)
   {
     this.db.raw.show(id, name, docId, Err.resultFunc('design', callback));
   }
   
-  view (id: string, name: string, params: Object, callback: (err?: Err, data?: any)=>any = ()=>{}, tries: number = 0)
+  view (id: string, name: string, params: Object, callback: (err?: Err, result?: any)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!id) {
       callback(Err.missingId('doc'));
       return;
     }
-    tries++;
     this._performView(id, name, params, (err, result) => {
       if (err) {
-        if (tries <= 1 && ["no_db_file", "not_found"].indexOf(err.name) > -1) {
+        if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           this._updateDesign(id, { 'views': [name] }, (err: Err) => {
             if (err)
               callback(err);
@@ -79,7 +79,7 @@ export default class DbDesign
     });
   }
   
-  private _performView (id: string, name: string, params: Object, callback: (err: Err, data?: any)=>any)
+  private _performView (id: string, name: string, params: Object, callback: (err: Err, result?: any)=>any)
   {
     this.db.raw.view(id, name, params, Err.resultFunc('design', callback));
   }

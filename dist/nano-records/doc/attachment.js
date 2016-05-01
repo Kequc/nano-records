@@ -29,11 +29,11 @@ var DocAttachment = (function () {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!this.doc.getId()) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        tries++;
         this._performWrite(name, data, mimeType, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
@@ -52,7 +52,7 @@ var DocAttachment = (function () {
                 // TODO: Is there more information available here?
                 _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
                 _this.doc.body['_attachments'][name] = {};
-                // we are intentionally not storing the new rev of the document
+                // we are intentionally not storing the new rev on the document
                 _this.doc._latestRev = result['rev'];
                 callback();
             }
@@ -68,7 +68,7 @@ var DocAttachment = (function () {
             callback(err_1.default.missingId('doc'));
             return devNull();
         }
-        return this._performWriteStream(name, null, mimetype, function (err, result) {
+        return this._performWriteStream(name, undefined, mimetype, function (err, result) {
             if (err)
                 callback(err);
             else {
@@ -76,29 +76,24 @@ var DocAttachment = (function () {
                 // TODO: Is there more information available here?
                 _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
                 _this.doc.body['_attachments'][name] = {};
-                // we are intentionally not storing the new rev of the document
+                // we are intentionally not storing the new rev on the document
                 _this.doc._latestRev = result['rev'];
                 callback();
             }
         });
     };
     DocAttachment.prototype._performWriteStream = function (name, data, mimeType, callback) {
-        if (this.doc.getRev() !== this.doc._latestRev) {
-            callback(err_1.default.conflict('doc'));
-            return devNull();
-        }
-        else
-            return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, err_1.default.resultFunc('attachment', callback));
+        return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, err_1.default.resultFunc('attachment', callback));
     };
     DocAttachment.prototype.destroy = function (name, callback, tries) {
         var _this = this;
         if (callback === void 0) { callback = function () { }; }
         if (tries === void 0) { tries = 0; }
+        tries++;
         if (!this.doc.getId()) {
             callback(err_1.default.missingId('doc'));
             return;
         }
-        tries++;
         this._performDestroy(name, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {

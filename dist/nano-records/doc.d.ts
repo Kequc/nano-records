@@ -26,7 +26,7 @@ export default class Doc {
     private _extendBody(body);
     destroy(callback?: (err?: Err) => any, tries?: number): void;
     private _performDestroy(callback);
-    head(callback?: (err?: Err, rev?: string, data?: any) => any): void;
+    head(callback?: (err?: Err, rev?: string, result?: any) => any): void;
     getId(): string;
     getRev(): string;
     getBody(): {

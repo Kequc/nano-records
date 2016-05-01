@@ -36,11 +36,11 @@ export default class DocAttachment
   
   write (name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!this.doc.getId()) {
       callback(Err.missingId('doc'));
       return;
     }
-    tries++;
     this._performWrite(name, data, mimeType, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
@@ -59,7 +59,7 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        // we are intentionally not storing the new rev of the document
+        // we are intentionally not storing the new rev on the document
         this.doc._latestRev = result['rev'];
         callback();
       }
@@ -77,7 +77,7 @@ export default class DocAttachment
       callback(Err.missingId('doc'));
       return devNull();
     }
-    return this._performWriteStream(name, null, mimetype, (err, result) => {
+    return this._performWriteStream(name, undefined, mimetype, (err, result) => {
       if (err)
         callback(err);
       else {
@@ -85,7 +85,7 @@ export default class DocAttachment
         // TODO: Is there more information available here?
         this.doc.body['_attachments'] = this.doc.body['_attachments'] || {};
         this.doc.body['_attachments'][name] = {};
-        // we are intentionally not storing the new rev of the document
+        // we are intentionally not storing the new rev on the document
         this.doc._latestRev = result['rev'];
         callback();
       }
@@ -94,21 +94,16 @@ export default class DocAttachment
   
   private _performWriteStream (name: string, data: any, mimeType: string, callback: (err: Err, result?: { [index: string]: string })=>any)
   {
-    if (this.doc.getRev() !== this.doc._latestRev) {
-      callback(Err.conflict('doc'));
-      return devNull();
-    }
-    else
-      return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc.getRev() }, Err.resultFunc('attachment', callback));
+    return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, Err.resultFunc('attachment', callback));
   }
   
   destroy (name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
+    tries++;
     if (!this.doc.getId()) {
       callback(Err.missingId('doc'));
       return;
     }
-    tries++;
     this._performDestroy(name, (err, result) => {
       if (err) {
         if (tries <= this.doc.db.maxTries && err.name == "conflict") {
