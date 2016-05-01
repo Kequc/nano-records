@@ -5,8 +5,8 @@ var NanoRecords = require('../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
-var assert = require('../assert/db/doc.assert');
-var Util = require('../assert/util');
+var assert = require('../../assert/db/doc.assert');
+var Util = require('../../assert/util');
 
 describe('db-doc', () => {
   after((done) => {
@@ -40,7 +40,7 @@ describe('db-doc', () => {
       assert.forcedUpdate(db, Util.id, done);
     });
     it('destroy', (done) => {
-      assert.destroy(db, Util.id, done);
+      assert.destroy_Fail(db, Util.id, "not_found", done);
     });
   });
   
@@ -102,7 +102,7 @@ describe('db-doc', () => {
         assert.forcedUpdate(db, Util.id, done);
       });
       it('destroy', (done) => {
-        assert.destroy(db, Util.id, done);
+        assert.destroy_Fail(db, Util.id, "not_found", done);
       });
     });
     
@@ -119,7 +119,7 @@ describe('db-doc', () => {
       describe('attachment does not exist', () => {
         
         it('read', (done) => {
-          assert.create(db, _doc.getId(), done);
+          assert.read(db, _doc.getId(), done);
         });
         it('head', (done) => {
           assert.head(db, _doc.getId(), done);
@@ -149,7 +149,7 @@ describe('db-doc', () => {
         });
         
         it('read', (done) => {
-          assert.create(db, _doc.getId(), done);
+          assert.read(db, _doc.getId(), done);
         });
         it('head', (done) => {
           assert.head(db, _doc.getId(), done);

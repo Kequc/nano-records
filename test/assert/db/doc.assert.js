@@ -8,10 +8,10 @@ var Util = require('../util');
 var DbDocAssert = {};
 
 DbDocAssert.create = (db, done) => {
-  db.doc.create(complexBody, (err, doc) => {
+  db.doc.create(Util.complexBody, (err, doc) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
-    Util.checkBody(doc, complexBody, done);
+    Util.checkBody(doc, Util.complexBody, done);
   });
 };
 
@@ -29,7 +29,7 @@ DbDocAssert.read = (db, id, done) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.checkBody(doc, complexBody, done);
+    Util.checkBody(doc, Util.complexBody, done);
   });
 };
 
@@ -107,7 +107,7 @@ DbDocAssert.update = (db, id, done, moreChanges) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.assertBody(doc, asserts, done);
+    Util.checkBody(doc, asserts, done);
   });
 };
 
@@ -132,7 +132,7 @@ DbDocAssert.forcedUpdate = (db, id, done, moreChanges) => {
 };
 
 DbDocAssert.destroy_Fail = (db, id, errorName, done) => {
-  db.doc.destroy(id, { will: "fail" }, (err, doc) => {
+  db.doc.destroy(id, (err, doc) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(doc).to.be.undefined;

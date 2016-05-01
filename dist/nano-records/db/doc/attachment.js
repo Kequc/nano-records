@@ -75,18 +75,12 @@ var DbDocAttachment = (function () {
         if (tries === void 0) { tries = 0; }
         tries++;
         this.doc.head(id, function (err, rev) {
-            if (err) {
-                if (err.name == "not_found")
-                    callback(); // nothing to see here
-                else
-                    callback(err);
-            }
+            if (err)
+                callback(err);
             else {
                 _this._performDestroy(id, rev, name, function (err) {
                     if (err) {
-                        if (err.name == "not_found")
-                            callback(); // nothing to see here
-                        else if (tries <= _this.doc.db.maxTries && err.name == "conflict")
+                        if (tries <= _this.doc.db.maxTries && err.name == "conflict")
                             _this.destroy(id, name, callback, tries);
                         else
                             callback(err);

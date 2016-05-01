@@ -1,12 +1,12 @@
 "use strict";
 var dbName = 'nano-records-db-doc-attachment-test';
 
-var NanoRecords = require('../../../dist/nano-records');
+var NanoRecords = require('../../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
-var assert = require('../../assert/db/doc/attachment');
-var Util = require('../../assert/util');
+var assert = require('../../../assert/db/doc/attachment.assert');
+var Util = require('../../../assert/util');
 
 describe('db-doc-attachment', () => {
   after((done) => {
@@ -28,7 +28,7 @@ describe('db-doc-attachment', () => {
       assert.write_Fail(db, Util.id, "not_found", done);
     });
     it('destroy', (done) => {
-      assert.destroy(db, Util.id, done);
+      assert.destroy_Fail(db, Util.id, "not_found", done);
     });
     
   });
@@ -44,7 +44,7 @@ describe('db-doc-attachment', () => {
       });
       
       it('read', (done) => {
-        assert.read_Fail(db, Util.id, errorName, done);
+        assert.read_Fail(db, Util.id, "not_found", done);
       });
       it('readStream', (done) => {
         assert.readStream_Fail(db, Util.id, "not_found", done);
@@ -53,7 +53,7 @@ describe('db-doc-attachment', () => {
         assert.write_Fail(db, Util.id, "not_found", done);
       });
       it('destroy', (done) => {
-        assert.destroy(db, Util.id, done);
+        assert.destroy_Fail(db, Util.id, "not_found", done);
       });
       
     });

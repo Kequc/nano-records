@@ -88,18 +88,12 @@ export default class DbDocAttachment
   {
     tries++;
     this.doc.head(id, (err, rev) => {
-      if (err) {
-        if (err.name == "not_found")
-          callback(); // nothing to see here
-        else
-          callback(err);
-      }
+      if (err)
+        callback(err);
       else {
         this._performDestroy(id, rev, name, (err) => {
           if (err) {
-            if (err.name == "not_found")
-              callback(); // nothing to see here
-            else if (tries <= this.doc.db.maxTries && err.name == "conflict")
+            if (tries <= this.doc.db.maxTries && err.name == "conflict")
               this.destroy(id, name, callback, tries);
             else
               callback(err);

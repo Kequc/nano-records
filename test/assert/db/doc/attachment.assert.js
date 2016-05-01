@@ -19,7 +19,8 @@ DbDocAttachmentAssert.read_Fail = (db, id, errorName, done) => {
 DbDocAttachmentAssert.read = (db, id, done) => {
   db.doc.attachment.read(id, Util.fileName, (err, data) => {
     expect(err).to.be.undefined;
-    expect(data).to.equal(Util.fileContent);
+    expect(data).to.be.ok;
+    expect(Util.bufferToString(data)).to.equal(Util.fileContent);
     done();
   });
 };
@@ -30,8 +31,10 @@ DbDocAttachmentAssert.readStream_Fail = (db, id, errorName, done) => {
     expect(err.name).to.equal(errorName);
     done();
   }), (result) => {
-    expect(result).to.be.ok;
-    // expect(result).to.equal("");
+    if (result == "")
+      expect(result).to.equal("");
+    else
+      expect(JSON.parse(result)).to.include.keys('error', 'reason');
   });
 };
 
@@ -53,10 +56,15 @@ DbDocAttachmentAssert.write_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAttachmentAssert.write = (db, id, done) => {
-  db.doc.attachment.write(id, Util.fileName, "Can write here.", "text/plain", (err, doc) => {
-    expect(doc.attachment.exists(Util.fileName)).to.be.true;
-    expect(doc.body).to.include.keys('_attachments', '_id', '_rev');
-    Util.checkBody(doc, {}, done);
+  db.doc.attachment.write(id, Util.fileName, "Can write here.", "text/plain", (err) => {
+    expect(err).to.be.undefined;
+    db.doc.read(id, (err, doc) => {
+      expect(err).to.be.undefined;
+      expect(doc).to.be.ok;
+      expect(doc.attachment.exists(Util.fileName)).to.be.true;
+      expect(doc.body).to.include.keys('_attachments', '_id', '_rev');
+      done();
+    });
   });
 };
 
@@ -72,9 +80,13 @@ DbDocAttachmentAssert.destroy = (db, id, done) => {
   db.doc.attachment.destroy(id, Util.fileName, (err) => {
     expect(err).to.be.undefined;
     db.doc.read(id, (err, doc) => {
-      expect(err).to.be.undefined;
-      expect(doc.attachment.exists(Util.fileName)).to.be.false;
-      done();
+      if (err && err.name == "not_found")
+        done();
+      else {
+        expect(err).to.be.undefined;
+        expect(doc.attachment.exists(Util.fileName)).to.be.false;
+        done();
+      }
     });
   });
 };

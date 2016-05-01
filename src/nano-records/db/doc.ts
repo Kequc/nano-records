@@ -184,25 +184,19 @@ export default class DbDoc
   
   private _performWrite (id: string, rev: string, body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
   {
-    this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), Err.resultFunc('doc', callback));
+    this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': rev }), Err.resultFunc('doc', callback));
   }
   
   destroy (id: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
   {
     tries++;
     this.head(id, (err, rev) => {
-      if (err) {
-        if (err.name == "not_found")
-          callback(); // nothing to see here
-        else
-          callback(err);
-      }
-      else
+      if (err)
+        callback(err);
+      else {
         this._performDestroy(id, rev, (err) => {
           if (err) {
-            if (err.name == "not_found")
-              callback(); // nothing to see here
-            else if (tries <= this.db.maxTries && err.name == "conflict")
+            if (tries <= this.db.maxTries && err.name == "conflict")
               this.destroy(id, callback, tries);
             else
               callback(err);
@@ -210,6 +204,7 @@ export default class DbDoc
           else
             callback(); // successfully destroyed
         });
+      }
     });
   }
   

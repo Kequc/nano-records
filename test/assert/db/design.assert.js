@@ -38,7 +38,7 @@ DbDesignAssert.view_Retries = (db, id, name, done) => {
   done();
 };
 
-DocAssert.view_Retries_Fail = (db, id, name, done) => {
+DbDesignAssert.view_Retries_Fail = (db, id, name, done) => {
   // TODO: not currently a way to test this
   // triggerBgUpdate(db, () => {
   //   db.design.view(id, name, {}, (err, result) => {
@@ -77,7 +77,7 @@ DbDesignAssert.show_Retries = (db, id, name, asserts, done) => {
   done();
 };
 
-DocAssert.show_Retries_Fail = (db, id, name, done) => {
+DbDesignAssert.show_Retries_Fail = (db, id, name, done) => {
   // TODO: not currently a way to test this
   // triggerBgUpdate(db, () => {
   //   db.design.show(id, name, "fake-id-doesnt-exist", (err, result) => {

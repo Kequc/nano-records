@@ -18,12 +18,12 @@ Util.triggerBgUpdate = (db, id, changes, callback) => {
     callback = changes;
     changes = undefined;
   }
-  db.get(id, (err, body) => {
+  db.raw.get(id, (err, body) => {
     expect(err).to.be.falsy;
     deepExtend(body, changes || { a: 'change' });
     var oldRev = body['_rev'];
     expect(oldRev).to.be.ok;
-    db.insert(body, (err, body) => {
+    db.raw.insert(body, (err, body) => {
       expect(err).to.be.falsy;
       expect(body['rev']).to.be.ok;
       expect(body['rev']).to.not.equal(oldRev);
@@ -46,6 +46,10 @@ Util.checkBody = (doc, asserts, done) => {
     expect(gotDoc.body).to.eql(doc.body);
     done();
   });
+};
+
+Util.bufferToString = (buf) => {
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
 };
 
 Util.streamToString = (stream, callback) => {

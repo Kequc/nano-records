@@ -5,8 +5,8 @@ var NanoRecords = require('../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
-var assert = require('../assert/doc/attachment.assert');
-var Util = require('../assert/util');
+var assert = require('../../assert/doc/attachment.assert');
+var Util = require('../../assert/util');
 
 describe('doc-attachment', () => {
   var _doc;
@@ -119,7 +119,7 @@ describe('doc-attachment', () => {
           assert.write_Retries_Fail(_doc, true, done);
         });
         it('writeStream', (done) => {
-          assert.writeStream_Fail(_doc, "conflict", true, done);
+          assert.writeStream(_doc, done);
         });
         it('destroy', (done) => {
           assert.destroy(_doc, done);

@@ -175,7 +175,7 @@ var DbDoc = (function () {
         });
     };
     DbDoc.prototype._performWrite = function (id, rev, body, callback) {
-        this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': undefined }), err_1.default.resultFunc('doc', callback));
+        this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': rev }), err_1.default.resultFunc('doc', callback));
     };
     DbDoc.prototype.destroy = function (id, callback, tries) {
         var _this = this;
@@ -183,18 +183,12 @@ var DbDoc = (function () {
         if (tries === void 0) { tries = 0; }
         tries++;
         this.head(id, function (err, rev) {
-            if (err) {
-                if (err.name == "not_found")
-                    callback(); // nothing to see here
-                else
-                    callback(err);
-            }
-            else
+            if (err)
+                callback(err);
+            else {
                 _this._performDestroy(id, rev, function (err) {
                     if (err) {
-                        if (err.name == "not_found")
-                            callback(); // nothing to see here
-                        else if (tries <= _this.db.maxTries && err.name == "conflict")
+                        if (tries <= _this.db.maxTries && err.name == "conflict")
                             _this.destroy(id, callback, tries);
                         else
                             callback(err);
@@ -202,6 +196,7 @@ var DbDoc = (function () {
                     else
                         callback(); // successfully destroyed
                 });
+            }
         });
     };
     DbDoc.prototype._performDestroy = function (id, rev, callback) {

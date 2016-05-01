@@ -2,6 +2,7 @@
 var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
+var fs = require('fs');
 
 var Util = require('../util');
 
@@ -39,7 +40,10 @@ DocAttachmentAssert.readStream_Fail = (doc, errorName, done) => {
     expect(err.name).to.equal(errorName);
     done();
   }), (result) => {
-    expect(result).to.equal("");
+    if (result == "")
+      expect(result).to.equal("");
+    else
+      expect(JSON.parse(result)).to.include.keys('error', 'reason');
   });
 };
 
@@ -73,7 +77,7 @@ DocAttachmentAssert.write = (doc, done) => {
     doc.read((err) => {
       expect(err).to.be.undefined;
       DocAttachmentAssert.exists(doc, true);
-      expect(doc.getrev()).to.not.equal(oldRev);
+      expect(doc.getRev()).to.not.equal(oldRev);
       done();
     });
   });
@@ -92,33 +96,33 @@ DocAttachmentAssert.write_Retries_Fail = (doc, exists, done) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       DocAttachmentAssert.exists(doc, exists);
-      expect(doc.getrev()).to.equal(oldRev);
+      expect(doc.getRev()).to.equal(oldRev);
       done();
-    }, db.maxTries); // tried x times
+    }, doc.db.maxTries); // tried x times
   });
 };
 
 DocAttachmentAssert.writeStream_Fail = (doc, errorName, exists, done) => {
   let oldRev = doc.getRev();
-  fs.createReadStream('../../attachment.txt').pipe(doc.attachment.writeStream(Util.fileName, "text/plain", (err) => {
+  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writeStream(Util.fileName, "text/plain", (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     DocAttachmentAssert.exists(doc, exists);
-    expect(doc.getrev()).to.equal(oldRev);
+    expect(doc.getRev()).to.equal(oldRev);
     done();
   }));
 };
 
 DocAttachmentAssert.writeStream = (doc, done) => {
   let oldRev = doc.getRev();
-  fs.createReadStream('../../attachment.txt').pipe(doc.attachment.writeStream(Util.fileName, "text/plain", (err) => {
+  fs.createReadStream('./test/attachment.txt').pipe(doc.attachment.writeStream(Util.fileName, "text/plain", (err) => {
     expect(err).to.be.undefined;
     DocAttachmentAssert.exists(doc, true);
-    expect(doc.getrev()).to.equal(oldRev);
+    expect(doc.getRev()).to.equal(oldRev);
     doc.read((err) => {
       expect(err).to.be.undefined;
       DocAttachmentAssert.exists(doc, true);
-      expect(doc.getrev()).to.not.equal(oldRev);
+      expect(doc.getRev()).to.not.equal(oldRev);
       done();
     });
   }));
@@ -138,11 +142,11 @@ DocAttachmentAssert.destroy = (doc, done) => {
   doc.attachment.destroy(Util.fileName, (err) => {
     expect(err).to.be.undefined;
     DocAttachmentAssert.exists(doc, false);
-    expect(doc.getrev()).to.equal(oldRev);
+    expect(doc.getRev()).to.equal(oldRev);
     doc.read((err) => {
       expect(err).to.be.undefined;
       DocAttachmentAssert.exists(doc, false);
-      expect(doc.getrev()).to.not.equal(oldRev);
+      expect(doc.getRev()).to.not.equal(oldRev);
       done();
     });
   });
@@ -157,13 +161,13 @@ DocAttachmentAssert.destroy_Retries = (doc, done) => {
 DocAttachmentAssert.destroy_Retries_Fail = (doc, exists, done) => {
   Util.triggerBgUpdate(doc.db, doc.getId(), () => {
     let oldRev = doc.getRev();
-    _doc.attachment.destroy(Util.fileName, (err) => {
+    doc.attachment.destroy(Util.fileName, (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       DocAttachmentAssert.exists(doc, exists);
-      expect(doc.getrev()).to.equal(oldRev);
+      expect(doc.getRev()).to.equal(oldRev);
       done();
-    }, db.maxTries); // tried x times
+    }, doc.db.maxTries); // tried x times
   });
 };
 
