@@ -9,7 +9,7 @@
  * 
  */
 
-export interface iNanoError {
+export interface NanoError {
   name?: string;
   error?: string;
   reason?: string;
@@ -29,9 +29,9 @@ export default class Err
   name: string;
   message: string;
   
-  raw: iNanoError;
+  raw: NanoError;
   
-  constructor (scope: string, name?: string, message?: string, raw?: iNanoError) {
+  constructor (scope: string, name?: string, message?: string, raw?: NanoError) {
     this.scope = scope;
     this.name = name || "unknown_error";
     this.message = message || "No additional information available.";
@@ -40,7 +40,7 @@ export default class Err
   
   static resultFunc (scope: string, callback: (err: Err, result?: any)=>any): Function
   {
-    return (raw: iNanoError, result: any) => {
+    return (raw: NanoError, result: any) => {
       let err = this.make(scope, raw);
       if (err)
         callback(err);
@@ -49,7 +49,7 @@ export default class Err
     }
   }
   
-  static make (scope: string, err: iNanoError): Err {
+  static make (scope: string, err: NanoError): Err {
     if (!err)
       return;
     else if (err.statusCode == 412) {
@@ -91,7 +91,7 @@ export default class Err
   
   // common ones
   
-  static missing (scope: string, err?: iNanoError): Err {
+  static missing (scope: string, err?: NanoError): Err {
     return new Err(scope, "not_found", "Not found.", err);
   }
   
@@ -99,7 +99,7 @@ export default class Err
     return new Err(scope, "missing_id", "Id parameter required.");
   }
   
-  static conflict (scope: string, err?: iNanoError): Err {
+  static conflict (scope: string, err?: NanoError): Err {
     return new Err(scope, "conflict", "There was a conflict.", err);
   }
   

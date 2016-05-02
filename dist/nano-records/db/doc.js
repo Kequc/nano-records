@@ -22,15 +22,17 @@ var DbDoc = (function () {
         if (callback === void 0) { callback = function () { }; }
         this._performWriteAndInstantiateDoc(undefined, undefined, body, callback);
     };
-    DbDoc.prototype.read = function (id, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.read = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._read(id, callback);
+    };
+    DbDoc.prototype._read = function (id, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performRead(id, function (err, result) {
             if (err) {
                 if (tries <= 1 && err.name == "no_db_file") {
@@ -39,7 +41,7 @@ var DbDoc = (function () {
                         if (err && err.name != "db_already_exists")
                             callback(err);
                         else
-                            _this.read(id, callback, tries);
+                            _this._read(id, callback, tries);
                     });
                 }
                 else
@@ -52,9 +54,15 @@ var DbDoc = (function () {
     DbDoc.prototype._performRead = function (id, callback) {
         this.db.raw.get(id, err_1.default.resultFunc('doc', callback));
     };
-    DbDoc.prototype.write = function (id, body, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.write = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._write(id, body, callback);
+    };
+    DbDoc.prototype._write = function (id, body, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
         this.head(id, function (err, rev) {
@@ -64,7 +72,7 @@ var DbDoc = (function () {
                 _this._performWriteAndInstantiateDoc(id, rev, body, function (err, doc) {
                     if (err) {
                         if (tries <= _this.db.maxTries && err.name == "conflict")
-                            _this.write(id, body, callback, tries);
+                            _this._write(id, body, callback, tries);
                         else
                             callback(err);
                     }
@@ -74,39 +82,38 @@ var DbDoc = (function () {
             }
         });
     };
-    DbDoc.prototype.forcedWrite = function (id, body, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.forcedWrite = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._forcedWrite(id, body, callback);
+    };
+    DbDoc.prototype._forcedWrite = function (id, body, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
-        this._performWriteAndInstantiateDoc(id, undefined, body, function (err, doc) {
-            if (err) {
-                if (err.name == "conflict") {
-                    // document exists
-                    _this.write(id, body, function (err, doc) {
-                        if (err) {
-                            if (tries <= _this.db.maxTries && err.name == "not_found")
-                                _this.forcedWrite(id, body, callback, tries);
-                            else
-                                callback(err);
-                        }
-                        else
-                            callback(undefined, doc); // successfully written
-                    });
+        this.head(id, function (err, rev) {
+            _this._performWriteAndInstantiateDoc(id, rev, body, function (err, doc) {
+                if (err) {
+                    if (tries <= _this.db.maxTries && err.name == "conflict")
+                        _this._forcedWrite(id, body, callback, tries);
+                    else
+                        callback(err);
                 }
                 else
-                    callback(err);
-            }
-            else
-                callback(undefined, doc); // successfully written
+                    callback(undefined, doc); // successfully written
+            });
         });
     };
     DbDoc.prototype.update = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._update(id, body, callback);
+    };
+    DbDoc.prototype._update = function (id, body, callback) {
         this.read(id, function (err, doc) {
             if (err)
                 callback(err);
@@ -121,35 +128,38 @@ var DbDoc = (function () {
             }
         });
     };
-    DbDoc.prototype.forcedUpdate = function (id, body, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.forcedUpdate = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._forcedUpdate(id, body, callback);
+    };
+    DbDoc.prototype._forcedUpdate = function (id, body, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
-        this._performWriteAndInstantiateDoc(id, undefined, body, function (err, doc) {
+        this.update(id, body, function (err, doc) {
             if (err) {
-                if (err.name == "conflict") {
-                    // document exists
-                    _this.update(id, body, function (err, doc) {
+                if (err.name == "not_found") {
+                    _this._performWriteAndInstantiateDoc(id, undefined, body, function (err, doc) {
                         if (err) {
-                            if (tries <= _this.db.maxTries && err.name == "not_found")
-                                _this.forcedUpdate(id, body, callback, tries);
+                            if (tries <= _this.db.maxTries && err.name == "conflict") {
+                                // document exists
+                                _this._forcedUpdate(id, body, callback, tries);
+                            }
                             else
                                 callback(err);
                         }
                         else
-                            callback(undefined, doc); // successfully updated
+                            callback(undefined, doc); // successfully written
                     });
                 }
                 else
                     callback(err);
             }
             else
-                callback(undefined, doc); // successfully written
+                callback(undefined, doc); // successfully updated
         });
     };
     DbDoc.prototype._performWriteAndInstantiateDoc = function (id, rev, body, callback, tries) {
@@ -177,9 +187,15 @@ var DbDoc = (function () {
     DbDoc.prototype._performWrite = function (id, rev, body, callback) {
         this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': rev }), err_1.default.resultFunc('doc', callback));
     };
-    DbDoc.prototype.destroy = function (id, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.destroy = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._destroy(id, callback);
+    };
+    DbDoc.prototype._destroy = function (id, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
         this.head(id, function (err, rev) {
@@ -189,7 +205,7 @@ var DbDoc = (function () {
                 _this._performDestroy(id, rev, function (err) {
                     if (err) {
                         if (tries <= _this.db.maxTries && err.name == "conflict")
-                            _this.destroy(id, callback, tries);
+                            _this._destroy(id, callback, tries);
                         else
                             callback(err);
                     }
@@ -202,15 +218,17 @@ var DbDoc = (function () {
     DbDoc.prototype._performDestroy = function (id, rev, callback) {
         this.db.raw.destroy(id, rev, err_1.default.resultFunc('doc', callback));
     };
-    DbDoc.prototype.head = function (id, callback, tries) {
-        var _this = this;
+    DbDoc.prototype.head = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._head(id, callback);
+    };
+    DbDoc.prototype._head = function (id, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performHead(id, function (err, rev, result) {
             if (err) {
                 if (tries <= 1 && err.name == "no_db_file") {
@@ -219,7 +237,7 @@ var DbDoc = (function () {
                         if (err && err.name != "db_already_exists")
                             callback(err);
                         else
-                            _this.head(id, callback, tries);
+                            _this._head(id, callback, tries);
                     });
                 }
                 else

@@ -16,15 +16,17 @@ var DbDesign = (function () {
     // in cases where they have been changed
     // TODO: we probably need a separate interface for interacting with
     // the results from this class
-    DbDesign.prototype.show = function (id, name, docId, callback, tries) {
-        var _this = this;
+    DbDesign.prototype.show = function (id, name, docId, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('design'));
+        else
+            this._show(id, name, docId, callback);
+    };
+    DbDesign.prototype._show = function (id, name, docId, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!id) {
-            callback(err_1.default.missingId('design'));
-            return;
-        }
         this._performShow(id, name, docId, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
@@ -32,7 +34,7 @@ var DbDesign = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.show(id, name, docId, callback, tries);
+                            _this._show(id, name, docId, callback, tries);
                     });
                 }
                 else
@@ -45,15 +47,17 @@ var DbDesign = (function () {
     DbDesign.prototype._performShow = function (id, name, docId, callback) {
         this.db.raw.show(id, name, docId, err_1.default.resultFunc('design', callback));
     };
-    DbDesign.prototype.view = function (id, name, params, callback, tries) {
-        var _this = this;
+    DbDesign.prototype.view = function (id, name, params, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._view(id, name, params, callback);
+    };
+    DbDesign.prototype._view = function (id, name, params, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!id) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performView(id, name, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
@@ -61,7 +65,7 @@ var DbDesign = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.view(id, name, params, callback, tries);
+                            _this._view(id, name, params, callback, tries);
                     });
                 }
                 else
@@ -73,9 +77,6 @@ var DbDesign = (function () {
     };
     DbDesign.prototype._performView = function (id, name, params, callback) {
         this.db.raw.view(id, name, params, err_1.default.resultFunc('design', callback));
-    };
-    DbDesign.prototype._performRetrieveLatest = function (id, callback) {
-        this.db.raw.get('_design/' + id, err_1.default.resultFunc('design', callback));
     };
     DbDesign.prototype._updateDesign = function (id, kinds, callback) {
         var design = this.db.designs[id];

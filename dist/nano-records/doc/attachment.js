@@ -25,15 +25,17 @@ var DocAttachment = (function () {
         // we have a method already available for this on the db object
         return this.doc.db.doc.attachment.createReadStream(this.doc.getId(), name, callback);
     };
-    DocAttachment.prototype.write = function (name, data, mimeType, callback, tries) {
-        var _this = this;
+    DocAttachment.prototype.write = function (name, data, mimeType, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!this.doc.getId())
+            callback(err_1.default.missingId('doc'));
+        else
+            this._write(name, data, mimeType, callback);
+    };
+    DocAttachment.prototype._write = function (name, data, mimeType, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!this.doc.getId()) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performWrite(name, data, mimeType, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
@@ -41,7 +43,7 @@ var DocAttachment = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.write(name, data, mimeType, callback, tries);
+                            _this._write(name, data, mimeType, callback, tries);
                     });
                 }
                 else
@@ -68,32 +70,36 @@ var DocAttachment = (function () {
             callback(err_1.default.missingId('doc'));
             return devNull();
         }
-        return this._performCreateWriteStream(name, undefined, mimeType, function (err, result) {
-            if (err)
-                callback(err);
-            else {
-                // attachment written
-                // TODO: Is there more information available here?
-                _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
-                _this.doc.body['_attachments'][name] = {};
-                // we are intentionally not storing the new rev on the document
-                _this.doc._latestRev = result['rev'];
-                callback();
-            }
-        });
+        else {
+            return this._performCreateWriteStream(name, undefined, mimeType, function (err, result) {
+                if (err)
+                    callback(err);
+                else {
+                    // attachment written
+                    // TODO: Is there more information available here?
+                    _this.doc.body['_attachments'] = _this.doc.body['_attachments'] || {};
+                    _this.doc.body['_attachments'][name] = {};
+                    // we are intentionally not storing the new rev on the document
+                    _this.doc._latestRev = result['rev'];
+                    callback();
+                }
+            });
+        }
     };
     DocAttachment.prototype._performCreateWriteStream = function (name, data, mimeType, callback) {
         return this.doc.db.raw.attachment.insert(this.doc.getId(), name, data, mimeType, { rev: this.doc._latestRev }, err_1.default.resultFunc('attachment', callback));
     };
-    DocAttachment.prototype.destroy = function (name, callback, tries) {
-        var _this = this;
+    DocAttachment.prototype.destroy = function (name, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!this.doc.getId())
+            callback(err_1.default.missingId('doc'));
+        else
+            this._destroy(name, callback);
+    };
+    DocAttachment.prototype._destroy = function (name, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!this.doc.getId()) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performDestroy(name, function (err, result) {
             if (err) {
                 if (tries <= _this.doc.db.maxTries && err.name == "conflict") {
@@ -101,7 +107,7 @@ var DocAttachment = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.destroy(name, callback, tries);
+                            _this._destroy(name, callback, tries);
                     });
                 }
                 else

@@ -89,7 +89,7 @@ DocAssert.write_Retries = (doc, done) => {
 
 DocAssert.write_Retries_Fail = (doc, done) => {
   Util.triggerBgUpdate(doc.db, doc.getId(), () => {
-    doc.write({ boo: "oorns" }, (err) => {
+    doc._write({ boo: "oorns" }, (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       done();
@@ -125,7 +125,7 @@ DocAssert.update_Retries = (doc, done) => {
 
 DocAssert.update_Retries_Fail = (doc, done) => {
   Util.triggerBgUpdate(doc.db, doc.getId(), () => {
-    doc.update({ boo: "oorns" }, (err) => {
+    doc._update({ boo: "oorns" }, (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       done();
@@ -183,7 +183,7 @@ DocAssert.destroy_Retries = (doc, done) => {
 
 DocAssert.destroy_Retries_Fail = (doc, done) => {
   Util.triggerBgUpdate(doc.db, doc.getId(), () => {
-    doc.destroy((err) => {
+    doc._destroy((err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       done();

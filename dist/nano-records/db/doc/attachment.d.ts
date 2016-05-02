@@ -1,14 +1,22 @@
 import { default as Err } from '../../err';
 import { default as DbDoc } from '../doc';
+export interface ErrCallback {
+    (err?: Err): any;
+}
+export interface ErrDataCallback {
+    (err?: Err, data?: any): any;
+}
 export default class DbDocAttachment {
     doc: DbDoc;
     constructor(doc: DbDoc);
-    read(id: string, name: string, callback?: (err?: Err, data?: any) => any): void;
+    read(id: string, name: string, callback?: ErrDataCallback): void;
     private _performRead(id, name, callback);
-    createReadStream(id: string, name: string, callback?: (err?: Err) => any): any;
+    createReadStream(id: string, name: string, callback?: ErrCallback): any;
     private _performCreateReadStream(id, name, callback);
-    write(id: string, name: string, data: any, mimeType: string, callback?: (err?: Err) => any, tries?: number): void;
+    write(id: string, name: string, data: any, mimeType: string, callback?: ErrCallback): void;
+    private _write(id, name, data, mimeType, callback, tries?);
     private _performWrite(id, rev, name, data, mimeType, callback);
-    destroy(id: string, name: string, callback?: (err?: Err) => any, tries?: number): void;
+    destroy(id: string, name: string, callback?: ErrCallback): void;
+    private _destroy(id, name, callback, tries?);
     private _performDestroy(id, rev, name, callback);
 }

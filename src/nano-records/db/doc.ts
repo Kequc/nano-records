@@ -15,6 +15,22 @@ import {default as Doc} from '../doc';
 import {default as DbDocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
 
+export interface ErrCallback {
+	(err?: Err): any;
+}
+export interface ErrDocCallback {
+	(err?: Err, doc?: Doc): any;
+}
+export interface ErrResultCallback {
+	(err?: Err, result?: SimpleObject): any;
+}
+export interface HeadCallback {
+	(err?: Err, rev?: string, result?: SimpleObject): any;
+}
+export interface SimpleObject {
+	[index: string]: any;
+}
+
 export default class DbDoc
 {
   db: Db;
@@ -26,18 +42,22 @@ export default class DbDoc
     this.attachment = new DbDocAttachment(this);
   }
   
-  create (body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  create (body: SimpleObject, callback: ErrDocCallback = ()=>{})
   {
     this._performWriteAndInstantiateDoc(undefined, undefined, body, callback);
   }
   
-  read (id: string, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  read (id: string, callback: ErrDocCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._read(id, callback);
+  }
+  
+  private _read (id: string, callback: ErrDocCallback, tries: number = 0)
   {
     tries++;
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
     this._performRead(id, (err, result) => {
       if (err) {
         if (tries <= 1 && err.name == "no_db_file") {
@@ -46,7 +66,7 @@ export default class DbDoc
             if (err && err.name != "db_already_exists")
               callback(err);
             else
-              this.read(id, callback, tries);
+              this._read(id, callback, tries);
           });
         }
         else
@@ -57,12 +77,20 @@ export default class DbDoc
     });
   }
   
-  private _performRead (id: string, callback: (err: Err, result?: { [index: string]: any })=>any)
+  private _performRead (id: string, callback: ErrResultCallback)
   {
     this.db.raw.get(id, Err.resultFunc('doc', callback));
   }
   
-  write (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  write (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._write(id, body, callback);
+  }
+  
+  private _write (id: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
   {
     tries++;
     this.head(id, (err, rev) => {
@@ -72,7 +100,7 @@ export default class DbDoc
         this._performWriteAndInstantiateDoc(id, rev, body, (err, doc) => {
           if (err) {
             if (tries <= this.db.maxTries && err.name == "conflict")
-              this.write(id, body, callback, tries);
+              this._write(id, body, callback, tries);
             else
               callback(err);
           }
@@ -83,37 +111,40 @@ export default class DbDoc
     });
   }
   
-  forcedWrite (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  forcedWrite (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
   {
-    tries++;
-    if (!id) {
+    if (!id)
       callback(Err.missingId('doc'));
-      return;
-    }
-    this._performWriteAndInstantiateDoc(id, undefined, body, (err, doc) => {
-      if (err) {
-        if (err.name == "conflict") {
-          // document exists
-          this.write(id, body, (err, doc) => {
-            if (err) {
-              if (tries <= this.db.maxTries && err.name == "not_found")
-                this.forcedWrite(id, body, callback, tries);
-              else
-                callback(err);
-            }
-            else
-              callback(undefined, doc); // successfully written
-          });
-        }
-        else
-          callback(err);
-      }
-      else
-        callback(undefined, doc); // successfully written
-    });
+    else
+      this._forcedWrite(id, body, callback);
   }
   
-  update (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{})
+  private _forcedWrite (id: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
+  {
+    tries++;
+    this.head(id, (err, rev) => {
+      this._performWriteAndInstantiateDoc(id, rev, body, (err, doc) => {
+        if (err) {
+          if (tries <= this.db.maxTries && err.name == "conflict")
+            this._forcedWrite(id, body, callback, tries);
+          else
+            callback(err);
+        }
+        else
+          callback(undefined, doc); // successfully written
+      });
+    });
+  }
+
+  update (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._update(id, body, callback);
+  }
+  
+  private _update (id: string, body: SimpleObject, callback: ErrDocCallback)
   {
     this.read(id, (err, doc) => {
       if (err)
@@ -130,37 +161,42 @@ export default class DbDoc
     });
   }
   
-  forcedUpdate (id: string, body: { [index: string]: any }, callback: (err?: Err, doc?: Doc)=>any = ()=>{}, tries: number = 0)
+  forcedUpdate (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._forcedUpdate(id, body, callback);
+  }
+  
+  private _forcedUpdate (id: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
   {
     tries++;
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
-    this._performWriteAndInstantiateDoc(id, undefined, body, (err, doc) => {
+    this.update(id, body, (err, doc) => {
       if (err) {
-        if (err.name == "conflict") {
-          // document exists
-          this.update(id, body, (err, doc) => {
+        if (err.name == "not_found") {
+          this._performWriteAndInstantiateDoc(id, undefined, body, (err, doc) => {
             if (err) {
-              if (tries <= this.db.maxTries && err.name == "not_found")
-                this.forcedUpdate(id, body, callback, tries);
+              if (tries <= this.db.maxTries && err.name == "conflict") {
+                // document exists
+                this._forcedUpdate(id, body, callback, tries);
+              }
               else
                 callback(err);
             }
             else
-              callback(undefined, doc); // successfully updated
+              callback(undefined, doc); // successfully written
           });
         }
         else
           callback(err);
       }
       else
-        callback(undefined, doc); // successfully written
+        callback(undefined, doc); // successfully updated
     });
   }
   
-  private _performWriteAndInstantiateDoc (id: string, rev: string, body: { [index: string]: any }, callback: (err: Err, doc?: Doc)=>any, tries: number = 0)
+  private _performWriteAndInstantiateDoc (id: string, rev: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
   {
     tries++;
     this._performWrite(id, rev, body, (err, result) => {
@@ -182,12 +218,20 @@ export default class DbDoc
     });
   }
   
-  private _performWrite (id: string, rev: string, body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
+  private _performWrite (id: string, rev: string, body: SimpleObject, callback: ErrResultCallback)
   {
     this.db.raw.insert(deepExtend({}, body, { '_id': id, '_rev': rev }), Err.resultFunc('doc', callback));
   }
   
-  destroy (id: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  destroy (id: string, callback: ErrCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._destroy(id, callback);
+  }
+  
+  private _destroy (id: string, callback: ErrCallback, tries: number = 0)
   {
     tries++;
     this.head(id, (err, rev) => {
@@ -197,7 +241,7 @@ export default class DbDoc
         this._performDestroy(id, rev, (err) => {
           if (err) {
             if (tries <= this.db.maxTries && err.name == "conflict")
-              this.destroy(id, callback, tries);
+              this._destroy(id, callback, tries);
             else
               callback(err);
           }
@@ -208,18 +252,22 @@ export default class DbDoc
     });
   }
   
-  private _performDestroy (id: string, rev: string, callback: (err: Err)=>any)
+  private _performDestroy (id: string, rev: string, callback: ErrCallback)
   {
     this.db.raw.destroy(id, rev, Err.resultFunc('doc', callback));
   }
   
-  head (id: string, callback: (err?: Err, rev?: string, result?: any)=>any = ()=>{}, tries: number = 0)
+  head (id: string, callback: HeadCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._head(id, callback);
+  }
+  
+  private _head (id: string, callback: HeadCallback, tries: number = 0)
   {
     tries++;
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
     this._performHead(id, (err, rev, result) => {
       if (err) {
         if (tries <= 1 && err.name == "no_db_file") {
@@ -228,7 +276,7 @@ export default class DbDoc
             if (err && err.name != "db_already_exists")
               callback(err);
             else
-              this.head(id, callback, tries);
+              this._head(id, callback, tries);
           });
         }
         else
@@ -239,7 +287,7 @@ export default class DbDoc
     });
   }
   
-  private _performHead (id: string, callback: (err: Err, rev?: string, result?: any)=>any)
+  private _performHead (id: string, callback: HeadCallback)
   {
     // here we need the third parameter
     // not the second

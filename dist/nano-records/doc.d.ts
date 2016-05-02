@@ -1,6 +1,21 @@
 import { default as Err } from './err';
 import { default as Db } from './db';
 import { default as DocAttachment } from './doc/attachment';
+export interface ErrCallback {
+    (err?: Err): any;
+}
+export interface ErrDocCallback {
+    (err?: Err, doc?: Doc): any;
+}
+export interface ErrResultCallback {
+    (err?: Err, result?: SimpleObject): any;
+}
+export interface HeadCallback {
+    (err?: Err, rev?: string, result?: SimpleObject): any;
+}
+export interface SimpleObject {
+    [index: string]: any;
+}
 export default class Doc {
     body: {
         [index: string]: any;
@@ -8,28 +23,23 @@ export default class Doc {
     _latestRev: string;
     db: Db;
     attachment: DocAttachment;
-    constructor(db: Db, body?: {
-        [index: string]: any;
-    }, result?: {
-        [index: string]: any;
-    });
-    read(callback?: (err?: Err) => any): void;
+    constructor(db: Db, body?: SimpleObject, result?: SimpleObject);
+    read(callback?: ErrCallback): void;
+    private _read(callback);
     private _performRead(callback);
-    write(body: {
-        [index: string]: any;
-    }, callback?: (err?: Err) => any, tries?: number): void;
+    write(body: SimpleObject, callback?: ErrCallback): void;
+    private _write(body, callback, tries?);
     private _performWrite(body, callback);
-    update(body: {
-        [index: string]: any;
-    }, callback?: (err?: Err) => any, tries?: number): void;
+    update(body: SimpleObject, callback?: ErrCallback): void;
+    private _update(body, callback, tries?);
     private _performUpdate(body, callback);
     private _extendBody(body);
-    destroy(callback?: (err?: Err) => any, tries?: number): void;
+    destroy(callback?: ErrCallback): void;
+    private _destroy(callback, tries?);
     private _performDestroy(callback);
-    head(callback?: (err?: Err, rev?: string, result?: any) => any): void;
+    head(callback?: HeadCallback): void;
+    private _head(callback);
     getId(): string;
     getRev(): string;
-    getBody(): {
-        [index: string]: any;
-    };
+    getBody(): SimpleObject;
 }

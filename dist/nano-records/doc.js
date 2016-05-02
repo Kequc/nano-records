@@ -24,12 +24,14 @@ var Doc = (function () {
         this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];
     }
     Doc.prototype.read = function (callback) {
-        var _this = this;
         if (callback === void 0) { callback = function () { }; }
-        if (!this.getId()) {
+        if (!this.getId())
             callback(err_1.default.missingId('doc'));
-            return;
-        }
+        else
+            this._read(callback);
+    };
+    Doc.prototype._read = function (callback) {
+        var _this = this;
         this._performRead(function (err, result) {
             if (err)
                 callback(err);
@@ -43,15 +45,17 @@ var Doc = (function () {
     Doc.prototype._performRead = function (callback) {
         this.db.raw.get(this.getId(), err_1.default.resultFunc('doc', callback));
     };
-    Doc.prototype.write = function (body, callback, tries) {
-        var _this = this;
+    Doc.prototype.write = function (body, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!this.getId())
+            callback(err_1.default.missingId('doc'));
+        else
+            this._write(body, callback);
+    };
+    Doc.prototype._write = function (body, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!this.getId()) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performWrite(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
@@ -59,7 +63,7 @@ var Doc = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.write(body, callback, tries);
+                            _this._write(body, callback, tries);
                     });
                 }
                 else
@@ -76,15 +80,17 @@ var Doc = (function () {
     Doc.prototype._performWrite = function (body, callback) {
         this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev }), err_1.default.resultFunc('doc', callback));
     };
-    Doc.prototype.update = function (body, callback, tries) {
-        var _this = this;
+    Doc.prototype.update = function (body, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!this.getId())
+            callback(err_1.default.missingId('doc'));
+        else
+            this._update(body, callback);
+    };
+    Doc.prototype._update = function (body, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!this.getId()) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performUpdate(body, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
@@ -92,7 +98,7 @@ var Doc = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.update(body, callback, tries);
+                            _this._update(body, callback, tries);
                     });
                 }
                 else
@@ -114,15 +120,17 @@ var Doc = (function () {
     Doc.prototype._extendBody = function (body) {
         return deepExtend({}, this.body, body);
     };
-    Doc.prototype.destroy = function (callback, tries) {
-        var _this = this;
+    Doc.prototype.destroy = function (callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!this.getId())
+            callback(err_1.default.missingId('doc'));
+        else
+            this._destroy(callback);
+    };
+    Doc.prototype._destroy = function (callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        if (!this.getId()) {
-            callback(err_1.default.missingId('doc'));
-            return;
-        }
         this._performDestroy(function (err) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
@@ -130,7 +138,7 @@ var Doc = (function () {
                         if (err)
                             callback(err);
                         else
-                            _this.destroy(callback, tries);
+                            _this._destroy(callback, tries);
                     });
                 }
                 else
@@ -146,8 +154,14 @@ var Doc = (function () {
         this.db.raw.destroy(this.getId(), this._latestRev, err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype.head = function (callback) {
-        var _this = this;
         if (callback === void 0) { callback = function () { }; }
+        if (!this.getId())
+            callback(err_1.default.missingId('doc'));
+        else
+            this._head(callback);
+    };
+    Doc.prototype._head = function (callback) {
+        var _this = this;
         // we have a method already available for this on the db object
         this.db.doc.head(this.getId(), function (err, rev, result) {
             if (rev)

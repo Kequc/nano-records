@@ -18,11 +18,10 @@ var DbDocAttachment = (function () {
     }
     DbDocAttachment.prototype.read = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (!id) {
+        if (!id)
             callback(err_1.default.missingId('doc'));
-            return;
-        }
-        this._performRead(id, name, callback);
+        else
+            this._performRead(id, name, callback);
     };
     DbDocAttachment.prototype._performRead = function (id, name, callback) {
         this.doc.db.raw.attachment.get(id, name, {}, err_1.default.resultFunc('attachment', callback));
@@ -37,16 +36,23 @@ var DbDocAttachment = (function () {
             readable.push(null);
             return readable;
         }
-        return this._performCreateReadStream(id, name, callback);
+        else
+            return this._performCreateReadStream(id, name, callback);
     };
     DbDocAttachment.prototype._performCreateReadStream = function (id, name, callback) {
         // TODO: truthfully this returns pretty ugly streams when there is an error
         // would be nice to clean up
         return this.doc.db.raw.attachment.get(id, name, {}, err_1.default.resultFunc('attachment', callback));
     };
-    DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback, tries) {
-        var _this = this;
+    DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._write(id, name, data, mimeType, callback);
+    };
+    DbDocAttachment.prototype._write = function (id, name, data, mimeType, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
         this.doc.head(id, function (err, rev) {
@@ -56,7 +62,7 @@ var DbDocAttachment = (function () {
                 _this._performWrite(id, rev, name, data, mimeType, function (err) {
                     if (err) {
                         if (tries <= _this.doc.db.maxTries && err.name == "conflict")
-                            _this.write(id, name, data, mimeType, callback, tries);
+                            _this._write(id, name, data, mimeType, callback, tries);
                         else
                             callback(err);
                     }
@@ -69,9 +75,15 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype._performWrite = function (id, rev, name, data, mimeType, callback) {
         this.doc.db.raw.attachment.insert(id, name, data, mimeType, { rev: rev }, err_1.default.resultFunc('attachment', callback));
     };
-    DbDocAttachment.prototype.destroy = function (id, name, callback, tries) {
-        var _this = this;
+    DbDocAttachment.prototype.destroy = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
+        if (!id)
+            callback(err_1.default.missingId('doc'));
+        else
+            this._destroy(id, name, callback);
+    };
+    DbDocAttachment.prototype._destroy = function (id, name, callback, tries) {
+        var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
         this.doc.head(id, function (err, rev) {
@@ -81,7 +93,7 @@ var DbDocAttachment = (function () {
                 _this._performDestroy(id, rev, name, function (err) {
                     if (err) {
                         if (tries <= _this.doc.db.maxTries && err.name == "conflict")
-                            _this.destroy(id, name, callback, tries);
+                            _this._destroy(id, name, callback, tries);
                         else
                             callback(err);
                     }

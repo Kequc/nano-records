@@ -92,7 +92,7 @@ DocAttachmentAssert.write_Retries = (doc, done) => {
 DocAttachmentAssert.write_Retries_Fail = (doc, exists, done) => {
   Util.triggerBgUpdate(doc.db, doc.getId(), () => {
     let oldRev = doc.getRev();
-    doc.attachment.write(Util.fileName, "Too many tries.", "text/plain", (err) => {
+    doc.attachment._write(Util.fileName, "Too many tries.", "text/plain", (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       DocAttachmentAssert.exists(doc, exists);
@@ -161,7 +161,7 @@ DocAttachmentAssert.destroy_Retries = (doc, done) => {
 DocAttachmentAssert.destroy_Retries_Fail = (doc, exists, done) => {
   Util.triggerBgUpdate(doc.db, doc.getId(), () => {
     let oldRev = doc.getRev();
-    doc.attachment.destroy(Util.fileName, (err) => {
+    doc.attachment._destroy(Util.fileName, (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       DocAttachmentAssert.exists(doc, exists);

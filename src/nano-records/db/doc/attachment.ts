@@ -15,6 +15,13 @@ import {default as Doc} from '../../doc';
 import {default as DbDoc} from '../doc';
 import stream = require('stream');
 
+export interface ErrCallback {
+	(err?: Err): any;
+}
+export interface ErrDataCallback {
+	(err?: Err, data?: any): any;
+}
+
 export default class DbDocAttachment
 {
   doc: DbDoc;
@@ -24,21 +31,20 @@ export default class DbDocAttachment
     this.doc = doc;
   }
   
-  read (id: string, name: string, callback: (err?: Err, data?: any)=>any = ()=>{})
+  read (id: string, name: string, callback: ErrDataCallback = ()=>{})
   {
-    if (!id) {
+    if (!id)
       callback(Err.missingId('doc'));
-      return;
-    }
-    this._performRead(id, name, callback);
+    else
+      this._performRead(id, name, callback);
   }
   
-  private _performRead (id: string, name: string, callback: (err: Err, data?: any)=>any)
+  private _performRead (id: string, name: string, callback: ErrDataCallback)
   {
     this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
   }
   
-  createReadStream (id: string, name: string, callback: (err?: Err)=>any = ()=>{})
+  createReadStream (id: string, name: string, callback: ErrCallback = ()=>{})
   {
     if (!id) {
       callback(Err.missingId('doc'));
@@ -48,17 +54,26 @@ export default class DbDocAttachment
       readable.push(null);
       return readable;
     }
-    return this._performCreateReadStream(id, name, callback);
+    else
+      return this._performCreateReadStream(id, name, callback);
   }
   
-  private _performCreateReadStream (id: string, name: string, callback: (err?: Err)=>any)
+  private _performCreateReadStream (id: string, name: string, callback: ErrCallback)
   {
     // TODO: truthfully this returns pretty ugly streams when there is an error
     // would be nice to clean up
     return this.doc.db.raw.attachment.get(id, name, {}, Err.resultFunc('attachment', callback));
   }
   
-  write (id: string, name: string, data: any, mimeType: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  write (id: string, name: string, data: any, mimeType: string, callback: ErrCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._write(id, name, data, mimeType, callback);
+  }
+  
+  private _write (id: string, name: string, data: any, mimeType: string, callback: ErrCallback, tries: number = 0)
   {
     tries++;
     this.doc.head(id, (err, rev) => {
@@ -68,7 +83,7 @@ export default class DbDocAttachment
         this._performWrite(id, rev, name, data, mimeType, (err) => {
           if (err) {
             if (tries <= this.doc.db.maxTries && err.name == "conflict")
-              this.write(id, name, data, mimeType, callback, tries);
+              this._write(id, name, data, mimeType, callback, tries);
             else
               callback(err);
           }
@@ -79,12 +94,20 @@ export default class DbDocAttachment
     });
   }
   
-  private _performWrite (id: string, rev: string, name: string, data: any, mimeType: string, callback: (err: Err)=>any)
+  private _performWrite (id: string, rev: string, name: string, data: any, mimeType: string, callback: ErrCallback)
   {
     this.doc.db.raw.attachment.insert(id, name, data, mimeType, { rev: rev }, Err.resultFunc('attachment', callback));
   }
   
-  destroy (id: string, name: string, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  destroy (id: string, name: string, callback: ErrCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._destroy(id, name, callback);
+  }
+  
+  private _destroy (id: string, name: string, callback: ErrCallback, tries: number = 0)
   {
     tries++;
     this.doc.head(id, (err, rev) => {
@@ -94,7 +117,7 @@ export default class DbDocAttachment
         this._performDestroy(id, rev, name, (err) => {
           if (err) {
             if (tries <= this.doc.db.maxTries && err.name == "conflict")
-              this.destroy(id, name, callback, tries);
+              this._destroy(id, name, callback, tries);
             else
               callback(err);
           }
@@ -105,7 +128,7 @@ export default class DbDocAttachment
     });
   }
   
-  private _performDestroy (id: string, rev: string, name: string, callback: (err: Err)=>any)
+  private _performDestroy (id: string, rev: string, name: string, callback: ErrCallback)
   {
     this.doc.db.raw.attachment.destroy(id, name, { rev: rev }, Err.resultFunc('attachment', callback));
   }

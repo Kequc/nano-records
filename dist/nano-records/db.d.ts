@@ -1,7 +1,13 @@
 import { default as Err } from './err';
 import { default as DbDoc } from './db/doc';
 import { default as DbDesign } from './db/design';
-export interface iDesignInput {
+export interface ErrCallback {
+    (err?: Err): any;
+}
+export interface DesignInputs {
+    [index: string]: DesignInput;
+}
+export interface DesignInput {
     language?: string;
     shows?: {
         [index: string]: string;
@@ -17,18 +23,14 @@ export default class Db {
     maxTries: number;
     nano: any;
     dbName: string;
-    designs: {
-        [index: string]: iDesignInput;
-    };
+    designs: DesignInputs;
     raw: any;
     doc: DbDoc;
     design: DbDesign;
-    constructor(nano: any, dbName: string, designs?: {
-        [index: string]: iDesignInput;
-    });
-    create(callback?: (err?: Err) => any): void;
+    constructor(nano: any, dbName: string, designs?: DesignInputs);
+    create(callback?: ErrCallback): void;
     private _performCreate(callback);
-    destroy(verify: string, callback?: (err?: Err) => any): void;
+    destroy(verify: string, callback?: ErrCallback): void;
     private _performDestroy(callback);
-    reset(verify: string, callback?: (err?: Err) => any): void;
+    reset(verify: string, callback?: ErrCallback): void;
 }

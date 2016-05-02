@@ -8,8 +8,21 @@
  */
 
 import {default as Err} from '../err';
-import {default as Db, iDesignInput} from '../db';
+import {default as Db, DesignInput} from '../db';
 import {default as Doc} from '../doc';
+
+export interface ErrCallback {
+	(err?: Err): any;
+}
+export interface ErrOutputCallback {
+	(err?: Err, output?: any): any;
+}
+export interface ErrResultCallback {
+	(err?: Err, result?: SimpleObject): any;
+}
+export interface SimpleObject {
+	[index: string]: any;
+}
 
 export default class DbDesign
 {
@@ -24,13 +37,17 @@ export default class DbDesign
   // TODO: we probably need a separate interface for interacting with
   // the results from this class
   
-  show (id: string, name: string, docId: string, callback: (err?: Err, result?: any)=>any = ()=>{}, tries: number = 0)
+  show (id: string, name: string, docId: string, callback: ErrOutputCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('design'));
+    else
+      this._show(id, name, docId, callback);
+  }
+  
+  private _show (id: string, name: string, docId: string, callback: ErrOutputCallback, tries: number = 0)
   {
     tries++;
-    if (!id) {
-      callback(Err.missingId('design'));
-      return;
-    }
     this._performShow(id, name, docId, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
@@ -38,7 +55,7 @@ export default class DbDesign
             if (err)
               callback(err);
             else
-              this.show(id, name, docId, callback, tries);
+              this._show(id, name, docId, callback, tries);
           });
         }
         else
@@ -49,18 +66,22 @@ export default class DbDesign
     });
   }
   
-  private _performShow (id: string, name: string, docId: string, callback: (err: Err, result?: any)=>any)
+  private _performShow (id: string, name: string, docId: string, callback: ErrOutputCallback)
   {
     this.db.raw.show(id, name, docId, Err.resultFunc('design', callback));
   }
   
-  view (id: string, name: string, params: Object, callback: (err?: Err, result?: any)=>any = ()=>{}, tries: number = 0)
+  view (id: string, name: string, params: SimpleObject, callback: ErrOutputCallback = ()=>{})
+  {
+    if (!id)
+      callback(Err.missingId('doc'));
+    else
+      this._view(id, name, params, callback);
+  }
+  
+  private _view (id: string, name: string, params: SimpleObject, callback: ErrOutputCallback, tries: number = 0)
   {
     tries++;
-    if (!id) {
-      callback(Err.missingId('doc'));
-      return;
-    }
     this._performView(id, name, params, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
@@ -68,7 +89,7 @@ export default class DbDesign
             if (err)
               callback(err);
             else
-              this.view(id, name, params, callback, tries);
+              this._view(id, name, params, callback, tries);
           });
         }
         else
@@ -79,17 +100,12 @@ export default class DbDesign
     });
   }
   
-  private _performView (id: string, name: string, params: Object, callback: (err: Err, result?: any)=>any)
+  private _performView (id: string, name: string, params: SimpleObject, callback: ErrOutputCallback)
   {
     this.db.raw.view(id, name, params, Err.resultFunc('design', callback));
   }
   
-  private _performRetrieveLatest (id: string, callback: (err: Err, result?: { [index: string]: any })=>any)
-  {
-    this.db.raw.get('_design/' + id, Err.resultFunc('design', callback));
-  }
-  
-  private _updateDesign (id: string, kinds: { [index: string]: string[] }, callback: (err: Err)=>any)
+  private _updateDesign (id: string, kinds: { [index: string]: string[] }, callback: ErrCallback)
   {
     let design = this.db.designs[id];
     if (!design) {
@@ -98,7 +114,7 @@ export default class DbDesign
     }
     
     // generate design document
-    let body: iDesignInput = { language: design.language };
+    let body: DesignInput = { language: design.language };
     for (let kind in kinds) {
       switch (kind) {
         case 'shows':

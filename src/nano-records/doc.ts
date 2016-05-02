@@ -14,6 +14,22 @@ import {default as Db} from './db';
 import {default as DocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
 
+export interface ErrCallback {
+	(err?: Err): any;
+}
+export interface ErrDocCallback {
+	(err?: Err, doc?: Doc): any;
+}
+export interface ErrResultCallback {
+	(err?: Err, result?: SimpleObject): any;
+}
+export interface HeadCallback {
+	(err?: Err, rev?: string, result?: SimpleObject): any;
+}
+export interface SimpleObject {
+	[index: string]: any;
+}
+
 export default class Doc
 {
   body: { [index: string]: any } = {};
@@ -22,7 +38,7 @@ export default class Doc
   db: Db;
   attachment: DocAttachment;
   
-  constructor (db: Db, body: { [index: string]: any } = {}, result: { [index: string]: any } = {})
+  constructor (db: Db, body: SimpleObject = {}, result: SimpleObject = {})
   {
     this.db = db;
     this.attachment = new DocAttachment(this);
@@ -32,12 +48,16 @@ export default class Doc
     this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];
   }
   
-  read (callback: (err?: Err)=>any = ()=>{})
+  read (callback: ErrCallback = ()=>{})
   {
-    if (!this.getId()) {
+    if (!this.getId())
       callback(Err.missingId('doc'));
-      return;
-    }
+    else
+      this._read(callback);
+  }
+  
+  private _read (callback: ErrCallback)
+  {
     this._performRead((err, result) => {
       if (err)
         callback(err);
@@ -49,18 +69,22 @@ export default class Doc
     });
   }
   
-  private _performRead (callback: (err: Err, result?: { [index: string]: any })=>any)
+  private _performRead (callback: ErrResultCallback)
   {
     this.db.raw.get(this.getId(), Err.resultFunc('doc', callback));
   }
   
-  write (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  write (body: SimpleObject, callback: ErrCallback = ()=>{})
+  {
+    if (!this.getId())
+      callback(Err.missingId('doc'));
+    else
+      this._write(body, callback);
+  }
+  
+  private _write (body: SimpleObject, callback: ErrCallback, tries: number = 0)
   {
     tries++;
-    if (!this.getId()) {
-      callback(Err.missingId('doc'));
-      return;
-    }
     this._performWrite(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
@@ -68,7 +92,7 @@ export default class Doc
             if (err)
               callback(err);
             else
-              this.write(body, callback, tries);
+              this._write(body, callback, tries);
           });
         }
         else
@@ -83,18 +107,22 @@ export default class Doc
     });
   }
   
-  private _performWrite (body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
+  private _performWrite (body: SimpleObject, callback: ErrResultCallback)
   {
     this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev }), Err.resultFunc('doc', callback));
   }
   
-  update (body: { [index: string]: any }, callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  update (body: SimpleObject, callback: ErrCallback = ()=>{})
+  {
+    if (!this.getId())
+      callback(Err.missingId('doc'));
+    else
+      this._update(body, callback);
+  }
+  
+  private _update (body: SimpleObject, callback: ErrCallback, tries: number = 0)
   {
     tries++;
-    if (!this.getId()) {
-      callback(Err.missingId('doc'));
-      return;
-    }
     this._performUpdate(body, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
@@ -102,7 +130,7 @@ export default class Doc
             if (err)
               callback(err);
             else
-              this.update(body, callback, tries);
+              this._update(body, callback, tries);
           });
         }
         else
@@ -116,7 +144,7 @@ export default class Doc
     });
   }
   
-  private _performUpdate (body: { [index: string]: any }, callback: (err: Err, result?: { [index: string]: any })=>any)
+  private _performUpdate (body: SimpleObject, callback: ErrResultCallback)
   {
     if (this.getRev() !== this._latestRev)
       callback(Err.conflict('doc')); // we know we are out of date
@@ -124,18 +152,22 @@ export default class Doc
       this.db.raw.insert(this._extendBody(body), Err.resultFunc('doc', callback));
   }
   
-  private _extendBody (body: { [index: string]: any }): { [index: string]: any }
+  private _extendBody (body: SimpleObject): SimpleObject
   {
     return deepExtend({}, this.body, body);
   }
   
-  destroy (callback: (err?: Err)=>any = ()=>{}, tries: number = 0)
+  destroy (callback: ErrCallback = ()=>{})
+  {
+    if (!this.getId())
+      callback(Err.missingId('doc'));
+    else
+      this._destroy(callback);
+  }
+  
+  private _destroy (callback: ErrCallback, tries: number = 0)
   {
     tries++;
-    if (!this.getId()) {
-      callback(Err.missingId('doc'));
-      return;
-    }
     this._performDestroy((err) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
@@ -143,7 +175,7 @@ export default class Doc
             if (err)
               callback(err);
             else
-              this.destroy(callback, tries);
+              this._destroy(callback, tries);
           });
         }
         else
@@ -156,12 +188,20 @@ export default class Doc
     });
   }
   
-  private _performDestroy (callback: (err: Err)=>any)
+  private _performDestroy (callback: ErrCallback)
   {
     this.db.raw.destroy(this.getId(), this._latestRev, Err.resultFunc('doc', callback));
   }
   
-  head (callback: (err?: Err, rev?: string, result?: any)=>any = ()=>{})
+  head (callback: HeadCallback = ()=>{})
+  {
+    if (!this.getId())
+      callback(Err.missingId('doc'));
+    else
+      this._head(callback);
+  }
+  
+  private _head (callback: HeadCallback)
   {
     // we have a method already available for this on the db object
     this.db.doc.head(this.getId(), (err, rev, result) => {
@@ -181,7 +221,7 @@ export default class Doc
     return this.body['_rev'];
   }
   
-  getBody (): { [index: string]: any }
+  getBody (): SimpleObject
   {
     return deepExtend({}, this.body);
   }

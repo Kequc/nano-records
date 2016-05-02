@@ -14,7 +14,13 @@ import {default as DbDoc} from './db/doc';
 import {default as DbDesign} from './db/design';
 import deepExtend = require('deep-extend');
 
-export interface iDesignInput {
+export interface ErrCallback {
+	(err?: Err): any;
+}
+export interface DesignInputs {
+	[index: string]: DesignInput;
+}
+export interface DesignInput {
   language?: string,
   shows?: { [index: string]: string };
   views?: { [index: string]: { map: string, reduce: string }};
@@ -25,13 +31,13 @@ export default class Db
   maxTries: number = 5;
   nano: any;
   dbName: string;
-  designs: { [index: string]: iDesignInput } = {};
+  designs: DesignInputs = {};
   raw: any;
   
   doc: DbDoc;
   design: DbDesign;
   
-  constructor (nano: any, dbName: string, designs: { [index: string]: iDesignInput } = {})
+  constructor (nano: any, dbName: string, designs: DesignInputs = {})
   {
     this.nano = nano;
     this.dbName = dbName;
@@ -50,17 +56,17 @@ export default class Db
     this.design = new DbDesign(this);
   }
   
-  create (callback: (err?: Err)=>any = ()=>{})
+  create (callback: ErrCallback = ()=>{})
   {
     this._performCreate(callback);
   }
   
-  private _performCreate (callback: (err: Err)=>any)
+  private _performCreate (callback: ErrCallback)
   {
     this.nano.db.create(this.dbName, Err.resultFunc('db', callback));
   }
   
-  destroy (verify: string, callback: (err?: Err)=>any = ()=>{})
+  destroy (verify: string, callback: ErrCallback = ()=>{})
   {
     if (verify !== "_DESTROY_")
       callback(Err.verifyFailed('db'));
@@ -68,12 +74,12 @@ export default class Db
       this._performDestroy(callback);
   }
   
-  private _performDestroy (callback: (err: Err)=>any)
+  private _performDestroy (callback: ErrCallback)
   {
     this.nano.db.destroy(this.dbName, Err.resultFunc('db', callback));
   }
   
-  reset (verify: string, callback: (err?: Err)=>any = ()=>{})
+  reset (verify: string, callback: ErrCallback = ()=>{})
   {
     if (verify !== "_RESET_")
       callback(Err.verifyFailed('db'));
