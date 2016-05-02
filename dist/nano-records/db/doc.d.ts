@@ -34,7 +34,7 @@ export default class DbDoc {
     forcedUpdate(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
     private _forcedUpdate(id, body, callback, tries?);
     private _performWriteAndInstantiateDoc(id, rev, body, callback, tries?);
-    private _performWrite(id, rev, body, callback);
+    private _performWrite(body, callback);
     destroy(id: string, callback?: ErrCallback): void;
     private _destroy(id, callback, tries?);
     private _performDestroy(id, rev, callback);

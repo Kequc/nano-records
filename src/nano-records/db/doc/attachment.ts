@@ -34,7 +34,9 @@ export default class DbDocAttachment
   read (id: string, name: string, callback: ErrDataCallback = ()=>{})
   {
     if (!id)
-      callback(Err.missingId('doc'));
+      callback(Err.missingId('attachment'));
+    else if (!name)
+      callback(Err.missingParam('attachment', "name"));
     else
       this._performRead(id, name, callback);
   }
@@ -47,15 +49,23 @@ export default class DbDocAttachment
   createReadStream (id: string, name: string, callback: ErrCallback = ()=>{})
   {
     if (!id) {
-      callback(Err.missingId('doc'));
-      // return empty stream
-      let readable = new stream.Readable();
-      readable._read = ()=>{};
-      readable.push(null);
-      return readable;
+      callback(Err.missingId('attachment'));
+      return this._emptyStream();
+    }
+    else if (!name) {
+      callback(Err.missingParam('attachment', "name"));
+      return this._emptyStream();
     }
     else
       return this._performCreateReadStream(id, name, callback);
+  }
+  
+  private _emptyStream ()
+  {
+    let readable = new stream.Readable();
+    readable._read = ()=>{};
+    readable.push(null);
+    return readable;
   }
   
   private _performCreateReadStream (id: string, name: string, callback: ErrCallback)
@@ -68,7 +78,13 @@ export default class DbDocAttachment
   write (id: string, name: string, data: any, mimeType: string, callback: ErrCallback = ()=>{})
   {
     if (!id)
-      callback(Err.missingId('doc'));
+      callback(Err.missingId('attachment'));
+    else if (!name)
+      callback(Err.missingParam('attachment', "name"));
+    else if (!data)
+      callback(Err.missingParam('attachment', "data"));
+    else if (!mimeType)
+      callback(Err.missingParam('attachment', "mimeType"));
     else
       this._write(id, name, data, mimeType, callback);
   }
@@ -102,7 +118,9 @@ export default class DbDocAttachment
   destroy (id: string, name: string, callback: ErrCallback = ()=>{})
   {
     if (!id)
-      callback(Err.missingId('doc'));
+      callback(Err.missingId('attachment'));
+    else if (!name)
+      callback(Err.missingParam('attachment', "name"));
     else
       this._destroy(id, name, callback);
   }

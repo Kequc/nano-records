@@ -41,6 +41,10 @@ export default class DbDesign
   {
     if (!id)
       callback(Err.missingId('design'));
+    else if (!name)
+      callback(Err.missingParam('design', "name"));
+    else if (!docId)
+      callback(Err.missingParam('design', "docId"));
     else
       this._show(id, name, docId, callback);
   }
@@ -75,6 +79,10 @@ export default class DbDesign
   {
     if (!id)
       callback(Err.missingId('doc'));
+    else if (!name)
+      callback(Err.missingParam('design', "name"));
+    else if (!params)
+      callback(Err.missingParam('design', "params"));
     else
       this._view(id, name, params, callback);
   }

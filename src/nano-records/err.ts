@@ -28,7 +28,6 @@ export default class Err
   scope: string;
   name: string;
   message: string;
-  
   raw: NanoError;
   
   constructor (scope: string, name?: string, message?: string, raw?: NanoError) {
@@ -36,6 +35,16 @@ export default class Err
     this.name = name || "unknown_error";
     this.message = message || "No additional information available.";
     this.raw = raw || {};
+  }
+    
+  toJSON (): Object
+  {
+    return {
+      scope: this.scope,
+      name: this.name,
+      message: this.message,
+      raw: this.raw
+    };
   }
   
   static resultFunc (scope: string, callback: (err: Err, result?: any)=>any): Function
@@ -69,6 +78,10 @@ export default class Err
       // revision mismatch
       return this.conflict(scope, err);
     }
+    else if (err.error == "doc_validation") {
+      // something weird like insert of an _updated attribute
+      return new Err(scope, "doc_validation", "Bad document member.", err);
+    }
     else if (err.statusCode == 500 && ['function_clause', 'case_clause'].indexOf(err.reason) > -1) {
       // design broken somehow
       return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
@@ -97,6 +110,11 @@ export default class Err
   
   static missingId (scope: string): Err {
     return new Err(scope, "missing_id", "Id parameter required.");
+  }
+  
+  static missingParam (scope: string, name: string): Err {
+    let cName: string = name[0].toUpperCase() + name.slice(1);
+    return new Err(scope, "missing_param", cName + " parameter required.");
   }
   
   static conflict (scope: string, err?: NanoError): Err {

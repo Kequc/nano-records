@@ -49,6 +49,8 @@ var Doc = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (!this.getId())
             callback(err_1.default.missingId('doc'));
+        else if (!body)
+            callback(err_1.default.missingParam('doc', "body"));
         else
             this._write(body, callback);
     };
@@ -56,7 +58,8 @@ var Doc = (function () {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performWrite(body, function (err, result) {
+        var merged = deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev, 'updated_': Date.now() });
+        this._performWrite(merged, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
                     _this.head(function (err) {
@@ -70,7 +73,7 @@ var Doc = (function () {
                     callback(err);
             }
             else {
-                _this.body = deepExtend({}, body);
+                _this.body = merged;
                 _this.body['_id'] = result['id'];
                 _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success
@@ -78,12 +81,14 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performWrite = function (body, callback) {
-        this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev }), err_1.default.resultFunc('doc', callback));
+        this.db.raw.insert(body, err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype.update = function (body, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!this.getId())
             callback(err_1.default.missingId('doc'));
+        else if (!body)
+            callback(err_1.default.missingParam('doc', "body"));
         else
             this._update(body, callback);
     };
@@ -91,7 +96,8 @@ var Doc = (function () {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performUpdate(body, function (err, result) {
+        var merged = deepExtend({}, this.body, body, { 'updated_': Date.now() });
+        this._performUpdate(merged, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
                     _this.read(function (err) {
@@ -105,7 +111,8 @@ var Doc = (function () {
                     callback(err);
             }
             else {
-                _this.body = _this._extendBody(body);
+                _this.body = merged;
+                _this.body['_id'] = result['id'];
                 _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success
             }
@@ -115,10 +122,7 @@ var Doc = (function () {
         if (this.getRev() !== this._latestRev)
             callback(err_1.default.conflict('doc')); // we know we are out of date
         else
-            this.db.raw.insert(this._extendBody(body), err_1.default.resultFunc('doc', callback));
-    };
-    Doc.prototype._extendBody = function (body) {
-        return deepExtend({}, this.body, body);
+            this._performWrite(body, callback);
     };
     Doc.prototype.destroy = function (callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -174,6 +178,12 @@ var Doc = (function () {
     };
     Doc.prototype.getRev = function () {
         return this.body['_rev'];
+    };
+    Doc.prototype.getCreated = function () {
+        return this.body['created_'];
+    };
+    Doc.prototype.getUpdated = function () {
+        return this.body['updated_'];
     };
     Doc.prototype.getBody = function () {
         return deepExtend({}, this.body);

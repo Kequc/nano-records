@@ -78,6 +78,8 @@ export default class Doc
   {
     if (!this.getId())
       callback(Err.missingId('doc'));
+    else if (!body)
+      callback(Err.missingParam('doc', "body"));
     else
       this._write(body, callback);
   }
@@ -85,7 +87,8 @@ export default class Doc
   private _write (body: SimpleObject, callback: ErrCallback, tries: number = 0)
   {
     tries++;
-    this._performWrite(body, (err, result) => {
+    let merged = deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev, 'updated_': Date.now() });
+    this._performWrite(merged, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
           this.head((err) => {
@@ -99,7 +102,7 @@ export default class Doc
           callback(err);
       }
       else {
-        this.body = deepExtend({}, body);
+        this.body = merged;
         this.body['_id'] = result['id'];
         this.body['_rev'] = this._latestRev = result['rev'];
         callback(); // success
@@ -109,13 +112,15 @@ export default class Doc
   
   private _performWrite (body: SimpleObject, callback: ErrResultCallback)
   {
-    this.db.raw.insert(deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev }), Err.resultFunc('doc', callback));
+    this.db.raw.insert(body, Err.resultFunc('doc', callback));
   }
   
   update (body: SimpleObject, callback: ErrCallback = ()=>{})
   {
     if (!this.getId())
       callback(Err.missingId('doc'));
+    else if (!body)
+      callback(Err.missingParam('doc', "body"));
     else
       this._update(body, callback);
   }
@@ -123,7 +128,8 @@ export default class Doc
   private _update (body: SimpleObject, callback: ErrCallback, tries: number = 0)
   {
     tries++;
-    this._performUpdate(body, (err, result) => {
+    let merged = deepExtend({}, this.body, body, { 'updated_': Date.now() });
+    this._performUpdate(merged, (err, result) => {
       if (err) {
         if (tries <= this.db.maxTries && err.name == "conflict") {
           this.read((err) => {
@@ -137,7 +143,8 @@ export default class Doc
           callback(err);
       }
       else {
-        this.body = this._extendBody(body);
+        this.body = merged;
+        this.body['_id'] = result['id'];
         this.body['_rev'] = this._latestRev = result['rev'];
         callback(); // success
       }
@@ -149,12 +156,7 @@ export default class Doc
     if (this.getRev() !== this._latestRev)
       callback(Err.conflict('doc')); // we know we are out of date
     else
-      this.db.raw.insert(this._extendBody(body), Err.resultFunc('doc', callback));
-  }
-  
-  private _extendBody (body: SimpleObject): SimpleObject
-  {
-    return deepExtend({}, this.body, body);
+      this._performWrite(body, callback);
   }
   
   destroy (callback: ErrCallback = ()=>{})
@@ -219,6 +221,16 @@ export default class Doc
   getRev (): string
   {
     return this.body['_rev'];
+  }
+  
+  getCreated (): Date
+  {
+    return this.body['created_'];
+  }
+  
+  getUpdated (): Date
+  {
+    return this.body['updated_'];
   }
   
   getBody (): SimpleObject

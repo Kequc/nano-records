@@ -51,6 +51,12 @@ export default class DocAttachment
   {
     if (!this.doc.getId())
       callback(Err.missingId('doc'));
+    else if (!name)
+      callback(Err.missingParam('attachment', "name"));
+    else if (!data)
+      callback(Err.missingParam('attachment', "data"));
+    else if (!mimeType)
+      callback(Err.missingParam('attachment', "mimeType"));
     else
       this._write(name, data, mimeType, callback);
   }
@@ -94,6 +100,14 @@ export default class DocAttachment
       callback(Err.missingId('doc'));
       return devNull();
     }
+    else if (!name) {
+      callback(Err.missingParam('attachment', "name"));
+      return devNull();
+    }
+    else if (!mimeType) {
+      callback(Err.missingParam('attachment', "mimeType"));
+      return devNull();
+    }
     else {
       return this._performCreateWriteStream(name, undefined, mimeType, (err, result) => {
         if (err)
@@ -120,6 +134,8 @@ export default class DocAttachment
   {
     if (!this.doc.getId())
       callback(Err.missingId('doc'));
+    else if (!name)
+      callback(Err.missingParam('attachment', "name"));
     else
       this._destroy(name, callback);
   }

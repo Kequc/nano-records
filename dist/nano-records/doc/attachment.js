@@ -29,6 +29,12 @@ var DocAttachment = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (!this.doc.getId())
             callback(err_1.default.missingId('doc'));
+        else if (!name)
+            callback(err_1.default.missingParam('attachment', "name"));
+        else if (!data)
+            callback(err_1.default.missingParam('attachment', "data"));
+        else if (!mimeType)
+            callback(err_1.default.missingParam('attachment', "mimeType"));
         else
             this._write(name, data, mimeType, callback);
     };
@@ -70,6 +76,14 @@ var DocAttachment = (function () {
             callback(err_1.default.missingId('doc'));
             return devNull();
         }
+        else if (!name) {
+            callback(err_1.default.missingParam('attachment', "name"));
+            return devNull();
+        }
+        else if (!mimeType) {
+            callback(err_1.default.missingParam('attachment', "mimeType"));
+            return devNull();
+        }
         else {
             return this._performCreateWriteStream(name, undefined, mimeType, function (err, result) {
                 if (err)
@@ -93,6 +107,8 @@ var DocAttachment = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (!this.doc.getId())
             callback(err_1.default.missingId('doc'));
+        else if (!name)
+            callback(err_1.default.missingParam('attachment', "name"));
         else
             this._destroy(name, callback);
     };

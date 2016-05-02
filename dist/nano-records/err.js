@@ -16,6 +16,14 @@ var Err = (function () {
         this.message = message || "No additional information available.";
         this.raw = raw || {};
     }
+    Err.prototype.toJSON = function () {
+        return {
+            scope: this.scope,
+            name: this.name,
+            message: this.message,
+            raw: this.raw
+        };
+    };
     Err.resultFunc = function (scope, callback) {
         var _this = this;
         return function (raw, result) {
@@ -46,6 +54,10 @@ var Err = (function () {
             // revision mismatch
             return this.conflict(scope, err);
         }
+        else if (err.error == "doc_validation") {
+            // something weird like insert of an _updated attribute
+            return new Err(scope, "doc_validation", "Bad document member.", err);
+        }
         else if (err.statusCode == 500 && ['function_clause', 'case_clause'].indexOf(err.reason) > -1) {
             // design broken somehow
             return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
@@ -71,6 +83,10 @@ var Err = (function () {
     };
     Err.missingId = function (scope) {
         return new Err(scope, "missing_id", "Id parameter required.");
+    };
+    Err.missingParam = function (scope, name) {
+        var cName = name[0].toUpperCase() + name.slice(1);
+        return new Err(scope, "missing_param", cName + " parameter required.");
     };
     Err.conflict = function (scope, err) {
         return new Err(scope, "conflict", "There was a conflict.", err);

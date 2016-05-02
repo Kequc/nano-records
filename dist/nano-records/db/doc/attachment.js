@@ -19,7 +19,9 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype.read = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
-            callback(err_1.default.missingId('doc'));
+            callback(err_1.default.missingId('attachment'));
+        else if (!name)
+            callback(err_1.default.missingParam('attachment', "name"));
         else
             this._performRead(id, name, callback);
     };
@@ -29,15 +31,21 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype.createReadStream = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id) {
-            callback(err_1.default.missingId('doc'));
-            // return empty stream
-            var readable = new stream.Readable();
-            readable._read = function () { };
-            readable.push(null);
-            return readable;
+            callback(err_1.default.missingId('attachment'));
+            return this._emptyStream();
+        }
+        else if (!name) {
+            callback(err_1.default.missingParam('attachment', "name"));
+            return this._emptyStream();
         }
         else
             return this._performCreateReadStream(id, name, callback);
+    };
+    DbDocAttachment.prototype._emptyStream = function () {
+        var readable = new stream.Readable();
+        readable._read = function () { };
+        readable.push(null);
+        return readable;
     };
     DbDocAttachment.prototype._performCreateReadStream = function (id, name, callback) {
         // TODO: truthfully this returns pretty ugly streams when there is an error
@@ -47,7 +55,13 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype.write = function (id, name, data, mimeType, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
-            callback(err_1.default.missingId('doc'));
+            callback(err_1.default.missingId('attachment'));
+        else if (!name)
+            callback(err_1.default.missingParam('attachment', "name"));
+        else if (!data)
+            callback(err_1.default.missingParam('attachment', "data"));
+        else if (!mimeType)
+            callback(err_1.default.missingParam('attachment', "mimeType"));
         else
             this._write(id, name, data, mimeType, callback);
     };
@@ -78,7 +92,9 @@ var DbDocAttachment = (function () {
     DbDocAttachment.prototype.destroy = function (id, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
-            callback(err_1.default.missingId('doc'));
+            callback(err_1.default.missingId('attachment'));
+        else if (!name)
+            callback(err_1.default.missingParam('attachment', "name"));
         else
             this._destroy(id, name, callback);
     };

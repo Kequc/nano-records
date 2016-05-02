@@ -20,6 +20,10 @@ var DbDesign = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
             callback(err_1.default.missingId('design'));
+        else if (!name)
+            callback(err_1.default.missingParam('design', "name"));
+        else if (!docId)
+            callback(err_1.default.missingParam('design', "docId"));
         else
             this._show(id, name, docId, callback);
     };
@@ -51,6 +55,10 @@ var DbDesign = (function () {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
             callback(err_1.default.missingId('doc'));
+        else if (!name)
+            callback(err_1.default.missingParam('design', "name"));
+        else if (!params)
+            callback(err_1.default.missingParam('design', "params"));
         else
             this._view(id, name, params, callback);
     };
