@@ -9,25 +9,13 @@
  * 
  */
 
-import {default as Err} from './err';
+import {default as Err, ErrCallback, ErrResultCallback, ErrHeadCallback} from './err';
 import {default as Db} from './db';
 import {default as DocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
 
-export interface ErrCallback {
-	(err?: Err): any;
-}
 export interface ErrDocCallback {
 	(err?: Err, doc?: Doc): any;
-}
-export interface ErrResultCallback {
-	(err?: Err, result?: SimpleObject): any;
-}
-export interface HeadCallback {
-	(err?: Err, rev?: string, result?: SimpleObject): any;
-}
-export interface SimpleObject {
-	[index: string]: any;
 }
 
 export default class Doc
@@ -195,7 +183,7 @@ export default class Doc
     this.db.raw.destroy(this.getId(), this._latestRev, Err.resultFunc('doc', callback));
   }
   
-  head (callback: HeadCallback = ()=>{})
+  head (callback: ErrHeadCallback = ()=>{})
   {
     if (!this.getId())
       callback(Err.missingId('doc'));
@@ -203,7 +191,7 @@ export default class Doc
       this._head(callback);
   }
   
-  private _head (callback: HeadCallback)
+  private _head (callback: ErrHeadCallback)
   {
     // we have a method already available for this on the db object
     this.db.doc.head(this.getId(), (err, rev, result) => {

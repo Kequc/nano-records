@@ -7,22 +7,9 @@
  * 
  */
 
-import {default as Err} from '../err';
-import {default as Db, DesignInput} from '../db';
+import {default as Err, ErrCallback, ErrOutputCallback} from '../err';
+import {default as Db} from '../db';
 import {default as Doc} from '../doc';
-
-export interface ErrCallback {
-	(err?: Err): any;
-}
-export interface ErrOutputCallback {
-	(err?: Err, output?: any): any;
-}
-export interface ErrResultCallback {
-	(err?: Err, result?: SimpleObject): any;
-}
-export interface SimpleObject {
-	[index: string]: any;
-}
 
 export default class DbDesign
 {

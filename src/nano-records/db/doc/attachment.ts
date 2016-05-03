@@ -10,17 +10,10 @@
  * 
  */
 
-import {default as Err} from '../../err';
+import {default as Err, ErrCallback, ErrDataCallback} from '../../err';
 import {default as Doc} from '../../doc';
 import {default as DbDoc} from '../doc';
 import stream = require('stream');
-
-export interface ErrCallback {
-	(err?: Err): any;
-}
-export interface ErrDataCallback {
-	(err?: Err, data?: any): any;
-}
 
 export default class DbDocAttachment
 {

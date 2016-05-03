@@ -1,17 +1,5 @@
-import { default as Err } from '../err';
+import { ErrOutputCallback } from '../err';
 import { default as Db } from '../db';
-export interface ErrCallback {
-    (err?: Err): any;
-}
-export interface ErrOutputCallback {
-    (err?: Err, output?: any): any;
-}
-export interface ErrResultCallback {
-    (err?: Err, result?: SimpleObject): any;
-}
-export interface SimpleObject {
-    [index: string]: any;
-}
 export default class DbDesign {
     db: Db;
     constructor(db: Db);

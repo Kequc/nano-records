@@ -1,11 +1,5 @@
-import { default as Err } from '../../err';
+import { ErrCallback, ErrDataCallback } from '../../err';
 import { default as DbDoc } from '../doc';
-export interface ErrCallback {
-    (err?: Err): any;
-}
-export interface ErrDataCallback {
-    (err?: Err, data?: any): any;
-}
 export default class DbDocAttachment {
     doc: DbDoc;
     constructor(doc: DbDoc);

@@ -9,27 +9,11 @@
  * 
  */
 
-import {default as Err} from '../err';
+import {default as Err, ErrCallback, ErrHeadCallback, ErrResultCallback} from '../err';
 import {default as Db} from '../db';
-import {default as Doc} from '../doc';
+import {default as Doc, ErrDocCallback} from '../doc';
 import {default as DbDocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
-
-export interface ErrCallback {
-	(err?: Err): any;
-}
-export interface ErrDocCallback {
-	(err?: Err, doc?: Doc): any;
-}
-export interface ErrResultCallback {
-	(err?: Err, result?: SimpleObject): any;
-}
-export interface HeadCallback {
-	(err?: Err, rev?: string, result?: SimpleObject): any;
-}
-export interface SimpleObject {
-	[index: string]: any;
-}
 
 export default class DbDoc
 {
@@ -273,7 +257,7 @@ export default class DbDoc
     this.db.raw.destroy(id, rev, Err.resultFunc('doc', callback));
   }
   
-  head (id: string, callback: HeadCallback = ()=>{})
+  head (id: string, callback: ErrHeadCallback = ()=>{})
   {
     if (!id)
       callback(Err.missingId('doc'));
@@ -281,7 +265,7 @@ export default class DbDoc
       this._head(id, callback);
   }
   
-  private _head (id: string, callback: HeadCallback, tries: number = 0)
+  private _head (id: string, callback: ErrHeadCallback, tries: number = 0)
   {
     tries++;
     this._performHead(id, (err, rev, result) => {
@@ -303,7 +287,7 @@ export default class DbDoc
     });
   }
   
-  private _performHead (id: string, callback: HeadCallback)
+  private _performHead (id: string, callback: ErrHeadCallback)
   {
     // here we need the third parameter
     // not the second

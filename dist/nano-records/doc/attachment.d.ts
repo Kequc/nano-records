@@ -1,17 +1,5 @@
-import { default as Err } from '../err';
+import { ErrCallback, ErrDataCallback } from '../err';
 import { default as Doc } from '../doc';
-export interface ErrCallback {
-    (err?: Err): any;
-}
-export interface ErrResultCallback {
-    (err?: Err, result?: SimpleObject): any;
-}
-export interface ErrDataCallback {
-    (err?: Err, data?: any): any;
-}
-export interface SimpleObject {
-    [index: string]: any;
-}
 export default class DocAttachment {
     doc: Doc;
     constructor(doc: Doc);

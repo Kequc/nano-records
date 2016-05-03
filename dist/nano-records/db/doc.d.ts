@@ -1,22 +1,7 @@
-import { default as Err } from '../err';
+import { ErrCallback, ErrHeadCallback } from '../err';
 import { default as Db } from '../db';
-import { default as Doc } from '../doc';
+import { ErrDocCallback } from '../doc';
 import { default as DbDocAttachment } from './doc/attachment';
-export interface ErrCallback {
-    (err?: Err): any;
-}
-export interface ErrDocCallback {
-    (err?: Err, doc?: Doc): any;
-}
-export interface ErrResultCallback {
-    (err?: Err, result?: SimpleObject): any;
-}
-export interface HeadCallback {
-    (err?: Err, rev?: string, result?: SimpleObject): any;
-}
-export interface SimpleObject {
-    [index: string]: any;
-}
 export default class DbDoc {
     db: Db;
     attachment: DbDocAttachment;
@@ -38,7 +23,7 @@ export default class DbDoc {
     destroy(id: string, callback?: ErrCallback): void;
     private _destroy(id, callback, tries?);
     private _performDestroy(id, rev, callback);
-    head(id: string, callback?: HeadCallback): void;
+    head(id: string, callback?: ErrHeadCallback): void;
     private _head(id, callback, tries?);
     private _performHead(id, callback);
 }

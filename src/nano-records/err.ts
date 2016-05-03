@@ -9,18 +9,20 @@
  * 
  */
 
-export interface NanoError {
-  name?: string;
-  error?: string;
-  reason?: string;
-  scope?: string;
-  statusCode?: number;
-  code?: string;
-  request?: Object;
-  headers?: Object;
-  errid?: string;
-  description?: string;
-  message?: string;
+export interface ErrCallback {
+	(err?: Err): any;
+}
+export interface ErrResultCallback {
+	(err?: Err, result?: SimpleObject): any;
+}
+export interface ErrHeadCallback {
+	(err?: Err, rev?: string, result?: SimpleObject): any;
+}
+export interface ErrOutputCallback {
+	(err?: Err, output?: any): any;
+}
+export interface ErrDataCallback {
+	(err?: Err, data?: any): any;
 }
 
 export default class Err
