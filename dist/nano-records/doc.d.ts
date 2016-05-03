@@ -28,7 +28,5 @@ export default class Doc {
     private _head(callback);
     getId(): string;
     getRev(): string;
-    getCreated(): Date;
-    getUpdated(): Date;
     getBody(): SimpleObject;
 }

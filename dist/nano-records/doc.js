@@ -58,8 +58,8 @@ var Doc = (function () {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        var merged = deepExtend({}, body, { '_id': this.getId(), '_rev': this._latestRev, 'updated_': Date.now() });
-        this._performWrite(merged, function (err, result) {
+        var clone = deepExtend({}, body);
+        this._performWrite(clone, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
                     _this.head(function (err) {
@@ -73,7 +73,7 @@ var Doc = (function () {
                     callback(err);
             }
             else {
-                _this.body = merged;
+                _this.body = clone;
                 _this.body['_id'] = result['id'];
                 _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success
@@ -81,7 +81,8 @@ var Doc = (function () {
         });
     };
     Doc.prototype._performWrite = function (body, callback) {
-        this.db.raw.insert(body, err_1.default.resultFunc('doc', callback));
+        body['_rev'] = this._latestRev;
+        this.db.raw.insert(body, this.getId(), err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype.update = function (body, callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -96,8 +97,8 @@ var Doc = (function () {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        var merged = deepExtend({}, this.body, body, { 'updated_': Date.now() });
-        this._performUpdate(merged, function (err, result) {
+        var clone = deepExtend({}, this.body, body);
+        this._performUpdate(clone, function (err, result) {
             if (err) {
                 if (tries <= _this.db.maxTries && err.name == "conflict") {
                     _this.read(function (err) {
@@ -111,7 +112,7 @@ var Doc = (function () {
                     callback(err);
             }
             else {
-                _this.body = merged;
+                _this.body = clone;
                 _this.body['_id'] = result['id'];
                 _this.body['_rev'] = _this._latestRev = result['rev'];
                 callback(); // success
@@ -122,7 +123,7 @@ var Doc = (function () {
         if (this.getRev() !== this._latestRev)
             callback(err_1.default.conflict('doc')); // we know we are out of date
         else
-            this._performWrite(body, callback);
+            this.db.raw.insert(body, this.getId(), err_1.default.resultFunc('doc', callback));
     };
     Doc.prototype.destroy = function (callback) {
         if (callback === void 0) { callback = function () { }; }
@@ -178,12 +179,6 @@ var Doc = (function () {
     };
     Doc.prototype.getRev = function () {
         return this.body['_rev'];
-    };
-    Doc.prototype.getCreated = function () {
-        return this.body['created_'];
-    };
-    Doc.prototype.getUpdated = function () {
-        return this.body['updated_'];
     };
     Doc.prototype.getBody = function () {
         return deepExtend({}, this.body);

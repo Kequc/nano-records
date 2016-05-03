@@ -177,12 +177,8 @@ var DbDoc = (function () {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        var time = Date.now();
-        var meta = { '_id': id, '_rev': rev, 'updated_': time };
-        if (!rev)
-            meta['created_'] = time;
-        var merged = deepExtend({}, body, meta);
-        this._performWrite(merged, function (err, result) {
+        var clone = deepExtend({}, body);
+        this._performWrite(id, rev, clone, function (err, result) {
             if (err) {
                 if (tries <= 1 && err.name == "no_db_file") {
                     // create db
@@ -197,11 +193,12 @@ var DbDoc = (function () {
                     callback(err);
             }
             else
-                callback(undefined, new doc_1.default(_this.db, merged, result)); // written successfully
+                callback(undefined, new doc_1.default(_this.db, clone, result)); // written successfully
         });
     };
-    DbDoc.prototype._performWrite = function (body, callback) {
-        this.db.raw.insert(body, err_1.default.resultFunc('doc', callback));
+    DbDoc.prototype._performWrite = function (id, rev, body, callback) {
+        body['_rev'] = rev;
+        this.db.raw.insert(body, id, err_1.default.resultFunc('doc', callback));
     };
     DbDoc.prototype.destroy = function (id, callback) {
         if (callback === void 0) { callback = function () { }; }

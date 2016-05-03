@@ -194,12 +194,8 @@ export default class DbDoc
   private _performWriteAndInstantiateDoc (id: string, rev: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
   {
     tries++;
-    let time: number = Date.now();
-    let meta: SimpleObject = { '_id': id, '_rev': rev, 'updated_': time };
-    if (!rev)
-      meta['created_'] = time;
-    let merged = deepExtend({}, body, meta);
-    this._performWrite(merged, (err, result) => {
+    let clone = deepExtend({}, body);
+    this._performWrite(id, rev, clone, (err, result) => {
       if (err) {
         if (tries <= 1 && err.name == "no_db_file") {
           // create db
@@ -214,13 +210,14 @@ export default class DbDoc
           callback(err);
       }
       else
-        callback(undefined, new Doc(this.db, merged, result)); // written successfully
+        callback(undefined, new Doc(this.db, clone, result)); // written successfully
     });
   }
   
-  private _performWrite (body: SimpleObject, callback: ErrResultCallback)
+  private _performWrite (id: string, rev: string, body: SimpleObject, callback: ErrResultCallback)
   {
-    this.db.raw.insert(body, Err.resultFunc('doc', callback));
+    body['_rev'] = rev;
+    this.db.raw.insert(body, id, Err.resultFunc('doc', callback));
   }
   
   destroy (id: string, callback: ErrCallback = ()=>{})

@@ -63,7 +63,7 @@ DbDocAssert.write_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAssert.write = (db, id, done) => {
-  let changes = { complex: 'document updated', updated: 'changehere' };
+  let changes = { complex: 'document updated', newly: 'changehere' };
   db.doc.write(id, changes, (err, doc) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
@@ -82,7 +82,7 @@ DbDocAssert.forcedWrite_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAssert.forcedWrite = (db, id, done) => {
-  let changes = { complex: 'document updated', updated: 'changehere' };
+  let changes = { complex: 'document updated', newly: 'changehere' };
   db.doc.forcedWrite(id, changes, (err, doc) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;

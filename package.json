@@ -1,7 +1,7 @@
 {
   "name": "nano-records",
   "version": "1.0.8",
-  "description": "Utility returns objects for interacting with couchdb.",
+  "description": "Utility returns objects for interacting with CouchDB.",
   "author": "mr.kequc@gmail.com",
   "license": "ISC",
   "scripts": {
