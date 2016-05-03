@@ -14,7 +14,6 @@ var design_1 = require('./db/design');
 var deepExtend = require('deep-extend');
 var Db = (function () {
     function Db(nano, dbName, designs) {
-        if (designs === void 0) { designs = {}; }
         this.maxTries = 5;
         this.designs = {};
         this.nano = nano;

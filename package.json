@@ -23,7 +23,10 @@
   },
   "homepage": "https://github.com/Kequc/nano-records#readme",
   "keywords": [
-    "nano"
+    "nano",
+    "couchdb",
+    "nodejs",
+    "typescript"
   ],
   "devDependencies": {
     "chai": "^3.5.0",

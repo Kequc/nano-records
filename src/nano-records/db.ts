@@ -25,7 +25,7 @@ export default class Db
   doc: DbDoc;
   design: DbDesign;
   
-  constructor (nano: any, dbName: string, designs: DesignInputs = {})
+  constructor (nano: any, dbName: string, designs?: DesignInputs)
   {
     this.nano = nano;
     this.dbName = dbName;

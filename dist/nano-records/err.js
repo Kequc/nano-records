@@ -16,18 +16,9 @@ var Err = (function () {
         this.message = message || "No additional information available.";
         this.raw = raw || {};
     }
-    Err.prototype.toJSON = function () {
-        return {
-            scope: this.scope,
-            name: this.name,
-            message: this.message,
-            raw: this.raw
-        };
-    };
     Err.resultFunc = function (scope, callback) {
-        var _this = this;
         return function (raw, result) {
-            var err = _this.make(scope, raw);
+            var err = Err.make(scope, raw);
             if (err)
                 callback(err);
             else
@@ -58,7 +49,7 @@ var Err = (function () {
             // something weird like insert of an _updated attribute
             return new Err(scope, "doc_validation", "Bad document member.", err);
         }
-        else if (err.statusCode == 500 && ['function_clause', 'case_clause'].indexOf(err.reason) > -1) {
+        else if (err.statusCode == 500 && (err.reason == 'function_clause' || err.reason == 'case_clause')) {
             // design broken somehow
             return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
         }

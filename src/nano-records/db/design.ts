@@ -42,7 +42,7 @@ export default class DbDesign
     this._performShow(id, name, docId, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
-          this._updateDesign(id, { 'shows': [name] }, (err: Err) => {
+          this._updateDesign(id, { 'shows': [name] }, (err) => {
             if (err)
               callback(err);
             else
@@ -80,7 +80,7 @@ export default class DbDesign
     this._performView(id, name, params, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
-          this._updateDesign(id, { 'views': [name] }, (err: Err) => {
+          this._updateDesign(id, { 'views': [name] }, (err) => {
             if (err)
               callback(err);
             else

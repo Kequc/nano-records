@@ -19,7 +19,6 @@ export default class Err {
     message: string;
     raw: NanoError;
     constructor(scope: string, name?: string, message?: string, raw?: NanoError);
-    toJSON(): Object;
     static resultFunc(scope: string, callback: (err: Err, result?: any) => any): Function;
     static make(scope: string, err: NanoError): Err;
     static missing(scope: string, err?: NanoError): Err;

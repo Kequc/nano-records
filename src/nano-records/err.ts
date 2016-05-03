@@ -38,21 +38,11 @@ export default class Err
     this.message = message || "No additional information available.";
     this.raw = raw || {};
   }
-    
-  toJSON (): Object
-  {
-    return {
-      scope: this.scope,
-      name: this.name,
-      message: this.message,
-      raw: this.raw
-    };
-  }
   
   static resultFunc (scope: string, callback: (err: Err, result?: any)=>any): Function
   {
     return (raw: NanoError, result: any) => {
-      let err = this.make(scope, raw);
+      let err = Err.make(scope, raw);
       if (err)
         callback(err);
       else
@@ -84,7 +74,7 @@ export default class Err
       // something weird like insert of an _updated attribute
       return new Err(scope, "doc_validation", "Bad document member.", err);
     }
-    else if (err.statusCode == 500 && ['function_clause', 'case_clause'].indexOf(err.reason) > -1) {
+    else if (err.statusCode == 500 && (err.reason == 'function_clause' || err.reason == 'case_clause')) {
       // design broken somehow
       return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
     }
