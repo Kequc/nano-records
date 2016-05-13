@@ -49,10 +49,6 @@ var Err = (function () {
             // something weird like insert of an _updated attribute
             return new Err(scope, "doc_validation", "Bad document member.", err);
         }
-        else if (err.statusCode == 500 && (err.reason == 'function_clause' || err.reason == 'case_clause')) {
-            // design broken somehow
-            return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
-        }
         else if (err.statusCode == 500 && scope == 'design' && err.error == "TypeError") {
             // NANO: that is one hell of an error, man crazy
             // seems to only occur when a show is missing
@@ -62,6 +58,10 @@ var Err = (function () {
         else if (err.code == 'ECONNREFUSED') {
             // could not connect to the database
             return new Err(scope, "connection_refused", "Could not connect to database.", err);
+        }
+        else if (err.statusCode == 500 && err.scope == 'couch') {
+            // design broken somehow
+            return new Err(scope, "malformed_script", "Problem with one of your designs.", err);
         }
         else {
             // best guess!

@@ -7,7 +7,7 @@ Conflicts are avoided with automated retries, errors are sanitised, designs are 
 
 [npm](https://www.npmjs.com/package/nano-records)
 
-## Install
+### Install
 
 ```
 npm install nano --save
@@ -28,7 +28,7 @@ Each NanoRecords instance represents one database.
 
 Provide NanoRecords with a running instance of nano and a chosen database name. This should be all you need to get started.
 
-## Documents
+### Documents
 
 ```javascript
 db.doc.create(body, (err, doc) => {
@@ -144,7 +144,7 @@ Methods for accessing the document's _id and _rev properties. Another way of wri
 
 And one for creating a deep clone of the document body `deepExtend({}, doc.body)`<sup>[1](https://github.com/unclechu/node-deep-extend)</sup>.
 
-## Attachments
+### Attachments
 
 ```javascript
 doc.attachment.read(name, (err, data) => {
@@ -194,7 +194,7 @@ doc.attachment.exists(name);
 
 Return attachment names as an array and whether a specific attachment exists.
 
-## Streams
+### Streams
 
 ```javascript
 doc.attachment.createReadStream(name, (err) => {
@@ -219,7 +219,7 @@ reader.pipe(doc.attachment.createWriteStream(name, mimeType, (err) => {
 
 Write an attachment using a stream. It's important to note that streams cannot be retried, if there is an error you will have to pipe a new stream manually.
 
-## Designs
+### Designs
 
 ```json
 // > ./designs.json
@@ -268,7 +268,7 @@ db.design.show(id, name, docId, (err, output) => {
 
 Persist a show similar to the way `db.design.view` does then return the result.
 
-## Db
+### Db
 
 ```javascript
 db.create((err) => {
@@ -297,7 +297,7 @@ db.reset("_RESET_", (err) => {
 
 Destroy and then recreate the database, first parameter must be `_RESET_`.
 
-## Errors
+### Errors
 
 ```javascript
 err.scope; // source of the error
@@ -320,6 +320,6 @@ A `conflict` would only happen if the max number of retries was reached on a req
 
 You might see `no_db_file` if your CouchDB has security locked down.
 
-## Contribute
+### Contribute
 
 If you like what you see please feel encouraged to [get involved](https://github.com/Kequc/nano-records/issues) report problems and submit pull requests! As of the time of this writing the project is new with one maintainer.
