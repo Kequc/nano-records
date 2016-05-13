@@ -15,12 +15,12 @@ import {default as DocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
 
 export interface ErrDocCallback {
-	(err?: Err, doc?: Doc): any;
+  (err?: Err, doc?: Doc): any;
 }
 
 export default class Doc
 {
-  body: { [index: string]: any } = {};
+  body: SimpleObject = {};
   _latestRev: string;
   
   db: Db;

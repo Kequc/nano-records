@@ -10,19 +10,19 @@
  */
 
 export interface ErrCallback {
-	(err?: Err): any;
+  (err?: Err): any;
 }
 export interface ErrResultCallback {
-	(err?: Err, result?: SimpleObject): any;
+  (err?: Err, result?: SimpleObject): any;
 }
 export interface ErrHeadCallback {
-	(err?: Err, rev?: string, result?: SimpleObject): any;
+  (err?: Err, rev?: string, result?: SimpleObject): any;
 }
 export interface ErrOutputCallback {
-	(err?: Err, output?: any): any;
+  (err?: Err, output?: any): any;
 }
 export interface ErrDataCallback {
-	(err?: Err, data?: any): any;
+  (err?: Err, data?: any): any;
 }
 
 export default class Err
@@ -32,7 +32,8 @@ export default class Err
   message: string;
   raw: NanoError;
   
-  constructor (scope: string, name?: string, message?: string, raw?: NanoError) {
+  constructor (scope: string, name?: string, message?: string, raw?: NanoError)
+  {
     this.scope = scope;
     this.name = name || "unknown_error";
     this.message = message || "No additional information available.";

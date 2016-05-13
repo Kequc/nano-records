@@ -1,8 +1,8 @@
 interface SimpleObject {
-	[index: string]: any;
+  [index: string]: any;
 }
 interface DesignInputs {
-	[index: string]: DesignInput;
+  [index: string]: DesignInput;
 }
 interface DesignInput {
   language?: string,
