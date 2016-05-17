@@ -7,7 +7,7 @@ interface DesignInputs {
 interface DesignInput {
   language?: string,
   shows?: { [index: string]: string };
-  views?: { [index: string]: { map: string, reduce: string }};
+  views?: { [index: string]: { map: string, reduce?: string }};
 }
 interface NanoError {
   name?: string;

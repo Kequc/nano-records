@@ -99,7 +99,7 @@ export default class DbDesign
   {
     this.db.raw.view(id, name, params, Err.resultFunc('design', callback));
   }
-  
+    
   private _updateDesign (id: string, kinds: { [index: string]: string[] }, callback: ErrCallback)
   {
     let design = this.db.designs[id];

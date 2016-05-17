@@ -13,6 +13,26 @@ var err_1 = require('../err');
 var doc_1 = require('../doc');
 var attachment_1 = require('./doc/attachment');
 var deepExtend = require('deep-extend');
+function readAllName(key) {
+    if (key instanceof Array)
+        return "read-" + key.join('-');
+    else
+        return "read-" + name;
+}
+exports.readAllName = readAllName;
+function readAllKey(key) {
+    if (key instanceof Array) {
+        var result = [];
+        for (var _i = 0, key_1 = key; _i < key_1.length; _i++) {
+            var k = key_1[_i];
+            result.push("doc." + k);
+        }
+        return "[" + result.join(', ') + "]";
+    }
+    else
+        return "doc." + key;
+}
+exports.readAllKey = readAllKey;
 var DbDoc = (function () {
     function DbDoc(db) {
         this.db = db;
@@ -56,6 +76,52 @@ var DbDoc = (function () {
     };
     DbDoc.prototype._performRead = function (id, callback) {
         this.db.raw.get(id, err_1.default.resultFunc('doc', callback));
+    };
+    DbDoc.prototype.readAll = function (key, params, callback) {
+        if (!key)
+            callback(err_1.default.missingParam('doc', "key"));
+        else if (!params)
+            callback(err_1.default.missingParam('doc', "params"));
+        else
+            this._readAll(key, params, callback);
+    };
+    DbDoc.prototype._readAll = function (key, params, callback, tries) {
+        var _this = this;
+        if (tries === void 0) { tries = 0; }
+        tries++;
+        this.db.design.view("_nano_records", readAllName(key), params, function (err, output) {
+            if (err) {
+                if (tries <= 1 && err.name == "not_defined") {
+                    _this._updateReadAllDesign(key, function (err) {
+                        if (err)
+                            callback(err);
+                        else
+                            _this._readAll(key, params, callback, tries);
+                    });
+                }
+                else
+                    callback(err);
+            }
+            else {
+                var docs = [];
+                for (var _i = 0, _a = output['rows'] || []; _i < _a.length; _i++) {
+                    var body = _a[_i];
+                    docs.push(new doc_1.default(_this.db, body));
+                }
+                callback(undefined, docs); // success
+            }
+        });
+    };
+    DbDoc.prototype._updateReadAllDesign = function (key, callback) {
+        // generate design document
+        var body = {
+            language: "javascript",
+            views: {}
+        };
+        body.views[readAllName(key)] = {
+            map: "function (doc) { emit(" + readAllKey(key) + ", doc); }"
+        };
+        this.forcedUpdate('_design/_nano_records', body, callback);
     };
     DbDoc.prototype.write = function (id, body, callback) {
         if (callback === void 0) { callback = function () { }; }
