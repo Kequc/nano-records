@@ -249,24 +249,70 @@ var db = new NanoRecords(nano, dbName, designs);
 When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [Views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [Design Documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 ```javascript
-db.design.view(id, name, params, (err, output) => {
+db.show.read(id, name, docId, (err, result) => {
   if (err)
     return;
-  console.log(output);
+  console.log(result);
 });
 ```
 
-Persist a view using the provided id (ie. 'foo') and name if it's not already there, then return the result of the query.
+Persist a show using the provided id (ie. 'foo') and name if it's not already there, then return the result for the doc.
 
 ```javascript
-db.design.show(id, name, docId, (err, output) => {
+db.view.read(id, name, params, (err, list) => {
   if (err)
     return;
-  console.log(output);
+  // list is a NanoRecords list
+  console.log(list.values());
 });
 ```
 
-Persist a show similar to the way `db.design.view` does then return the result.
+Persist a view similar to `db.show.read` then return the result.
+
+### View helpers
+
+```javascript
+db.view.all(keys, params, (err, list) => {
+  if (err)
+    return;
+  // list is a NanoRecords list
+  console.log(list.values());
+});
+```
+
+Will generate a view for you using the provided keys, which returns a list of documents.
+
+Useful for simple search functions, for example `keys` may be `"user_id"` then you can then provide `{ key: "myuserid" }` to `params` and find relevant results. The `keys` parameter may also be an array of values, or nested values. It's best not to provide parameters to this function which are dynamic in nature, as a new view is persisted to the database for each set of keys you provide.
+
+Complex views are still best constructed manually.
+
+```javascript
+db.view.only(keys, values, params, (err, list) => {
+  if (err)
+    return;
+  // list is a NanoRecords list
+  console.log(list.values());
+});
+```
+
+Will generate a view similar to `view.all` which will only return specific set of values from each document. For example `values` may be `["created_at", "title", "author.name"]` which would return `{ created_at: "mydate", title: "mytitle", author: { name: "myauthorname" } }` for each of your returned list's value parameters.
+
+This is more efficient than performing a full document lookup. There is the potential for incredible complexity using this helper be careful.
+
+### Lists
+
+```javascript
+list.total; // 11
+list.offset; // 0
+list.rows; // raw result
+list.ids(); // [ids...]
+list.keys(); // [keys...]
+list.values(); // [values...]
+list.docs(); // [NanoRecords documents...]
+list.doc(index); // NanoRecords document
+```
+
+The `list.docs` method may not give you complete document objects depending on the values that were returned by the view. However running `doc.read` will fetch the full document from the database, similarly all normal NanoRecords document functions should work as you expect.
 
 ### Db
 

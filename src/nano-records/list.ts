@@ -44,7 +44,7 @@ export default class List
   
   values (): any[]
   {
-    return _.map(this.rows, (row: ViewRow) => { return row.value; });
+    return _.map(this.rows, (row: ViewRow) => { return row.doc || row.value; });
   }
   
   docs (): Doc[]
@@ -52,14 +52,9 @@ export default class List
     return _.map(this.rows, (row: ViewRow) => { return new Doc(this.db, (row.doc || row.value), { id: row.id }) });
   }
   
-  row (index: number): ViewRow
-  {
-    return this.rows[index];
-  }
-  
   doc (index: number)
   {
-    let row = this.row(index);
+    let row = this.rows[index];
     return (row ? new Doc(this.db, (row.doc || row.value), { id: row.id }) : undefined);
   }
 }
