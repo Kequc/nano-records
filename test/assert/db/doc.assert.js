@@ -3,15 +3,15 @@ var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
 
-var Util = require('../util');
+var Helper = require('../../helper');
 
 var DbDocAssert = {};
 
 DbDocAssert.create = (db, done) => {
-  db.doc.create(Util.complexBody, (err, doc) => {
+  db.doc.create(Helper.complexBody, (err, doc) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
-    Util.checkBody(doc, Util.complexBody, done);
+    Helper.checkBody(doc, Helper.complexBody, done);
   });
 };
 
@@ -29,7 +29,7 @@ DbDocAssert.read = (db, id, done) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.checkBody(doc, Util.complexBody, done);
+    Helper.checkBody(doc, Helper.complexBody, done);
   });
 };
 
@@ -68,7 +68,7 @@ DbDocAssert.write = (db, id, done) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.checkBody(doc, changes, done);
+    Helper.checkBody(doc, changes, done);
   });
 };
 
@@ -87,7 +87,7 @@ DbDocAssert.forcedWrite = (db, id, done) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.checkBody(doc, changes, done);
+    Helper.checkBody(doc, changes, done);
   });
 };
 
@@ -107,7 +107,7 @@ DbDocAssert.update = (db, id, done, moreChanges) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.checkBody(doc, asserts, done);
+    Helper.checkBody(doc, asserts, done);
   });
 };
 
@@ -127,7 +127,7 @@ DbDocAssert.forcedUpdate = (db, id, done, moreChanges) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);
-    Util.checkBody(doc, asserts, done);
+    Helper.checkBody(doc, asserts, done);
   });
 };
 

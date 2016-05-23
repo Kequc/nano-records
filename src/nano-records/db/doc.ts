@@ -11,30 +11,9 @@
 
 import {default as Err, ErrCallback, ErrHeadCallback, ErrResultCallback} from '../err';
 import {default as Db} from '../db';
-import {default as Doc, ErrDocCallback, ErrDocsCallback} from '../doc';
+import {default as Doc, ErrDocCallback} from '../doc';
 import {default as DbDocAttachment} from './doc/attachment';
 import deepExtend = require('deep-extend');
-
-export function readAllName (key: string|string[]): string
-{
-  if (key instanceof Array)
-    return "read-" + key.join('-');
-  else
-    return "read-" + name;
-}
-
-export function readAllKey (key: string|string[]): string
-{
-  if (key instanceof Array) {
-    let result: string[] = [];
-    for (let k of key) {
-      result.push("doc." + k);
-    }
-    return "[" + result.join(', ') + "]";
-  }
-  else
-    return "doc." + key;
-}
 
 export default class DbDoc
 {
@@ -88,55 +67,6 @@ export default class DbDoc
   private _performRead (id: string, callback: ErrResultCallback)
   {
     this.db.raw.get(id, Err.resultFunc('doc', callback));
-  }
-  
-  readAll(key: any, params: SimpleObject, callback: ErrDocsCallback)
-  {
-    if (!key)
-      callback(Err.missingParam('doc', "key"));
-    else if (!params)
-      callback(Err.missingParam('doc', "params"));
-    else
-      this._readAll(key, params, callback);
-  }
-  
-  private _readAll (key: string|string[], params: SimpleObject, callback: ErrDocsCallback, tries: number = 0)
-  {
-    tries++;
-    this.db.design.view("_nano_records", readAllName(key), params, (err, output) => {
-      if (err) {
-        if (tries <= 1 && err.name == "not_defined") {
-          this._updateReadAllDesign(key, (err) => {
-            if (err)
-              callback(err);
-            else
-              this._readAll(key, params, callback, tries);
-          });
-        }
-        else
-          callback(err);
-      }
-      else {
-        let docs: Doc[] = [];
-        for (let body of output['rows'] || []) {
-          docs.push(new Doc(this.db, body));
-        }
-        callback(undefined, docs); // success
-      }
-    });
-  }
-  
-  private _updateReadAllDesign (key: string|string[], callback: ErrCallback)
-  {
-    // generate design document
-    let body: DesignInput = {
-      language: "javascript",
-      views: {}
-    };
-    body.views[readAllName(key)] = {
-      map: "function (doc) { emit(" + readAllKey(key) + ", doc); }"
-    };
-    this.forcedUpdate('_design/_nano_records', body, callback);
   }
   
   write (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})

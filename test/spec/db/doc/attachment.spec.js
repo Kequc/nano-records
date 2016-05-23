@@ -1,12 +1,12 @@
 "use strict";
 var dbName = 'nano-records-db-doc-attachment-test';
 
+var Helper = require('../../../helper');
 var NanoRecords = require('../../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
 var assert = require('../../../assert/db/doc/attachment.assert');
-var Util = require('../../../assert/util');
 
 describe('db-doc-attachment', () => {
   after((done) => {
@@ -19,16 +19,16 @@ describe('db-doc-attachment', () => {
     });
     
     it('read', (done) => {
-      assert.read_Fail(db, Util.id, "not_found", done);
+      assert.read_Fail(db, Helper.id, "not_found", done);
     });
     it('createReadStream', (done) => {
-      assert.createReadStream_Fail(db, Util.id, "not_found", done);
+      assert.createReadStream_Fail(db, Helper.id, "not_found", done);
     });
     it('write', (done) => {
-      assert.write_Fail(db, Util.id, "not_found", done);
+      assert.write_Fail(db, Helper.id, "not_found", done);
     });
     it('destroy', (done) => {
-      assert.destroy_Fail(db, Util.id, "not_found", done);
+      assert.destroy_Fail(db, Helper.id, "not_found", done);
     });
     
   });
@@ -40,29 +40,29 @@ describe('db-doc-attachment', () => {
     
     describe('document does not exist', () => {
       beforeEach((done) => {
-        db.doc.destroy(Util.id, () => { done(); })
+        db.doc.destroy(Helper.id, () => { done(); })
       });
       
       it('read', (done) => {
-        assert.read_Fail(db, Util.id, "not_found", done);
+        assert.read_Fail(db, Helper.id, "not_found", done);
       });
       it('createReadStream', (done) => {
-        assert.createReadStream_Fail(db, Util.id, "not_found", done);
+        assert.createReadStream_Fail(db, Helper.id, "not_found", done);
       });
       it('write', (done) => {
-        assert.write_Fail(db, Util.id, "not_found", done);
+        assert.write_Fail(db, Helper.id, "not_found", done);
       });
       it('destroy', (done) => {
-        assert.destroy_Fail(db, Util.id, "not_found", done);
+        assert.destroy_Fail(db, Helper.id, "not_found", done);
       });
       
     });
     
     describe('document exists', () => {
-      var _doc;
+      let _doc;
       beforeEach((done) => {
         _doc = undefined;
-        db.doc.create(Util.simpleBody, (err, doc) => {
+        db.doc.create(Helper.simpleBody, (err, doc) => {
           _doc = doc;
           done();
         });
@@ -90,7 +90,7 @@ describe('db-doc-attachment', () => {
       });
       describe('attachment exists', () => {
         beforeEach((done) => {
-          _doc.attachment.write(Util.fileName, Util.fileContent, "text/plain", () => { done(); });
+          _doc.attachment.write(Helper.fileName, Helper.fileContent, "text/plain", () => { done(); });
         });
         
         it('read', (done) => {

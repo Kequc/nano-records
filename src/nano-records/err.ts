@@ -18,9 +18,6 @@ export interface ErrResultCallback {
 export interface ErrHeadCallback {
   (err?: Err, rev?: string, result?: SimpleObject): any;
 }
-export interface ErrOutputCallback {
-  (err?: Err, output?: any): any;
-}
 export interface ErrDataCallback {
   (err?: Err, data?: any): any;
 }

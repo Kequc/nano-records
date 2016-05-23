@@ -1,18 +1,18 @@
 "use strict";
 var dbName = 'nano-records-doc-test';
 
+var Helper = require('../helper');
 var NanoRecords = require('../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
 var assert = require('../assert/doc.assert');
-var Util = require('../assert/util');
 
 describe('doc', () => {
-  var _doc;
+  let _doc;
   beforeEach((done) => {
     _doc = undefined;
-    db.doc.create(Util.complexBody, (err, doc) => {
+    db.doc.create(Helper.complexBody, (err, doc) => {
       _doc = doc;
       done();
     });
@@ -102,7 +102,7 @@ describe('doc', () => {
     });
     describe('attachment exists', () => {
       beforeEach((done) => {
-        _doc.attachment.write(Util.fileName, "This is an example attachment.", "text/plain", () => { done(); });
+        _doc.attachment.write(Helper.fileName, "This is an example attachment.", "text/plain", () => { done(); });
       });
       
       describe('just persisted', () => {

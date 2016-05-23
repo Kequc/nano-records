@@ -16,3 +16,7 @@ declare module 'stream' {
 	export var Readable: any;
 	export var Writable: any;
 }
+declare module 'underscore' {
+	var methods: any;
+	export = methods;
+}

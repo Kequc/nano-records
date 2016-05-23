@@ -11,7 +11,8 @@
 import {default as Err, ErrCallback} from './err';
 import {default as Doc} from './doc';
 import {default as DbDoc} from './db/doc';
-import {default as DbDesign} from './db/design';
+import {default as DbView} from './db/view';
+import {default as DbShow} from './db/show';
 import deepExtend = require('deep-extend');
 
 export default class Db
@@ -23,7 +24,8 @@ export default class Db
   raw: any;
   
   doc: DbDoc;
-  design: DbDesign;
+  view: DbView;
+  show: DbShow;
   
   constructor (nano: any, dbName: string, designs?: DesignInputs)
   {
@@ -41,7 +43,8 @@ export default class Db
     deepExtend(this.designs, designs);
     
     this.doc = new DbDoc(this);
-    this.design = new DbDesign(this);
+    this.view = new DbView(this);
+    this.show = new DbShow(this);
   }
   
   create (callback: ErrCallback = ()=>{})

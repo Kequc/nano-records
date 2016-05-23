@@ -4,9 +4,6 @@ import { default as DocAttachment } from './doc/attachment';
 export interface ErrDocCallback {
     (err?: Err, doc?: Doc): any;
 }
-export interface ErrDocsCallback {
-    (err?: Err, docs?: Doc[]): any;
-}
 export default class Doc {
     body: SimpleObject;
     _latestRev: string;

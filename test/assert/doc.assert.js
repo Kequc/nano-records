@@ -3,7 +3,7 @@ var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
 
-var Util = require('./util');
+var Helper = require('./../helper');
 
 var DocAssert = {};
 
@@ -50,12 +50,12 @@ DocAssert.read = (doc, done) => {
   // check read
   let changes = { more: "Yay!", complex: "cats and dogs" };
   let asserts = deepExtend({}, doc.body, changes);
-  Util.triggerBgUpdate(doc.db, doc.getId(), changes, () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), changes, () => {
     expect(doc.body).to.not.have.keys('more');
     doc.read((err) => {
       expect(err).to.be.undefined;
       expect(doc.body).to.include.keys('complex', 'more', '_id', '_rev');
-      Util.checkBody(doc, asserts, done);
+      Helper.checkBody(doc, asserts, done);
     });
   });
 };
@@ -77,18 +77,18 @@ DocAssert.write = (doc, done) => {
     expect(err).to.be.undefined;
     expect(doc.body).to.include.keys('complex', 'more', '_id', '_rev');
     expect(doc.body).to.not.include.keys('num');
-    Util.checkBody(doc, asserts, done);
+    Helper.checkBody(doc, asserts, done);
   });
 };
 
 DocAssert.write_Retries = (doc, done) => {
-  Util.triggerBgUpdate(doc.db, doc.getId(), { anotheranother: "changed" }, () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), { anotheranother: "changed" }, () => {
     DocAssert.write(doc, done);
   });
 };
 
 DocAssert.write_Retries_Fail = (doc, done) => {
-  Util.triggerBgUpdate(doc.db, doc.getId(), () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), () => {
     doc._write({ boo: "oorns" }, (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
@@ -112,19 +112,19 @@ DocAssert.update = (doc, done, moreChanges) => {
   doc.update(changes, (err) => {
     expect(err).to.be.undefined;
     expect(doc.body).to.include.keys('complex', 'more', '_id', '_rev');
-    Util.checkBody(doc, asserts, done);
+    Helper.checkBody(doc, asserts, done);
   });
 };
 
 DocAssert.update_Retries = (doc, done) => {
   let changes = { anotheranother: "changed" };
-  Util.triggerBgUpdate(doc.db, doc.getId(), changes, () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), changes, () => {
     DocAssert.update(doc, done, changes);
   });
 };
 
 DocAssert.update_Retries_Fail = (doc, done) => {
-  Util.triggerBgUpdate(doc.db, doc.getId(), () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), () => {
     doc._update({ boo: "oorns" }, (err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
@@ -176,13 +176,13 @@ DocAssert.destroy = (doc, done) => {
 };
 
 DocAssert.destroy_Retries = (doc, done) => {
-  Util.triggerBgUpdate(doc.db, doc.getId(), { anotheranother: "changed" }, () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), { anotheranother: "changed" }, () => {
     DocAssert.destroy(doc, done);
   });
 };
 
 DocAssert.destroy_Retries_Fail = (doc, done) => {
-  Util.triggerBgUpdate(doc.db, doc.getId(), () => {
+  Helper.triggerBgUpdate(doc.db, doc.getId(), () => {
     doc._destroy((err) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");

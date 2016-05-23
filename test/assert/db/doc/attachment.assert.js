@@ -3,12 +3,12 @@ var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
 
-var Util = require('../../util');
+var Helper = require('../../../helper');
 
 var DbDocAttachmentAssert = {};
 
 DbDocAttachmentAssert.read_Fail = (db, id, errorName, done) => {
-  db.doc.attachment.read(id, Util.fileName, (err, data) => {
+  db.doc.attachment.read(id, Helper.fileName, (err, data) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(data).to.be.undefined;
@@ -17,16 +17,16 @@ DbDocAttachmentAssert.read_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAttachmentAssert.read = (db, id, done) => {
-  db.doc.attachment.read(id, Util.fileName, (err, data) => {
+  db.doc.attachment.read(id, Helper.fileName, (err, data) => {
     expect(err).to.be.undefined;
     expect(data).to.be.ok;
-    expect(Util.bufferToString(data)).to.equal(Util.fileContent);
+    expect(Helper.bufferToString(data)).to.equal(Helper.fileContent);
     done();
   });
 };
 
 DbDocAttachmentAssert.createReadStream_Fail = (db, id, errorName, done) => {
-  Util.streamToString(db.doc.attachment.createReadStream(id, Util.fileName, (err) => {
+  Helper.streamToString(db.doc.attachment.createReadStream(id, Helper.fileName, (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     done();
@@ -39,16 +39,16 @@ DbDocAttachmentAssert.createReadStream_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAttachmentAssert.createReadStream = (db, id, done) => {
-  Util.streamToString(db.doc.attachment.createReadStream(id, Util.fileName, (err) => {
+  Helper.streamToString(db.doc.attachment.createReadStream(id, Helper.fileName, (err) => {
     expect(err).to.be.undefined;
     done();
   }), (result) => {
-    expect(result).to.equal(Util.fileContent);
+    expect(result).to.equal(Helper.fileContent);
   });
 };
 
 DbDocAttachmentAssert.write_Fail = (db, id, errorName, done) => {
-  db.doc.attachment.write(id, Util.fileName, "Cannot write here.", "text/plain", (err) => {
+  db.doc.attachment.write(id, Helper.fileName, "Cannot write here.", "text/plain", (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     done();
@@ -56,12 +56,12 @@ DbDocAttachmentAssert.write_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAttachmentAssert.write = (db, id, done) => {
-  db.doc.attachment.write(id, Util.fileName, "Can write here.", "text/plain", (err) => {
+  db.doc.attachment.write(id, Helper.fileName, "Can write here.", "text/plain", (err) => {
     expect(err).to.be.undefined;
     db.doc.read(id, (err, doc) => {
       expect(err).to.be.undefined;
       expect(doc).to.be.ok;
-      expect(doc.attachment.exists(Util.fileName)).to.be.true;
+      expect(doc.attachment.exists(Helper.fileName)).to.be.true;
       expect(doc.body).to.include.keys('_attachments', '_id', '_rev');
       done();
     });
@@ -69,7 +69,7 @@ DbDocAttachmentAssert.write = (db, id, done) => {
 };
 
 DbDocAttachmentAssert.destroy_Fail = (db, id, errorName, done) => {
-  db.doc.attachment.destroy(id, Util.fileName, (err) => {
+  db.doc.attachment.destroy(id, Helper.fileName, (err) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     done();
@@ -77,14 +77,14 @@ DbDocAttachmentAssert.destroy_Fail = (db, id, errorName, done) => {
 };
 
 DbDocAttachmentAssert.destroy = (db, id, done) => {
-  db.doc.attachment.destroy(id, Util.fileName, (err) => {
+  db.doc.attachment.destroy(id, Helper.fileName, (err) => {
     expect(err).to.be.undefined;
     db.doc.read(id, (err, doc) => {
       if (err && err.name == "not_found")
         done();
       else {
         expect(err).to.be.undefined;
-        expect(doc.attachment.exists(Util.fileName)).to.be.false;
+        expect(doc.attachment.exists(Helper.fileName)).to.be.false;
         done();
       }
     });

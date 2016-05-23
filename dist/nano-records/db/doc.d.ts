@@ -1,9 +1,7 @@
 import { ErrCallback, ErrHeadCallback } from '../err';
 import { default as Db } from '../db';
-import { ErrDocCallback, ErrDocsCallback } from '../doc';
+import { ErrDocCallback } from '../doc';
 import { default as DbDocAttachment } from './doc/attachment';
-export declare function readAllName(key: string | string[]): string;
-export declare function readAllKey(key: string | string[]): string;
 export default class DbDoc {
     db: Db;
     attachment: DbDocAttachment;
@@ -12,9 +10,6 @@ export default class DbDoc {
     read(id: string, callback?: ErrDocCallback): void;
     private _read(id, callback, tries?);
     private _performRead(id, callback);
-    readAll(key: any, params: SimpleObject, callback: ErrDocsCallback): void;
-    private _readAll(key, params, callback, tries?);
-    private _updateReadAllDesign(key, callback);
     write(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
     private _write(id, body, callback, tries?);
     forcedWrite(id: string, body: SimpleObject, callback?: ErrDocCallback): void;

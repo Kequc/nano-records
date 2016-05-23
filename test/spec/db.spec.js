@@ -2,26 +2,9 @@
 var mocha  = require('mocha');
 var expect = require('chai').expect;
 
-var designs = {
-  "foo": {
-    "views": {
-      "comments": {
-        "map": "function (doc) { ... };",
-        "reduce": "function (keys, values, rereduce) { ... };"
-      }
-    },
-    "shows": {
-      "post": "function (doc, req) { ... };",
-      "user": "function (doc, req) { ... };"
-    }
-  },
-  "bar": {
-    "language": "csharp",
-    "views": {}
-  }
-};
 var dbName = 'nano-records-db-test';
 
+var Helper = require('../helper');
 var NanoRecords = require('../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db;
@@ -47,14 +30,14 @@ describe('db', () => {
     
     it('constructor with designs', () => {
       // should be successful
-      db = new NanoRecords(nano, dbName, designs);
+      db = new NanoRecords(nano, dbName, Helper.designs);
       expect(db.nano).to.equal(nano);
       expect(db.dbName).to.equal(dbName);
       expect(db.designs).to.have.all.keys("foo", "bar");
       
       expect(db.designs["foo"]).to.have.all.keys("language", "views", "shows");
       expect(db.designs["foo"]["language"]).to.equal("javascript");
-      expect(db.designs["foo"]["views"]).to.have.all.keys("comments");
+      expect(db.designs["foo"]["views"]).to.have.all.keys("comments", "all-comments");
       expect(db.designs["foo"]["views"]["comments"]).to.have.all.keys("map", "reduce");
       expect(db.designs["foo"]["shows"]).to.have.all.keys("post", "user");
       

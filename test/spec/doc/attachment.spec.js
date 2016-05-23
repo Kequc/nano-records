@@ -1,18 +1,18 @@
 "use strict";
 var dbName = 'nano-records-doc-test';
 
+var Helper = require('../../helper');
 var NanoRecords = require('../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
 var assert = require('../../assert/doc/attachment.assert');
-var Util = require('../../assert/util');
 
 describe('doc-attachment', () => {
-  var _doc;
+  let _doc;
   beforeEach((done) => {
     _doc = undefined;
-    db.doc.create(Util.simpleBody, (err, doc) => {
+    db.doc.create(Helper.simpleBody, (err, doc) => {
       _doc = doc;
       done();
     });
@@ -23,7 +23,7 @@ describe('doc-attachment', () => {
   
   describe('document does not exist', () => {
     beforeEach((done) => {
-      _doc.attachment.write(Util.fileName, "Oops!", "text/plain", () => {
+      _doc.attachment.write(Helper.fileName, "Oops!", "text/plain", () => {
         _doc.destroy(() => { done(); })
       });
     });
@@ -92,13 +92,13 @@ describe('doc-attachment', () => {
     
     describe('attachment exists', () => {
       beforeEach((done) => {
-        _doc.attachment.write(Util.fileName, "This is an example attachment.", "text/plain", () => { done(); });
+        _doc.attachment.write(Helper.fileName, "This is an example attachment.", "text/plain", () => { done(); });
       });
       
       describe('just persisted', () => {
         
         it('list', () => {
-          assert.list(_doc, [Util.fileName]);
+          assert.list(_doc, [Helper.fileName]);
         });
         it('exists', () => {
           assert.exists(_doc, true);
@@ -138,7 +138,7 @@ describe('doc-attachment', () => {
         });
         
         it('list', () => {
-          assert.list(_doc, [Util.fileName]);
+          assert.list(_doc, [Helper.fileName]);
         });
         it('exists', () => {
           assert.exists(_doc, true);

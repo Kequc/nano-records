@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "deep-extend": "^0.4.1",
-    "dev-null": "^0.1.1"
+    "dev-null": "^0.1.1",
+    "underscore": "^1.8.3"
   }
 }

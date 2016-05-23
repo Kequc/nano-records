@@ -1,12 +1,12 @@
 "use strict";
 var dbName = 'nano-records-db-doc-test';
 
+var Helper = require('../../helper');
 var NanoRecords = require('../../../dist/nano-records');
 var nano = require('nano')("http://127.0.0.1:5984/");
 var db = new NanoRecords(nano, dbName);
 
 var assert = require('../../assert/db/doc.assert');
-var Util = require('../../assert/util');
 
 describe('db-doc', () => {
   after((done) => {
@@ -22,25 +22,25 @@ describe('db-doc', () => {
       assert.create(db, done);
     });
     it('read', (done) => {
-      assert.read_Fail(db, Util.id, "not_found", done);
+      assert.read_Fail(db, Helper.id, "not_found", done);
     });
     it('head', (done) => {
-      assert.head_Fail(db, Util.id, "not_found", done);
+      assert.head_Fail(db, Helper.id, "not_found", done);
     });
     it('write', (done) => {
-      assert.write_Fail(db, Util.id, "not_found", done);
+      assert.write_Fail(db, Helper.id, "not_found", done);
     });
     it('forcedWrite', (done) => {
-      assert.forcedWrite(db, Util.id, done);
+      assert.forcedWrite(db, Helper.id, done);
     });
     it('update', (done) => {
-      assert.update_Fail(db, Util.id, "not_found", done);
+      assert.update_Fail(db, Helper.id, "not_found", done);
     });
     it('forcedUpdate', (done) => {
-      assert.forcedUpdate(db, Util.id, done);
+      assert.forcedUpdate(db, Helper.id, done);
     });
     it('destroy', (done) => {
-      assert.destroy_Fail(db, Util.id, "not_found", done);
+      assert.destroy_Fail(db, Helper.id, "not_found", done);
     });
   });
   
@@ -77,40 +77,40 @@ describe('db-doc', () => {
     
     describe('document does not exist', () => {
       beforeEach((done) => {
-        db.doc.destroy(Util.id, () => { done(); });
+        db.doc.destroy(Helper.id, () => { done(); });
       });
       
       it('create', (done) => {
         assert.create(db, done);
       });
       it('read', (done) => {
-        assert.read_Fail(db, Util.id, "not_found", done);
+        assert.read_Fail(db, Helper.id, "not_found", done);
       });
       it('head', (done) => {
-        assert.head_Fail(db, Util.id, "not_found", done);
+        assert.head_Fail(db, Helper.id, "not_found", done);
       });
       it('write', (done) => {
-        assert.write_Fail(db, Util.id, "not_found", done);
+        assert.write_Fail(db, Helper.id, "not_found", done);
       });
       it('forcedWrite', (done) => {
-        assert.forcedWrite(db, Util.id, done);
+        assert.forcedWrite(db, Helper.id, done);
       });
       it('update', (done) => {
-        assert.update_Fail(db, Util.id, "not_found", done);
+        assert.update_Fail(db, Helper.id, "not_found", done);
       });
       it('forcedUpdate', (done) => {
-        assert.forcedUpdate(db, Util.id, done);
+        assert.forcedUpdate(db, Helper.id, done);
       });
       it('destroy', (done) => {
-        assert.destroy_Fail(db, Util.id, "not_found", done);
+        assert.destroy_Fail(db, Helper.id, "not_found", done);
       });
     });
     
     describe('document exists', () => {
-      var _doc;
+      let _doc;
       beforeEach((done) => {
         _doc = undefined;
-        db.doc.create(Util.complexBody, (err, doc) => {
+        db.doc.create(Helper.complexBody, (err, doc) => {
           _doc = doc;
           done();
         }); 
@@ -151,7 +151,7 @@ describe('db-doc', () => {
       });
       describe('attachment exists', () => {
         beforeEach((done) => {
-          _doc.attachment.write(Util.fileName, "This is an example attachment.", "text/plain", () => {
+          _doc.attachment.write(Helper.fileName, "This is an example attachment.", "text/plain", () => {
             _doc.read(() => { done(); });
           });
         });
