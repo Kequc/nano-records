@@ -24,17 +24,14 @@ var List = (function () {
         return _.map(this.rows, function (row) { return row.key; });
     };
     List.prototype.values = function () {
-        return _.map(this.rows, function (row) { return row.value; });
+        return _.map(this.rows, function (row) { return row.doc || row.value; });
     };
     List.prototype.docs = function () {
         var _this = this;
         return _.map(this.rows, function (row) { return new doc_1.default(_this.db, (row.doc || row.value), { id: row.id }); });
     };
-    List.prototype.row = function (index) {
-        return this.rows[index];
-    };
     List.prototype.doc = function (index) {
-        var row = this.row(index);
+        var row = this.rows[index];
         return (row ? new doc_1.default(this.db, (row.doc || row.value), { id: row.id }) : undefined);
     };
     return List;

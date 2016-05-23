@@ -14,6 +14,5 @@ export default class List {
     keys(): any[];
     values(): any[];
     docs(): Doc[];
-    row(index: number): ViewRow;
     doc(index: number): Doc;
 }

@@ -91,6 +91,7 @@ var ViewUtil;
         var name = "";
         if (keys instanceof Array) {
             var kk = [];
+            keys.sort();
             for (var _i = 0, keys_4 = keys; _i < keys_4.length; _i++) {
                 var key = keys_4[_i];
                 kk.push(key.split('.').join('_D_'));
@@ -103,6 +104,7 @@ var ViewUtil;
             name += "_S_";
             if (values instanceof Array) {
                 var vv = [];
+                values.sort();
                 for (var _a = 0, values_2 = values; _a < values_2.length; _a++) {
                     var value = values_2[_a];
                     vv.push(value.split('.').join('_D_'));

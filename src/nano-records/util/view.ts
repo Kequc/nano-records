@@ -91,6 +91,7 @@ export namespace ViewUtil
     let name: string = "";
     if (keys instanceof Array) {
       let kk: string[] = [];
+      keys.sort();
       for (let key of keys) {
         kk.push(key.split('.').join('_D_'));
       }
@@ -102,6 +103,7 @@ export namespace ViewUtil
       name += "_S_";
       if (values instanceof Array) {
         let vv: string[] = [];
+        values.sort();
         for (let value of values) {
           vv.push(value.split('.').join('_D_'));
         }

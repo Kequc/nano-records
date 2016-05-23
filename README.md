@@ -282,7 +282,7 @@ db.view.all(keys, params, (err, list) => {
 
 Will generate a view for you using the provided keys, which returns a list of documents.
 
-Useful for simple search functions, for example `keys` may be `"user_id"` then you can then provide `{ key: "myuserid" }` to `params` and find relevant results. The `keys` parameter may also be an array of values, or nested values. It's best not to provide parameters to this function which are dynamic in nature, as a new view is persisted to the database for each set of keys you provide.
+Useful for simple search functions, for example `keys` may be `"user_id"` then you can provide `{ key: "myuserid" }` to `params` and find relevant results. The `keys` parameter may also be an array of values, or nested values. It's best not to provide parameters to this function which are dynamic in nature, as a new view is persisted to the database for each set of keys provided.
 
 Complex views are still best constructed manually.
 
@@ -297,7 +297,7 @@ db.view.only(keys, values, params, (err, list) => {
 
 Will generate a view similar to `view.all` which will only return specific set of values from each document. For example `values` may be `["created_at", "title", "author.name"]` which would return `{ created_at: "mydate", title: "mytitle", author: { name: "myauthorname" } }` for each of your returned list's value parameters.
 
-This is more efficient than performing a full document lookup. There is the potential for incredible complexity using this helper be careful.
+This is more efficient than performing a full document lookup. There is the potential for incredible complexity using this helper so be careful.
 
 ### Lists
 
