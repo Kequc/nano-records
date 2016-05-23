@@ -7,6 +7,16 @@ Conflicts are avoided with automated retries, errors are sanitised, designs are 
 
 [npm](https://www.npmjs.com/package/nano-records)
 
+_This branch is under development._
+
+### Upgrading from 1.0.9 to 1.0.10
+
+* `doc.forcedWrite` is now `doc.write`
+* `doc.write` has been removed
+* `doc.forcedUpdate` is now `doc.updateOrWrite`
+* `doc.designs.show` is now `doc.show.read`
+* `doc.designs.view` is now `doc.view.read`
+
 ### Install
 
 ```
@@ -194,7 +204,7 @@ doc.attachment.exists(name);
 
 Return attachment names as an array and whether a specific attachment exists.
 
-### Streams
+### Attachment streams
 
 ```javascript
 doc.attachment.createReadStream(name, (err) => {
