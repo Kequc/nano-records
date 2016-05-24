@@ -19,25 +19,17 @@ describe('db-show', () => {
       db.destroy('_DESTROY_', () => { done(); });
     });
     
-    it('read', (done) => {
-      assert.read(db, "foo", "post", "Hello world!", done);
+    it('explicit', (done) => {
+      assert.explicit(db, "foo", "post", "Hello world!", done);
     });
-    it('read retries');
-    it('read more than maxTries');
+    it('explicit retries');
+    it('explicit more than maxTries');
     
   });
   
   describe('database exists', () => {
     before((done) => {
       db.reset('_RESET_', () => { done(); });
-    });
-    
-    describe('no id specified', () => {
-      
-      it('read', (done) => {
-        assert.read_Fail(db, undefined, "post", "missing_id", done);
-      });
-      
     });
     
     describe('design does not exist', () => {
@@ -47,19 +39,19 @@ describe('db-show', () => {
       
       describe('definition does not exist', () => {
         
-        it('read', (done) => {
-          assert.read_Fail(db, "foo", "does-not-exist", "missing_show", done);
+        it('explicit', (done) => {
+          assert.explicit_Fail(db, "foo", "does-not-exist", "missing_show", done);
         });
         
       });
       
       describe('definition exists', () => {
         
-        it('read', (done) => {
-          assert.read(db, "foo", "post", "Hello world!", done);
+        it('explicit', (done) => {
+          assert.explicit(db, "foo", "post", "Hello world!", done);
         });
-        it('read retries');
-        it('read more than maxTries');
+        it('explicit retries');
+        it('explicit more than maxTries');
         
       });
       
@@ -72,24 +64,24 @@ describe('db-show', () => {
       
       describe('definition does not exist', () => {
         
-        it('read', (done) => {
-          assert.read_Fail(db, "foo", "does-not-exist", "missing_show", done);
+        it('explicit', (done) => {
+          assert.explicit_Fail(db, "foo", "does-not-exist", "missing_show", done);
         });
         
       });
       
       describe('definition exists', () => {
         
-        it('read', (done) => {
-          assert.read(db, "foo", "post", "Hello world!", done);
+        it('explicit', (done) => {
+          assert.explicit(db, "foo", "post", "Hello world!", done);
         });
-        it('read retries');
-        it('read more than maxTries');
-        // it('read retries', (done) => {
-        //   assert.read_Retries(db, "foo", "post", "Hello world!", done);
+        it('explicit retries');
+        it('explicit more than maxTries');
+        // it('explicit retries', (done) => {
+        //   assert.explicit_Retries(db, "foo", "post", "Hello world!", done);
         // });
-        // it('read more than maxTries', (done) => {
-        //   assert.read_Retries_Fail(db, "foo", "post", done);
+        // it('explicit more than maxTries', (done) => {
+        //   assert.explicit_Retries_Fail(db, "foo", "post", done);
         // });
         
       });

@@ -3,8 +3,8 @@ import { default as Db } from '../db';
 export default class DbDesign {
     db: Db;
     constructor(db: Db);
-    read(id: string, name: string, docId: string, callback?: ErrResultCallback): void;
-    private _read(id, name, docId, callback, tries?);
-    private _performRead(id, name, docId, callback);
-    private _updateDesign(id, names, callback);
+    explicit(id: string, design: string, name: string, callback?: ErrResultCallback): void;
+    private _explicit(id, design, name, callback, tries?);
+    private _performExplicit(id, design, name, callback);
+    private _updateDesign(designId, names, callback);
 }

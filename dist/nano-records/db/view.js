@@ -42,7 +42,7 @@ var DbView = (function () {
         if (tries === void 0) { tries = 0; }
         tries++;
         var name = builder_1.DbViewBuilder.generateName(keys, values);
-        this._performRead("_nano_records", name, params, function (err, result) {
+        this._performExplicit("_nano_records", name, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     var view = {
@@ -70,29 +70,29 @@ var DbView = (function () {
     };
     // TODO: we need a way to force persist individual views in
     // cases where they have been changed
-    DbView.prototype.read = function (id, name, params, callback) {
+    DbView.prototype.explicit = function (design, name, params, callback) {
         if (callback === void 0) { callback = function () { }; }
-        if (!id)
-            callback(err_1.default.missingId('view'));
+        if (!design)
+            callback(err_1.default.missingParam('view', "design"));
         else if (!name)
             callback(err_1.default.missingParam('view', "name"));
         else if (!params)
             callback(err_1.default.missingParam('view', "params"));
         else
-            this._read(id, name, params, callback);
+            this._explicit(design, name, params, callback);
     };
-    DbView.prototype._read = function (id, name, params, callback, tries) {
+    DbView.prototype._explicit = function (design, name, params, callback, tries) {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performRead(id, name, params, function (err, result) {
+        this._performExplicit(design, name, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
-                    _this._updateDesign(id, [name], function (err) {
+                    _this._updateDesign(design, [name], function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this._read(id, name, params, callback, tries);
+                            _this._explicit(design, name, params, callback, tries);
                     });
                 }
                 else
@@ -102,13 +102,13 @@ var DbView = (function () {
                 callback(undefined, new list_1.default(_this.db, result)); // executed successfully
         });
     };
-    DbView.prototype._performRead = function (id, name, params, callback) {
-        this.db.raw.view(id, name, params, err_1.default.resultFunc('view', callback));
+    DbView.prototype._performExplicit = function (design, name, params, callback) {
+        this.db.raw.view(design, name, params, err_1.default.resultFunc('view', callback));
     };
-    DbView.prototype._updateDesign = function (id, names, callback) {
-        var design = this.db.designs[id];
+    DbView.prototype._updateDesign = function (designId, names, callback) {
+        var design = this.db.designs[designId];
         if (!design) {
-            callback(new err_1.default('view', "not_defined", "No design specified for: " + id));
+            callback(new err_1.default('view', "not_defined", "No design specified for: " + designId));
             return;
         }
         // generate design document
@@ -123,7 +123,7 @@ var DbView = (function () {
             }
         }
         // update design
-        this.db.doc.updateOrWrite('_design/' + id, body, callback);
+        this.db.doc.updateOrWrite('_design/' + designId, body, callback);
     };
     return DbView;
 }());

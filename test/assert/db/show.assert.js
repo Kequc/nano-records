@@ -7,8 +7,8 @@ var Helper = require('../../helper');
 
 var DbShowAssert = {};
 
-DbShowAssert.read_Fail = (db, id, name, errorName, done) => {
-  db.show.read(id, name, Helper.id, (err, result) => {
+DbShowAssert.explicit_Fail = (db, design, name, errorName, done) => {
+  db.show.explicit(Helper.id, design, name, (err, result) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(result).to.be.undefined;
@@ -16,8 +16,8 @@ DbShowAssert.read_Fail = (db, id, name, errorName, done) => {
   });
 };
 
-DbShowAssert.read = (db, id, name, asserts, done) => {
-  db.show.read(id, name, Helper.id, (err, result) => {
+DbShowAssert.explicit = (db, design, name, asserts, done) => {
+  db.show.explicit(Helper.id, design, name, (err, result) => {
     expect(err).to.be.undefined;
     expect(result).to.be.ok;
     expect(result).to.equal(asserts);
@@ -26,16 +26,16 @@ DbShowAssert.read = (db, id, name, asserts, done) => {
 };
 
 // TODO: not currently a way to test this
-DbShowAssert.read_Retries = (db, id, name, asserts, done) => {
-  Helper.triggerBgDesignUpdate(db, id, () => {
-    DbDesign.read(db, id, name, asserts, done);
+DbShowAssert.explicit_Retries = (db, id, name, asserts, done) => {
+  Helper.triggerBgDesignUpdate(db, design, () => {
+    DbDesign.explicit(db, design, name, asserts, done);
   });
 };
 
 // TODO: not currently a way to test this
-DbShowAssert.read_Retries_Fail = (db, id, name, done) => {
+DbShowAssert.explicit_Retries_Fail = (db, design, name, done) => {
   Helper.triggerBgDesignUpdate(db, "foo", () => {
-    db.show.read(id, name, Helper.id, (err, result) => {
+    db.show.explicit(Helper.id, design, name, (err, result) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       expect(result).to.be.undefined;

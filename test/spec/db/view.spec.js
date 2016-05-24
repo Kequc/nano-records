@@ -25,25 +25,17 @@ describe('db-view', () => {
     it('only', (done) => {
       assert.only(db, "key", "value", {}, [], done);
     });
-    it('read', (done) => {
-      assert.read(db, "foo", "comments", done);
+    it('explicit', (done) => {
+      assert.explicit(db, "foo", "comments", done);
     });
-    it('read retries');
-    it('read more than maxTries');
+    it('explicit retries');
+    it('explicit more than maxTries');
     
   });
   
   describe('database exists', () => {
     before((done) => {
       db.reset('_RESET_', () => { done(); });
-    });
-    
-    describe('no id specified', () => {
-      
-      it('read', (done) => {
-        assert.read_Fail(db, undefined, "post", "missing_id", done);
-      });
-      
     });
     
     describe('no results', () => {
@@ -54,29 +46,20 @@ describe('db-view', () => {
       it('all', (done) => {
         assert.all(db, "num", {}, [], done);
       });
-      it('all with multiple keys', (done) => {
-        assert.all(db, ["num", "complex"], {}, [], done);
-      });
       it('only', (done) => {
         assert.only(db, "num", "deep", {}, [], done);
-      });
-      it('only with multiple values', (done) => {
-        assert.only(db, "num", ["num", "deep"], {}, [], done);
-      });
-      it('only with multiple keys and values', (done) => {
-        assert.only(db, ["num", "complex"], ["num", "deep"], {}, [], done);
       });
       
     });
     
     describe('results to show', () => {
-      let expected = [];
+      let _docs = [];
       before((done) => {
-        expected = [];
+        _docs = [];
         db.doc.create(Helper.complexBody, (err, doc) => {
-          expected.unshift(doc);
+          _docs.push(doc);
           db.doc.create(Helper.simpleBody, (err, doc) => {
-            expected.unshift(doc);
+            _docs.push(doc);
             done();
           });
         });
@@ -86,19 +69,48 @@ describe('db-view', () => {
       });
       
       it('all', (done) => {
+        let expected = [Helper.simpleBody, Helper.complexBody];
         assert.all(db, "num", {}, expected, done);
       });
+      it('all with lookup', (done) => {
+        let expected = [Helper.complexBody];
+        assert.all(db, "num", { key: Helper.complexBody.num }, expected, done);
+      });
       it('all with multiple keys', (done) => {
+        let expected = [Helper.simpleBody, Helper.complexBody];
         assert.all(db, ["num", "complex"], {}, expected, done);
       });
+      it('all with multiple keys with lookup', (done) => {
+        let expected = [Helper.complexBody];
+        assert.all(db, ["num", "complex"], { key: [Helper.complexBody.num, Helper.complexBody.complex] }, expected, done);
+      });
+      it('all with nested keys', (done) => {
+        let expected = [Helper.complexBody];
+        assert.all(db, ["num", "deep.hi"], {}, expected, done);
+      });
       it('only', (done) => {
+        let expected = [{ deep: Helper.simpleBody.deep }, { deep: Helper.complexBody.deep }];
         assert.only(db, "num", "deep", {}, expected, done);
       });
+      it('only with lookup', (done) => {
+        let expected = [{}];
+        assert.only(db, "num", "deep", { key: Helper.simpleBody.num }, expected, done);
+      });
       it('only with multiple values', (done) => {
+        let expected = [{ num: Helper.simpleBody.num, deep: Helper.simpleBody.deep }, { num: Helper.complexBody.num, deep: Helper.complexBody.deep }];
         assert.only(db, "num", ["num", "deep"], {}, expected, done);
       });
+      it('only with nested values', (done) => {
+        let expected = [{ num: Helper.complexBody.num, deep: { hi: Helper.complexBody.deep.hi } }];
+        assert.only(db, "num", ["num", "deep.hi"], {}, expected, done);
+      });
       it('only with multiple keys and values', (done) => {
+        let expected = [{ num: Helper.simpleBody.num, deep: Helper.simpleBody.deep }, { num: Helper.complexBody.num, deep: Helper.complexBody.deep }];
         assert.only(db, ["num", "complex"], ["num", "deep"], {}, expected, done);
+      });
+      it('only with multiple keys and values and lookup', (done) => {
+        let expected = [{ num: Helper.simpleBody.num }];
+        assert.only(db, ["num", "complex"], ["num", "deep"], { key: [Helper.simpleBody.num, Helper.simpleBody.complex] }, expected, done);
       });
       
     });
@@ -110,19 +122,19 @@ describe('db-view', () => {
       
       describe('definition does not exist', () => {
         
-        it('read', (done) => {
-          assert.read_Fail(db, "foo", "does-not-exist", "missing_view", done);
+        it('explicit', (done) => {
+          assert.explicit_Fail(db, "foo", "does-not-exist", "missing_view", done);
         });
         
       });
       
       describe('definition exists', () => {
         
-        it('read', (done) => {
-          assert.read(db, "foo", "comments", done);
+        it('explicit', (done) => {
+          assert.explicit(db, "foo", "comments", done);
         });
-        it('read retries');
-        it('read more than maxTries');
+        it('explicit retries');
+        it('explicit more than maxTries');
         
       });
       
@@ -135,24 +147,24 @@ describe('db-view', () => {
       
       describe('definition does not exist', () => {
         
-        it('read', (done) => {
-          assert.read_Fail(db, "foo", "does-not-exist", "missing_view", done);
+        it('explicit', (done) => {
+          assert.explicit_Fail(db, "foo", "does-not-exist", "missing_view", done);
         });
         
       });
       
       describe('definition exists', () => {
         
-        it('read', (done) => {
-          assert.read(db, "foo", "comments", done);
+        it('explicit', (done) => {
+          assert.explicit(db, "foo", "comments", done);
         });
-        it('read retries');
-        it('read more than maxTries');
-        // it('read retries', (done) => {
-        //   assert.read_Retries(db, "foo", "comments", done);
+        it('explicit retries');
+        it('explicit more than maxTries');
+        // it('explicit retries', (done) => {
+        //   assert.explicit_Retries(db, "foo", "comments", done);
         // });
-        // it('read more than maxTries', (done) => {
-        //   assert.read_Retries_Fail(db, "foo", "comments", done);
+        // it('explicit more than maxTries', (done) => {
+        //   assert.explicit_Retries_Fail(db, "foo", "comments", done);
         // });
         
       });

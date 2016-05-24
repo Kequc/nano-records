@@ -14,29 +14,29 @@ var DbDesign = (function () {
     }
     // TODO: we need a way to force persist individual shows in
     // cases where they have been changed
-    DbDesign.prototype.read = function (id, name, docId, callback) {
+    DbDesign.prototype.explicit = function (id, design, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
-            callback(err_1.default.missingId('design'));
+            callback(err_1.default.missingId('show'));
+        else if (!design)
+            callback(err_1.default.missingParam('show', "design"));
         else if (!name)
-            callback(err_1.default.missingParam('design', "name"));
-        else if (!docId)
-            callback(err_1.default.missingParam('design', "docId"));
+            callback(err_1.default.missingParam('show', "name"));
         else
-            this._read(id, name, docId, callback);
+            this._explicit(id, design, name, callback);
     };
-    DbDesign.prototype._read = function (id, name, docId, callback, tries) {
+    DbDesign.prototype._explicit = function (id, design, name, callback, tries) {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performRead(id, name, docId, function (err, result) {
+        this._performExplicit(id, design, name, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
-                    _this._updateDesign(id, [name], function (err) {
+                    _this._updateDesign(design, [name], function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this._read(id, name, docId, callback, tries);
+                            _this._explicit(id, design, name, callback, tries);
                     });
                 }
                 else
@@ -46,13 +46,13 @@ var DbDesign = (function () {
                 callback(undefined, result); // executed successfully
         });
     };
-    DbDesign.prototype._performRead = function (id, name, docId, callback) {
-        this.db.raw.show(id, name, docId, err_1.default.resultFunc('design', callback));
+    DbDesign.prototype._performExplicit = function (id, design, name, callback) {
+        this.db.raw.show(design, name, id, err_1.default.resultFunc('design', callback));
     };
-    DbDesign.prototype._updateDesign = function (id, names, callback) {
-        var design = this.db.designs[id];
+    DbDesign.prototype._updateDesign = function (designId, names, callback) {
+        var design = this.db.designs[designId];
         if (!design) {
-            callback(new err_1.default('design', "not_defined", "No design specified for: " + id));
+            callback(new err_1.default('show', "not_defined", "No design specified for: " + designId));
             return;
         }
         // generate design document
@@ -62,12 +62,12 @@ var DbDesign = (function () {
             if (design.shows[name_1])
                 body.shows[name_1] = design.shows[name_1];
             else {
-                callback(new err_1.default('design', "missing_show", "Missing deinition for: " + name_1));
+                callback(new err_1.default('show', "missing_show", "Missing deinition for: " + name_1));
                 return;
             }
         }
         // update design
-        this.db.doc.updateOrWrite('_design/' + id, body, callback);
+        this.db.doc.updateOrWrite('_design/' + designId, body, callback);
     };
     return DbDesign;
 }());

@@ -11,11 +11,11 @@ _This branch is under development._
 
 ### Upgrading from 1.0.9 to 1.0.10
 
-* `doc.forcedWrite` is now `doc.write`
-* `doc.write` has been removed
-* `doc.forcedUpdate` is now `doc.updateOrWrite`
-* `doc.designs.show` is now `doc.show.read`
-* `doc.designs.view` is now `doc.view.read`
+* `db.doc.forcedWrite` is now `db.doc.write`
+* `db.doc.write` has been removed
+* `db.doc.forcedUpdate` is now `db.doc.updateOrWrite`
+* `db.designs.show` is now `db.show.explicit`
+* `db.designs.view` is now `db.view.explicit`
 
 ### Install
 
@@ -253,7 +253,7 @@ var db = new NanoRecords(nano, dbName, designs);
 When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [Views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [Design Documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 ```javascript
-db.show.read(id, design, name, (err, result) => {
+db.show.explicit(id, design, name, (err, result) => {
   if (err)
     return;
   console.log(result);
@@ -263,7 +263,7 @@ db.show.read(id, design, name, (err, result) => {
 Persist a show using the provided design (ie. `"foo"`) and name (ie. `"post"`) if it's not already there, then return the result for the doc.
 
 ```javascript
-db.view.read(design, name, params, (err, list) => {
+db.view.explicit(design, name, params, (err, list) => {
   if (err)
     return;
   // list is a NanoRecords list

@@ -57,7 +57,7 @@ export default class DbView
   {
     tries++;
     let name = DbViewBuilder.generateName(keys, values);
-    this._performRead("_nano_records", name, params, (err, result) => {
+    this._performExplicit("_nano_records", name, params, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           let view = {
@@ -89,7 +89,7 @@ export default class DbView
   // TODO: we need a way to force persist individual views in
   // cases where they have been changed
   
-  read (design: string, name: string, params: SimpleObject, callback: ErrListCallback = ()=>{})
+  explicit (design: string, name: string, params: SimpleObject, callback: ErrListCallback = ()=>{})
   {
     if (!design)
       callback(Err.missingParam('view', "design"));
@@ -98,20 +98,20 @@ export default class DbView
     else if (!params)
       callback(Err.missingParam('view', "params"));
     else
-      this._read(design, name, params, callback);
+      this._explicit(design, name, params, callback);
   }
   
-  private _read (design: string, name: string, params: SimpleObject, callback: ErrListCallback, tries: number = 0)
+  private _explicit (design: string, name: string, params: SimpleObject, callback: ErrListCallback, tries: number = 0)
   {
     tries++;
-    this._performRead(design, name, params, (err, result) => {
+    this._performExplicit(design, name, params, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           this._updateDesign(design, [name], (err) => {
             if (err)
               callback(err);
             else
-              this._read(design, name, params, callback, tries);
+              this._explicit(design, name, params, callback, tries);
           });
         }
         else
@@ -122,7 +122,7 @@ export default class DbView
     });
   }
   
-  private _performRead (design: string, name: string, params: SimpleObject, callback: ErrViewResultCallback)
+  private _performExplicit (design: string, name: string, params: SimpleObject, callback: ErrViewResultCallback)
   {
     this.db.raw.view(design, name, params, Err.resultFunc('view', callback));
   }

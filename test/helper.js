@@ -51,17 +51,30 @@ Helper.triggerBgUpdate = (db, id, changes, callback) => {
   });
 };
 
-Helper.triggerBgDesignUpdate = (db, id, callback) => {
-  Helper.triggerBgUpdate(db, "_design/" + id, { shows: { "cats": "function (doc, req) { return 'yo'; }" } }, callback);
+Helper.triggerBgDesignUpdate = (db, designId, callback) => {
+  Helper.triggerBgUpdate(db, "_design/" + designId, { shows: { "cats": "function (doc, req) { return 'yo'; }" } }, callback);
 }
 
-Helper.checkBody = (doc, asserts, done) => {
+Helper.checkList = (list, asserts) => {
+  for (let i = 0; i < asserts.length; i++) {
+    let doc = list.doc(i);
+    Helper.checkIncompleteBody(doc, asserts[i]);
+    if (asserts['_rev'])
+      expect(doc.getRev()).to.eql(asserts['_rev']);
+  }
+};
+
+Helper.checkIncompleteBody = (doc, asserts) => {
   for (let key in asserts) {
     if (key == "_attachments")
       expect(Object.keys(doc.body[key])).to.eql(Object.keys(asserts[key]));
     else if (key != "_rev")
       expect(doc.body[key]).to.eql(asserts[key]);
   }
+};
+
+Helper.checkBody = (doc, asserts, done) => {
+  Helper.checkIncompleteBody(doc, asserts);
   expect(asserts['_rev']).to.not.equal(doc.getRev());
   doc.db.doc.read(doc.getId(), (err, gotDoc) => {
     expect(err).to.be.undefined;

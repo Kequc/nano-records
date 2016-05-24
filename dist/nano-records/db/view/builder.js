@@ -91,9 +91,9 @@ var DbViewBuilder;
         var name = "";
         if (keys instanceof Array) {
             var kk = [];
-            keys.sort();
-            for (var _i = 0, keys_4 = keys; _i < keys_4.length; _i++) {
-                var key = keys_4[_i];
+            var sorted = keys.slice(0).sort();
+            for (var _i = 0, sorted_1 = sorted; _i < sorted_1.length; _i++) {
+                var key = sorted_1[_i];
                 kk.push(key.split('.').join('_D_'));
             }
             name += kk.join('_K_') + '_A_';
@@ -104,9 +104,9 @@ var DbViewBuilder;
             name += "_S_";
             if (values instanceof Array) {
                 var vv = [];
-                values.sort();
-                for (var _a = 0, values_2 = values; _a < values_2.length; _a++) {
-                    var value = values_2[_a];
+                var sorted = values.slice(0).sort();
+                for (var _a = 0, sorted_2 = sorted; _a < sorted_2.length; _a++) {
+                    var value = sorted_2[_a];
                     vv.push(value.split('.').join('_D_'));
                 }
                 name += vv.join('_V_') + '_A_';

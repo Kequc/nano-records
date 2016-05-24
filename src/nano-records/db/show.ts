@@ -24,7 +24,7 @@ export default class DbDesign
   // TODO: we need a way to force persist individual shows in
   // cases where they have been changed
   
-  read (id: string, design: string, name: string, callback: ErrResultCallback = ()=>{})
+  explicit (id: string, design: string, name: string, callback: ErrResultCallback = ()=>{})
   {
     if (!id)
       callback(Err.missingId('show'));
@@ -33,20 +33,20 @@ export default class DbDesign
     else if (!name)
       callback(Err.missingParam('show', "name"));
     else
-      this._read(id, design, name, callback);
+      this._explicit(id, design, name, callback);
   }
   
-  private _read (id: string, design: string, name: string, callback: ErrResultCallback, tries: number = 0)
+  private _explicit (id: string, design: string, name: string, callback: ErrResultCallback, tries: number = 0)
   {
     tries++;
-    this._performRead(id, design, name, (err, result) => {
+    this._performExplicit(id, design, name, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           this._updateDesign(design, [name], (err) => {
             if (err)
               callback(err);
             else
-              this._read(id, design, name, callback, tries);
+              this._explicit(id, design, name, callback, tries);
           });
         }
         else
@@ -57,7 +57,7 @@ export default class DbDesign
     });
   }
   
-  private _performRead (id: string, design: string, name: string, callback: ErrResultCallback)
+  private _performExplicit (id: string, design: string, name: string, callback: ErrResultCallback)
   {
     this.db.raw.show(design, name, id, Err.resultFunc('design', callback));
   }

@@ -7,8 +7,8 @@ var Helper = require('../../helper');
 
 var DbViewAssert = {};
 
-DbViewAssert.all_Fail = (db, key, params, errorName, done) => {
-  db.view.all(key, params, (err, list) => {
+DbViewAssert.all_Fail = (db, keys, params, errorName, done) => {
+  db.view.all(keys, params, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(list).to.be.undefined;
@@ -16,23 +16,18 @@ DbViewAssert.all_Fail = (db, key, params, errorName, done) => {
   });
 };
 
-DbViewAssert.all = (db, key, params, expected, done) => {
-  db.view.all(key, params, (err, list) => {
+DbViewAssert.all = (db, keys, params, expected, done) => {
+  db.view.all(keys, params, (err, list) => {
     expect(err).to.be.undefined;
     expect(list).to.be.ok;
-    expect(list.total).to.equal(expected.length);
     expect(list.rows.length).to.equal(expected.length);
-    for (let doc of expected) {
-      let index = list.ids().indexOf(doc.getId());
-      expect(index).to.be.above(-1);
-      expect(list.doc(index).body).to.eql(doc.body);
-    }
+    Helper.checkList(list, expected);
     done();
   });
 };
 
-DbViewAssert.only_Fail = (db, key, value, params, errorName, done) => {
-  db.view.only(key, value, params, (err, list) => {
+DbViewAssert.only_Fail = (db, keys, values, params, errorName, done) => {
+  db.view.only(keys, values, params, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(list).to.be.undefined;
@@ -40,23 +35,18 @@ DbViewAssert.only_Fail = (db, key, value, params, errorName, done) => {
   });
 };
 
-DbViewAssert.only = (db, key, value, params, expected, done) => {
-  db.view.only(key, value, params, (err, list) => {
+DbViewAssert.only = (db, keys, values, params, expected, done) => {
+  db.view.only(keys, values, params, (err, list) => {
     expect(err).to.be.undefined;
     expect(list).to.be.ok;
-    expect(list.total).to.equal(expected.length);
     expect(list.rows.length).to.equal(expected.length);
-    for (let doc of expected) {
-      let index = list.ids().indexOf(doc.getId());
-      expect(index).to.be.above(-1);
-      expect(list.doc(index).body).to.eql(doc.body);
-    }
+    Helper.checkList(list, expected);
     done();
   });
 };
 
-DbViewAssert.read_Fail = (db, id, name, errorName, done) => {
-  db.view.read(id, name, {}, (err, list) => {
+DbViewAssert.explicit_Fail = (db, design, name, errorName, done) => {
+  db.view.explicit(design, name, {}, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(list).to.be.undefined;
@@ -64,27 +54,25 @@ DbViewAssert.read_Fail = (db, id, name, errorName, done) => {
   });
 };
 
-DbViewAssert.read = (db, id, name, done) => {
-  db.view.read(id, name, {}, (err, list) => {
+DbViewAssert.explicit = (db, design, name, done) => {
+  db.view.explicit(design, name, {}, (err, list) => {
     expect(err).to.be.undefined;
     expect(list).to.be.ok;
-    expect(list.total).to.be.ok;
-    expect(list.rows).to.be.ok;
     done();
   });
 };
 
 // TODO: not currently a way to test this
-DbViewAssert.read_Retries = (db, id, name, done) => {
-  Helper.triggerBgDesignUpdate(db, id, () => {
-    DbDesign.read(db, id, name, done);
+DbViewAssert.explicit_Retries = (db, design, name, done) => {
+  Helper.triggerBgDesignUpdate(db, design, () => {
+    DbDesign.explicit(db, design, name, done);
   });
 };
 
 // TODO: not currently a way to test this
-DbViewAssert.read_Retries_Fail = (db, id, name, done) => {
-  Helper.triggerBgDesignUpdate(db, id, () => {
-    db.view.read(id, name, {}, (err, list) => {
+DbViewAssert.explicit_Retries_Fail = (db, design, name, done) => {
+  Helper.triggerBgDesignUpdate(db, design, () => {
+    db.view.explicit(design, name, {}, (err, list) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       expect(list).to.be.undefined;
