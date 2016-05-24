@@ -1,11 +1,11 @@
-/* namespace ViewUtil
+/* namespace DbViewBuilder
  * 
  * Helper functions mostly for use in generating views
  * for the view class.
  * 
  */
 
-export namespace ViewUtil
+export namespace DbViewBuilder
 {
   export function mapFunction (keys: string|string[], values?: string|string[]): string
   {

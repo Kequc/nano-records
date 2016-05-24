@@ -9,7 +9,7 @@
 "use strict";
 var err_1 = require('../err');
 var list_1 = require('../list');
-var view_1 = require('../util/view');
+var builder_1 = require('./view/builder');
 var _ = require('underscore');
 var DbView = (function () {
     function DbView(db) {
@@ -41,12 +41,12 @@ var DbView = (function () {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        var name = view_1.ViewUtil.generateName(keys, values);
+        var name = builder_1.DbViewBuilder.generateName(keys, values);
         this._performRead("_nano_records", name, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     var view = {
-                        map: view_1.ViewUtil.mapFunction(keys, values)
+                        map: builder_1.DbViewBuilder.mapFunction(keys, values)
                     };
                     _this._updateNanoRecordsDesign(name, view, function (err) {
                         if (err)

@@ -11,7 +11,7 @@ import {default as Err, ErrCallback, ErrResultCallback} from '../err';
 import {default as Db} from '../db';
 import {default as Doc} from '../doc';
 import {default as List, ErrListCallback} from '../list';
-import {ViewUtil} from '../util/view';
+import {DbViewBuilder} from './view/builder';
 import _ = require('underscore');
 
 interface ErrViewResultCallback {
@@ -56,12 +56,12 @@ export default class DbView
   private _only (keys: string|string[], values: string|string[], params: SimpleObject, callback: ErrListCallback, tries: number = 0)
   {
     tries++;
-    let name = ViewUtil.generateName(keys, values);
+    let name = DbViewBuilder.generateName(keys, values);
     this._performRead("_nano_records", name, params, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           let view = {
-            map: ViewUtil.mapFunction(keys, values)
+            map: DbViewBuilder.mapFunction(keys, values)
           };
           this._updateNanoRecordsDesign(name, view, (err) => {
             if (err)

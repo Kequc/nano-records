@@ -5,8 +5,8 @@
  *
  */
 "use strict";
-var ViewUtil;
-(function (ViewUtil) {
+var DbViewBuilder;
+(function (DbViewBuilder) {
     function mapFunction(keys, values) {
         // view map function generation
         var result = "emit(" + emitKey(keys) + "," + emitValue(values) + ");";
@@ -16,7 +16,7 @@ var ViewUtil;
         result = "function (doc) { " + result + " }";
         return result;
     }
-    ViewUtil.mapFunction = mapFunction;
+    DbViewBuilder.mapFunction = mapFunction;
     function _parametersForIf(keys, values) {
         // find nesting in keys to provision an if statement
         var result = [];
@@ -61,7 +61,7 @@ var ViewUtil;
         else
             return "doc." + keys;
     }
-    ViewUtil.emitKey = emitKey;
+    DbViewBuilder.emitKey = emitKey;
     function emitValue(keys) {
         // view map function emit value rendering
         if (!keys)
@@ -75,7 +75,7 @@ var ViewUtil;
         }
         return JSON.stringify(assembled).replace(/"/g, "");
     }
-    ViewUtil.emitValue = emitValue;
+    DbViewBuilder.emitValue = emitValue;
     function _addNestedEmitValue(assembled, parts, orig) {
         if (parts.length > 1) {
             var key = parts.shift();
@@ -116,5 +116,5 @@ var ViewUtil;
         }
         return name;
     }
-    ViewUtil.generateName = generateName;
-})(ViewUtil = exports.ViewUtil || (exports.ViewUtil = {}));
+    DbViewBuilder.generateName = generateName;
+})(DbViewBuilder = exports.DbViewBuilder || (exports.DbViewBuilder = {}));
