@@ -28,11 +28,14 @@ var List = (function () {
     };
     List.prototype.docs = function () {
         var _this = this;
-        return _.map(this.rows, function (row) { return new doc_1.default(_this.db, (row.doc || row.value), { id: row.id }); });
+        return _.map(this.rows, function (row) { return _this._docForRow(row); });
     };
     List.prototype.doc = function (index) {
         var row = this.rows[index];
-        return (row ? new doc_1.default(this.db, (row.doc || row.value), { id: row.id }) : undefined);
+        return (row ? this._docForRow(row) : undefined);
+    };
+    List.prototype._docForRow = function (row) {
+        return new doc_1.default(this.db, (row.doc || row.value), { id: row.id });
     };
     return List;
 }());

@@ -49,12 +49,17 @@ export default class List
   
   docs (): Doc[]
   {
-    return _.map(this.rows, (row: ViewRow) => { return new Doc(this.db, (row.doc || row.value), { id: row.id }) });
+    return _.map(this.rows, (row: ViewRow) => { return this._docForRow(row); });
   }
   
   doc (index: number)
   {
     let row = this.rows[index];
-    return (row ? new Doc(this.db, (row.doc || row.value), { id: row.id }) : undefined);
+    return (row ? this._docForRow(row) : undefined);
+  }
+  
+  private _docForRow(row: ViewRow): Doc
+  {
+    return new Doc(this.db, (row.doc || row.value), { id: row.id });
   }
 }

@@ -15,4 +15,5 @@ export default class List {
     values(): any[];
     docs(): Doc[];
     doc(index: number): Doc;
+    private _docForRow(row);
 }
