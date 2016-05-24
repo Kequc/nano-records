@@ -1,4 +1,4 @@
-/* namespace ViewUtil
+/* namespace DbViewBuilder
  *
  * Helper functions mostly for use in generating views
  * for the view class.

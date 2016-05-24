@@ -66,7 +66,7 @@ var DbView = (function () {
         // generate design view
         var body = { language: "javascript", views: {} };
         body.views[name] = view;
-        this.db.doc.forcedUpdate('_design/_nano_records', body, callback);
+        this.db.doc.updateOrWrite('_design/_nano_records', body, callback);
     };
     // TODO: we need a way to force persist individual views in
     // cases where they have been changed
@@ -123,7 +123,7 @@ var DbView = (function () {
             }
         }
         // update design
-        this.db.doc.forcedUpdate('_design/' + id, body, callback);
+        this.db.doc.updateOrWrite('_design/' + id, body, callback);
     };
     return DbView;
 }());

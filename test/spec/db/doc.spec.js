@@ -28,16 +28,13 @@ describe('db-doc', () => {
       assert.head_Fail(db, Helper.id, "not_found", done);
     });
     it('write', (done) => {
-      assert.write_Fail(db, Helper.id, "not_found", done);
-    });
-    it('forcedWrite', (done) => {
-      assert.forcedWrite(db, Helper.id, done);
+      assert.write(db, Helper.id, done);
     });
     it('update', (done) => {
       assert.update_Fail(db, Helper.id, "not_found", done);
     });
-    it('forcedUpdate', (done) => {
-      assert.forcedUpdate(db, Helper.id, done);
+    it('updateOrWrite', (done) => {
+      assert.updateOrWrite(db, Helper.id, done);
     });
     it('destroy', (done) => {
       assert.destroy_Fail(db, Helper.id, "not_found", done);
@@ -60,14 +57,11 @@ describe('db-doc', () => {
       it('write', (done) => {
         assert.write_Fail(db, undefined, "missing_id", done);
       });
-      it('forcedWrite', (done) => {
-        assert.forcedWrite_Fail(db, undefined, "missing_id", done);
-      });
       it('update', (done) => {
         assert.update_Fail(db, undefined, "missing_id", done);
       });
-      it('forcedUpdate', (done) => {
-        assert.forcedUpdate_Fail(db, undefined, "missing_id", done);
+      it('updateOrWrite', (done) => {
+        assert.updateOrWrite_Fail(db, undefined, "missing_id", done);
       });
       it('destroy', (done) => {
         assert.destroy_Fail(db, undefined, "missing_id", done);
@@ -90,16 +84,13 @@ describe('db-doc', () => {
         assert.head_Fail(db, Helper.id, "not_found", done);
       });
       it('write', (done) => {
-        assert.write_Fail(db, Helper.id, "not_found", done);
-      });
-      it('forcedWrite', (done) => {
-        assert.forcedWrite(db, Helper.id, done);
+        assert.write(db, Helper.id, done);
       });
       it('update', (done) => {
         assert.update_Fail(db, Helper.id, "not_found", done);
       });
-      it('forcedUpdate', (done) => {
-        assert.forcedUpdate(db, Helper.id, done);
+      it('updateOrWrite', (done) => {
+        assert.updateOrWrite(db, Helper.id, done);
       });
       it('destroy', (done) => {
         assert.destroy_Fail(db, Helper.id, "not_found", done);
@@ -129,19 +120,14 @@ describe('db-doc', () => {
         });
         it('write retries');
         it('write more than maxTries');
-        it('forcedWrite', (done) => {
-          assert.forcedWrite(db, _doc.getId(), done);
-        });
-        it('forcedWrite retries');
-        it('forcedWrite more than maxTries');
         it('update', (done) => {
           assert.update(db, _doc.getId(), done);
         });
-        it('forcedUpdate', (done) => {
-          assert.forcedUpdate(db, _doc.getId(), done);
+        it('updateOrWrite', (done) => {
+          assert.updateOrWrite(db, _doc.getId(), done);
         });
-        it('forcedUpdate retries');
-        it('forcedUpdate more than maxTries');
+        it('updateOrWrite retries');
+        it('updateOrWrite more than maxTries');
         it('destroy', (done) => {
           assert.destroy(db, _doc.getId(), done);
         });
@@ -167,19 +153,14 @@ describe('db-doc', () => {
         });
         it('write retries');
         it('write more than maxTries');
-        it('forcedWrite', (done) => {
-          assert.forcedWrite(db, _doc.getId(), done);
-        });
-        it('forcedWrite retries');
-        it('forcedWrite more than maxTries');
         it('update', (done) => {
           assert.update(db, _doc.getId(), done);
         });
-        it('forcedUpdate', (done) => {
-          assert.forcedUpdate(db, _doc.getId(), done);
+        it('updateOrWrite', (done) => {
+          assert.updateOrWrite(db, _doc.getId(), done);
         });
-        it('forcedUpdate retries');
-        it('forcedUpdate more than maxTries');
+        it('updateOrWrite retries');
+        it('updateOrWrite more than maxTries');
         it('destroy', (done) => {
           assert.destroy(db, _doc.getId(), done);
         });

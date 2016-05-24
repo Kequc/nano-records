@@ -79,7 +79,7 @@ db.doc.write(id, body, (err, doc) => {
 });
 ```
 
-Overwrite an existing document.
+Overwrite an existing document, create a new document if one doesn't exist.
 
 ```javascript
 doc.update(body, (err) => {
@@ -97,13 +97,7 @@ db.doc.update(id, body, (err, doc) => {
 Deeply extend an existing document.
 
 ```javascript
-db.doc.forcedWrite(id, body, (err, doc) => {
-  if (err)
-    return;
-  // doc is a NanoRecords document
-  console.log(doc.body);
-});
-db.doc.forcedUpdate(id, body, (err, doc) => {
+db.doc.updateOrWrite(id, body, (err, doc) => {
   if (err)
     return;
   // doc is a NanoRecords document
@@ -111,7 +105,7 @@ db.doc.forcedUpdate(id, body, (err, doc) => {
 });
 ```
 
-Forced is similar to the two methods above but will persist a new document if one doesn't exist.
+Deeply extend an existing document or create a document if one doesn't exist.
 
 ```javascript
 doc.destroy((err) => {

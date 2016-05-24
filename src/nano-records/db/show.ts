@@ -82,6 +82,6 @@ export default class DbDesign
     }
     
     // update design
-    this.db.doc.forcedUpdate('_design/' + id, body, callback);
+    this.db.doc.updateOrWrite('_design/' + id, body, callback);
   }
 }

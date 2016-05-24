@@ -83,7 +83,7 @@ export default class DbView
     // generate design view
     let body: DesignInput = { language: "javascript", views: {} };
     body.views[name] = view;
-    this.db.doc.forcedUpdate('_design/_nano_records', body, callback);
+    this.db.doc.updateOrWrite('_design/_nano_records', body, callback);
   }
   
   // TODO: we need a way to force persist individual views in
@@ -147,6 +147,6 @@ export default class DbView
     }
     
     // update design
-    this.db.doc.forcedUpdate('_design/' + id, body, callback);
+    this.db.doc.updateOrWrite('_design/' + id, body, callback);
   }
 }

@@ -83,41 +83,10 @@ export default class DbDoc
   {
     tries++;
     this.head(id, (err, rev) => {
-      if (err)
-        callback(err);
-      else {
-        this._performWriteAndInstantiateDoc(id, rev, body, (err, doc) => {
-          if (err) {
-            if (tries <= this.db.maxTries && err.name == "conflict")
-              this._write(id, body, callback, tries);
-            else
-              callback(err);
-          }
-          else
-            callback(undefined, doc); // successfully written
-        });
-      }
-    });
-  }
-  
-  forcedWrite (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
-  {
-    if (!id)
-      callback(Err.missingId('doc'));
-    else if (!body)
-      callback(Err.missingParam('doc', "body"));
-    else
-      this._forcedWrite(id, body, callback);
-  }
-  
-  private _forcedWrite (id: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
-  {
-    tries++;
-    this.head(id, (err, rev) => {
       this._performWriteAndInstantiateDoc(id, rev, body, (err, doc) => {
         if (err) {
           if (tries <= this.db.maxTries && err.name == "conflict")
-            this._forcedWrite(id, body, callback, tries);
+            this._write(id, body, callback, tries);
           else
             callback(err);
         }
@@ -126,7 +95,7 @@ export default class DbDoc
       });
     });
   }
-
+  
   update (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
   {
     if (!id)
@@ -154,17 +123,17 @@ export default class DbDoc
     });
   }
   
-  forcedUpdate (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
+  updateOrWrite (id: string, body: SimpleObject, callback: ErrDocCallback = ()=>{})
   {
     if (!id)
       callback(Err.missingId('doc'));
     else if (!body)
       callback(Err.missingParam('doc', "body"));
     else
-      this._forcedUpdate(id, body, callback);
+      this._updateOrWrite(id, body, callback);
   }
   
-  private _forcedUpdate (id: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
+  private _updateOrWrite (id: string, body: SimpleObject, callback: ErrDocCallback, tries: number = 0)
   {
     tries++;
     this.update(id, body, (err, doc) => {
@@ -174,7 +143,7 @@ export default class DbDoc
             if (err) {
               if (tries <= this.db.maxTries && err.name == "conflict") {
                 // document exists
-                this._forcedUpdate(id, body, callback, tries);
+                this._updateOrWrite(id, body, callback, tries);
               }
               else
                 callback(err);

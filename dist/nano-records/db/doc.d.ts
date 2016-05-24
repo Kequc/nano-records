@@ -12,12 +12,10 @@ export default class DbDoc {
     private _performRead(id, callback);
     write(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
     private _write(id, body, callback, tries?);
-    forcedWrite(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
-    private _forcedWrite(id, body, callback, tries?);
     update(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
     private _update(id, body, callback);
-    forcedUpdate(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
-    private _forcedUpdate(id, body, callback, tries?);
+    updateOrWrite(id: string, body: SimpleObject, callback?: ErrDocCallback): void;
+    private _updateOrWrite(id, body, callback, tries?);
     private _performWriteAndInstantiateDoc(id, rev, body, callback, tries?);
     private _performWrite(id, rev, body, callback);
     destroy(id: string, callback?: ErrCallback): void;

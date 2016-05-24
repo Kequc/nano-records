@@ -72,25 +72,6 @@ DbDocAssert.write = (db, id, done) => {
   });
 };
 
-DbDocAssert.forcedWrite_Fail = (db, id, errorName, done) => {
-  db.doc.forcedWrite(id, { will: "fail" }, (err, doc) => {
-    expect(err).to.be.ok;
-    expect(err.name).to.equal(errorName);
-    expect(doc).to.be.undefined;
-    done();
-  });
-};
-
-DbDocAssert.forcedWrite = (db, id, done) => {
-  let changes = { complex: 'document updated', newly: 'changehere' };
-  db.doc.forcedWrite(id, changes, (err, doc) => {
-    expect(err).to.be.undefined;
-    expect(doc).to.be.ok;
-    expect(doc.getId()).to.equal(id);
-    Helper.checkBody(doc, changes, done);
-  });
-};
-
 DbDocAssert.update_Fail = (db, id, errorName, done) => {
   db.doc.update(id, { will: "fail" }, (err, doc) => {
     expect(err).to.be.ok;
@@ -111,8 +92,8 @@ DbDocAssert.update = (db, id, done, moreChanges) => {
   });
 };
 
-DbDocAssert.forcedUpdate_Fail = (db, id, errorName, done) => {
-  db.doc.forcedUpdate(id, { will: "fail" }, (err, doc) => {
+DbDocAssert.updateOrWrite_Fail = (db, id, errorName, done) => {
+  db.doc.updateOrWrite(id, { will: "fail" }, (err, doc) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(doc).to.be.undefined;
@@ -120,10 +101,10 @@ DbDocAssert.forcedUpdate_Fail = (db, id, errorName, done) => {
   });
 };
 
-DbDocAssert.forcedUpdate = (db, id, done, moreChanges) => {
+DbDocAssert.updateOrWrite = (db, id, done, moreChanges) => {
   let changes = { another: 'one', complex: 'changed' };
   let asserts = deepExtend({}, moreChanges || {}, changes);
-  db.doc.forcedUpdate(id, changes, (err, doc) => {
+  db.doc.updateOrWrite(id, changes, (err, doc) => {
     expect(err).to.be.undefined;
     expect(doc).to.be.ok;
     expect(doc.getId()).to.equal(id);

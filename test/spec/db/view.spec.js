@@ -130,7 +130,7 @@ describe('db-view', () => {
     
     describe('design exists', () => {
       before((done) => {
-        db.doc.forcedWrite("_design/foo", {}, () => { done(); });
+        db.doc.write("_design/foo", {}, () => { done(); });
       });
       
       describe('definition does not exist', () => {

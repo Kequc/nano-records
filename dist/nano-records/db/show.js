@@ -67,7 +67,7 @@ var DbDesign = (function () {
             }
         }
         // update design
-        this.db.doc.forcedUpdate('_design/' + id, body, callback);
+        this.db.doc.updateOrWrite('_design/' + id, body, callback);
     };
     return DbDesign;
 }());
