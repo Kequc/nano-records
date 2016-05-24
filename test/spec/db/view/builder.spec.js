@@ -9,10 +9,10 @@ describe('util view', () => {
   it('generateName', () => {
     expect(DbViewBuilder.generateName("key1")).to.equal("key1");
     expect(DbViewBuilder.generateName(["key1"])).to.equal("key1_A_");
-    expect(DbViewBuilder.generateName(["key2", "key1", "key3"])).to.equal("key1_K_key2_K_key3_A_");
+    expect(DbViewBuilder.generateName(["key2", "key1", "key3"])).to.equal("key2_K_key1_K_key3_A_");
     expect(DbViewBuilder.generateName("key1", "value1")).to.equal("key1_S_value1");
     expect(DbViewBuilder.generateName(["key1"], ["value1"])).to.equal("key1_A__S_value1_A_");
-    expect(DbViewBuilder.generateName(["key2", "key1", "key3"], ["value2", "value1", "value3"])).to.equal("key1_K_key2_K_key3_A__S_value1_V_value2_V_value3_A_");
+    expect(DbViewBuilder.generateName(["key2", "key1", "key3"], ["value2", "value1", "value3"])).to.equal("key2_K_key1_K_key3_A__S_value2_V_value1_V_value3_A_");
     expect(DbViewBuilder.generateName("key1", ["value1", "value2", "value3"])).to.equal("key1_S_value1_V_value2_V_value3_A_");
     expect(DbViewBuilder.generateName("key1.deep1", "value1.deep2")).to.equal("key1_D_deep1_S_value1_D_deep2");
     expect(DbViewBuilder.generateName(["key1.deep1", "key2.deep2", "key3.deep3"], ["value1.deep4", "value2.deep5", "value3.deep6"])).to.equal("key1_D_deep1_K_key2_D_deep2_K_key3_D_deep3_A__S_value1_D_deep4_V_value2_D_deep5_V_value3_D_deep6_A_");

@@ -91,8 +91,7 @@ export namespace DbViewBuilder
     let name: string = "";
     if (keys instanceof Array) {
       let kk: string[] = [];
-      let sorted = keys.slice(0).sort(); 
-      for (let key of sorted) {
+      for (let key of keys) {
         kk.push(key.split('.').join('_D_'));
       }
       name += kk.join('_K_') + '_A_';
@@ -103,8 +102,7 @@ export namespace DbViewBuilder
       name += "_S_";
       if (values instanceof Array) {
         let vv: string[] = [];
-        let sorted = values.slice(0).sort();
-        for (let value of sorted) {
+        for (let value of values) {
           vv.push(value.split('.').join('_D_'));
         }
         name += vv.join('_V_') + '_A_';
