@@ -25,11 +25,11 @@ describe('db-view', () => {
     it('only', (done) => {
       assert.only(db, "key", "value", {}, [], done);
     });
-    it('explicit', (done) => {
-      assert.explicit(db, "foo", "comments", done);
+    it('catalog', (done) => {
+      assert.catalog(db, "foo", "comments", done);
     });
-    it('explicit retries');
-    it('explicit more than maxTries');
+    it('catalog retries');
+    it('catalog more than maxTries');
     
   });
   
@@ -122,19 +122,19 @@ describe('db-view', () => {
       
       describe('definition does not exist', () => {
         
-        it('explicit', (done) => {
-          assert.explicit_Fail(db, "foo", "does-not-exist", "missing_view", done);
+        it('catalog', (done) => {
+          assert.catalog_Fail(db, "foo", "does-not-exist", "missing_view", done);
         });
         
       });
       
       describe('definition exists', () => {
         
-        it('explicit', (done) => {
-          assert.explicit(db, "foo", "comments", done);
+        it('catalog', (done) => {
+          assert.catalog(db, "foo", "comments", done);
         });
-        it('explicit retries');
-        it('explicit more than maxTries');
+        it('catalog retries');
+        it('catalog more than maxTries');
         
       });
       
@@ -147,24 +147,24 @@ describe('db-view', () => {
       
       describe('definition does not exist', () => {
         
-        it('explicit', (done) => {
-          assert.explicit_Fail(db, "foo", "does-not-exist", "missing_view", done);
+        it('catalog', (done) => {
+          assert.catalog_Fail(db, "foo", "does-not-exist", "missing_view", done);
         });
         
       });
       
       describe('definition exists', () => {
         
-        it('explicit', (done) => {
-          assert.explicit(db, "foo", "comments", done);
+        it('catalog', (done) => {
+          assert.catalog(db, "foo", "comments", done);
         });
-        it('explicit retries');
-        it('explicit more than maxTries');
-        // it('explicit retries', (done) => {
-        //   assert.explicit_Retries(db, "foo", "comments", done);
+        it('catalog retries');
+        it('catalog more than maxTries');
+        // it('catalog retries', (done) => {
+        //   assert.catalog_Retries(db, "foo", "comments", done);
         // });
-        // it('explicit more than maxTries', (done) => {
-        //   assert.explicit_Retries_Fail(db, "foo", "comments", done);
+        // it('catalog more than maxTries', (done) => {
+        //   assert.catalog_Retries_Fail(db, "foo", "comments", done);
         // });
         
       });

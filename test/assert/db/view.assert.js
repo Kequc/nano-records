@@ -45,8 +45,8 @@ DbViewAssert.only = (db, keys, values, params, expected, done) => {
   });
 };
 
-DbViewAssert.explicit_Fail = (db, design, name, errorName, done) => {
-  db.view.explicit(design, name, {}, (err, list) => {
+DbViewAssert.catalog_Fail = (db, design, name, errorName, done) => {
+  db.view.catalog(design, name, {}, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
     expect(list).to.be.undefined;
@@ -54,8 +54,8 @@ DbViewAssert.explicit_Fail = (db, design, name, errorName, done) => {
   });
 };
 
-DbViewAssert.explicit = (db, design, name, done) => {
-  db.view.explicit(design, name, {}, (err, list) => {
+DbViewAssert.catalog = (db, design, name, done) => {
+  db.view.catalog(design, name, {}, (err, list) => {
     expect(err).to.be.undefined;
     expect(list).to.be.ok;
     done();
@@ -63,16 +63,16 @@ DbViewAssert.explicit = (db, design, name, done) => {
 };
 
 // TODO: not currently a way to test this
-DbViewAssert.explicit_Retries = (db, design, name, done) => {
+DbViewAssert.catalog_Retries = (db, design, name, done) => {
   Helper.triggerBgDesignUpdate(db, design, () => {
-    DbDesign.explicit(db, design, name, done);
+    DbDesign.catalog(db, design, name, done);
   });
 };
 
 // TODO: not currently a way to test this
-DbViewAssert.explicit_Retries_Fail = (db, design, name, done) => {
+DbViewAssert.catalog_Retries_Fail = (db, design, name, done) => {
   Helper.triggerBgDesignUpdate(db, design, () => {
-    db.view.explicit(design, name, {}, (err, list) => {
+    db.view.catalog(design, name, {}, (err, list) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
       expect(list).to.be.undefined;

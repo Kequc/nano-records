@@ -7,8 +7,8 @@ export default class DbView {
     all(keys: string | string[], params: SimpleObject, callback: ErrListCallback): void;
     private _only(keys, values, params, callback, tries?);
     private _updateNanoRecordsDesign(name, view, callback);
-    explicit(design: string, name: string, params: SimpleObject, callback?: ErrListCallback): void;
-    private _explicit(design, name, params, callback, tries?);
-    private _performExplicit(design, name, params, callback);
+    catalog(design: string, name: string, params: SimpleObject, callback?: ErrListCallback): void;
+    private _catalog(design, name, params, callback, tries?);
+    private _performCatalog(design, name, params, callback);
     private _updateDesign(designId, names, callback);
 }

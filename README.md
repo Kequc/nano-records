@@ -14,8 +14,8 @@ _This branch is under development._
 * `db.doc.forcedWrite` is now `db.doc.write`
 * `db.doc.write` has been removed
 * `db.doc.forcedUpdate` is now `db.doc.updateOrWrite`
-* `db.designs.show` is now `db.show.explicit`
-* `db.designs.view` is now `db.view.explicit`
+* `db.designs.show` is now `db.show.catalog`
+* `db.designs.view` is now `db.view.catalog`
 
 ### Install
 
@@ -250,10 +250,10 @@ var designs = require('./designs.json');
 var db = new NanoRecords(nano, dbName, designs);
 ```
 
-When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [Views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [Design Documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
+When creating your NanoRecords instance optionally provide it a catalog of designs to use. You can learn more about [Views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [Design Documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 ```javascript
-db.show.explicit(id, design, name, (err, result) => {
+db.show.catalog(id, design, name, (err, result) => {
   if (err)
     return;
   console.log(result);
@@ -263,7 +263,7 @@ db.show.explicit(id, design, name, (err, result) => {
 Persist a show using the provided design (ie. `"foo"`) and name (ie. `"post"`) if it's not already there, then return the result for the doc.
 
 ```javascript
-db.view.explicit(design, name, params, (err, list) => {
+db.view.catalog(design, name, params, (err, list) => {
   if (err)
     return;
   // list is a NanoRecords list

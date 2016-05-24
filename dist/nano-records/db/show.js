@@ -14,7 +14,7 @@ var DbDesign = (function () {
     }
     // TODO: we need a way to force persist individual shows in
     // cases where they have been changed
-    DbDesign.prototype.explicit = function (id, design, name, callback) {
+    DbDesign.prototype.catalog = function (id, design, name, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!id)
             callback(err_1.default.missingId('show'));
@@ -23,20 +23,20 @@ var DbDesign = (function () {
         else if (!name)
             callback(err_1.default.missingParam('show', "name"));
         else
-            this._explicit(id, design, name, callback);
+            this._catalog(id, design, name, callback);
     };
-    DbDesign.prototype._explicit = function (id, design, name, callback, tries) {
+    DbDesign.prototype._catalog = function (id, design, name, callback, tries) {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performExplicit(id, design, name, function (err, result) {
+        this._performCatalog(id, design, name, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     _this._updateDesign(design, [name], function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this._explicit(id, design, name, callback, tries);
+                            _this._catalog(id, design, name, callback, tries);
                     });
                 }
                 else
@@ -46,7 +46,7 @@ var DbDesign = (function () {
                 callback(undefined, result); // executed successfully
         });
     };
-    DbDesign.prototype._performExplicit = function (id, design, name, callback) {
+    DbDesign.prototype._performCatalog = function (id, design, name, callback) {
         this.db.raw.show(design, name, id, err_1.default.resultFunc('design', callback));
     };
     DbDesign.prototype._updateDesign = function (designId, names, callback) {

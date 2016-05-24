@@ -42,7 +42,7 @@ var DbView = (function () {
         if (tries === void 0) { tries = 0; }
         tries++;
         var name = builder_1.DbViewBuilder.generateName(keys, values);
-        this._performExplicit("_nano_records", name, params, function (err, result) {
+        this._performCatalog("_nano_records", name, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     var view = {
@@ -70,7 +70,7 @@ var DbView = (function () {
     };
     // TODO: we need a way to force persist individual views in
     // cases where they have been changed
-    DbView.prototype.explicit = function (design, name, params, callback) {
+    DbView.prototype.catalog = function (design, name, params, callback) {
         if (callback === void 0) { callback = function () { }; }
         if (!design)
             callback(err_1.default.missingParam('view', "design"));
@@ -79,20 +79,20 @@ var DbView = (function () {
         else if (!params)
             callback(err_1.default.missingParam('view', "params"));
         else
-            this._explicit(design, name, params, callback);
+            this._catalog(design, name, params, callback);
     };
-    DbView.prototype._explicit = function (design, name, params, callback, tries) {
+    DbView.prototype._catalog = function (design, name, params, callback, tries) {
         var _this = this;
         if (tries === void 0) { tries = 0; }
         tries++;
-        this._performExplicit(design, name, params, function (err, result) {
+        this._performCatalog(design, name, params, function (err, result) {
             if (err) {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     _this._updateDesign(design, [name], function (err) {
                         if (err)
                             callback(err);
                         else
-                            _this._explicit(design, name, params, callback, tries);
+                            _this._catalog(design, name, params, callback, tries);
                     });
                 }
                 else
@@ -102,7 +102,7 @@ var DbView = (function () {
                 callback(undefined, new list_1.default(_this.db, result)); // executed successfully
         });
     };
-    DbView.prototype._performExplicit = function (design, name, params, callback) {
+    DbView.prototype._performCatalog = function (design, name, params, callback) {
         this.db.raw.view(design, name, params, err_1.default.resultFunc('view', callback));
     };
     DbView.prototype._updateDesign = function (designId, names, callback) {
