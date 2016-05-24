@@ -7,9 +7,7 @@ Conflicts are avoided with automated retries, errors are sanitised, designs are 
 
 [npm](https://www.npmjs.com/package/nano-records)
 
-_This branch is under development._
-
-### Upgrading from 1.0.9 to 1.0.10
+### Upgrading from 1.0.9 to 1.1.0
 
 * `db.doc.forcedWrite` is now `db.doc.write`
 * `db.doc.write` has been removed
@@ -271,7 +269,7 @@ db.view.catalog(design, name, params, (err, list) => {
 });
 ```
 
-Persist a view similar to `db.show.read` and return the result.
+Persist a view similar to `db.show.catalog` and return the result.
 
 ### View helpers
 
