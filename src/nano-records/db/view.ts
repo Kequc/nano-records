@@ -89,29 +89,29 @@ export default class DbView
   // TODO: we need a way to force persist individual views in
   // cases where they have been changed
   
-  read (id: string, name: string, params: SimpleObject, callback: ErrListCallback = ()=>{})
+  read (design: string, name: string, params: SimpleObject, callback: ErrListCallback = ()=>{})
   {
-    if (!id)
-      callback(Err.missingId('view'));
+    if (!design)
+      callback(Err.missingParam('view', "design"));
     else if (!name)
       callback(Err.missingParam('view', "name"));
     else if (!params)
       callback(Err.missingParam('view', "params"));
     else
-      this._read(id, name, params, callback);
+      this._read(design, name, params, callback);
   }
   
-  private _read (id: string, name: string, params: SimpleObject, callback: ErrListCallback, tries: number = 0)
+  private _read (design: string, name: string, params: SimpleObject, callback: ErrListCallback, tries: number = 0)
   {
     tries++;
-    this._performRead(id, name, params, (err, result) => {
+    this._performRead(design, name, params, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
-          this._updateDesign(id, [name], (err) => {
+          this._updateDesign(design, [name], (err) => {
             if (err)
               callback(err);
             else
-              this._read(id, name, params, callback, tries);
+              this._read(design, name, params, callback, tries);
           });
         }
         else
@@ -122,16 +122,16 @@ export default class DbView
     });
   }
   
-  private _performRead (id: string, name: string, params: SimpleObject, callback: ErrViewResultCallback)
+  private _performRead (design: string, name: string, params: SimpleObject, callback: ErrViewResultCallback)
   {
-    this.db.raw.view(id, name, params, Err.resultFunc('view', callback));
+    this.db.raw.view(design, name, params, Err.resultFunc('view', callback));
   }
     
-  private _updateDesign (id: string, names: string[], callback: ErrCallback)
+  private _updateDesign (designId: string, names: string[], callback: ErrCallback)
   {
-    let design = this.db.designs[id];
+    let design = this.db.designs[designId];
     if (!design) {
-      callback(new Err('view', "not_defined", "No design specified for: " + id));
+      callback(new Err('view', "not_defined", "No design specified for: " + designId));
       return;
     }
    
@@ -147,6 +147,6 @@ export default class DbView
     }
     
     // update design
-    this.db.doc.updateOrWrite('_design/' + id, body, callback);
+    this.db.doc.updateOrWrite('_design/' + designId, body, callback);
   }
 }

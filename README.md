@@ -253,17 +253,17 @@ var db = new NanoRecords(nano, dbName, designs);
 When creating your NanoRecords instance optionally provide it a set of designs to use. You can learn more about [Views](http://docs.CouchDB.org/en/1.6.1/couchapp/views/intro.html) and [Design Documents](http://docs.CouchDB.org/en/1.6.1/couchapp/ddocs.html) on the CouchDB website.
 
 ```javascript
-db.show.read(id, name, docId, (err, result) => {
+db.show.read(id, design, name, (err, result) => {
   if (err)
     return;
   console.log(result);
 });
 ```
 
-Persist a show using the provided id (ie. `"foo"`) and name (ie. `"post"`) if it's not already there, then return the result for the doc.
+Persist a show using the provided design (ie. `"foo"`) and name (ie. `"post"`) if it's not already there, then return the result for the doc.
 
 ```javascript
-db.view.read(id, name, params, (err, list) => {
+db.view.read(design, name, params, (err, list) => {
   if (err)
     return;
   // list is a NanoRecords list
@@ -271,7 +271,7 @@ db.view.read(id, name, params, (err, list) => {
 });
 ```
 
-Persist a view similar to `db.show.read` then return the result.
+Persist a view similar to `db.show.read` and return the result.
 
 ### View helpers
 

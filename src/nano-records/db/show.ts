@@ -24,29 +24,29 @@ export default class DbDesign
   // TODO: we need a way to force persist individual shows in
   // cases where they have been changed
   
-  read (id: string, name: string, docId: string, callback: ErrResultCallback = ()=>{})
+  read (id: string, design: string, name: string, callback: ErrResultCallback = ()=>{})
   {
     if (!id)
-      callback(Err.missingId('design'));
+      callback(Err.missingId('show'));
+    else if (!design)
+      callback(Err.missingParam('show', "design"));
     else if (!name)
-      callback(Err.missingParam('design', "name"));
-    else if (!docId)
-      callback(Err.missingParam('design', "docId"));
+      callback(Err.missingParam('show', "name"));
     else
-      this._read(id, name, docId, callback);
+      this._read(id, design, name, callback);
   }
   
-  private _read (id: string, name: string, docId: string, callback: ErrResultCallback, tries: number = 0)
+  private _read (id: string, design: string, name: string, callback: ErrResultCallback, tries: number = 0)
   {
     tries++;
-    this._performRead(id, name, docId, (err, result) => {
+    this._performRead(id, design, name, (err, result) => {
       if (err) {
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
-          this._updateDesign(id, [name], (err) => {
+          this._updateDesign(design, [name], (err) => {
             if (err)
               callback(err);
             else
-              this._read(id, name, docId, callback, tries);
+              this._read(id, design, name, callback, tries);
           });
         }
         else
@@ -57,16 +57,16 @@ export default class DbDesign
     });
   }
   
-  private _performRead (id: string, name: string, docId: string, callback: ErrResultCallback)
+  private _performRead (id: string, design: string, name: string, callback: ErrResultCallback)
   {
-    this.db.raw.show(id, name, docId, Err.resultFunc('design', callback));
+    this.db.raw.show(design, name, id, Err.resultFunc('design', callback));
   }
   
-  private _updateDesign (id: string, names: string[], callback: ErrCallback)
+  private _updateDesign (designId: string, names: string[], callback: ErrCallback)
   {
-    let design = this.db.designs[id];
+    let design = this.db.designs[designId];
     if (!design) {
-      callback(new Err('design', "not_defined", "No design specified for: " + id));
+      callback(new Err('show', "not_defined", "No design specified for: " + designId));
       return;
     }
     
@@ -76,12 +76,12 @@ export default class DbDesign
       if (design.shows[name])
         body.shows[name] = design.shows[name];
       else {
-        callback(new Err('design', "missing_show", "Missing deinition for: " + name));
+        callback(new Err('show', "missing_show", "Missing deinition for: " + name));
         return;
       }
     }
     
     // update design
-    this.db.doc.updateOrWrite('_design/' + id, body, callback);
+    this.db.doc.updateOrWrite('_design/' + designId, body, callback);
   }
 }
