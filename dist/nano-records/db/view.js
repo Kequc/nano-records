@@ -50,13 +50,13 @@ var DbView = (function () {
                     };
                     _this._updateNanoRecordsDesign(name, view, function (err) {
                         if (err)
-                            callback(err);
+                            callback(err, new list_1.default(_this.db));
                         else
                             _this._only(keys, values, params, callback, tries);
                     });
                 }
                 else
-                    callback(err);
+                    callback(err, new list_1.default(_this.db));
             }
             else
                 callback(undefined, new list_1.default(_this.db, result)); // executed successfully
@@ -90,13 +90,13 @@ var DbView = (function () {
                 if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
                     _this._updateDesign(design, [name], function (err) {
                         if (err)
-                            callback(err);
+                            callback(err, new list_1.default(_this.db));
                         else
                             _this._catalog(design, name, params, callback, tries);
                     });
                 }
                 else
-                    callback(err);
+                    callback(err, new list_1.default(_this.db));
             }
             else
                 callback(undefined, new list_1.default(_this.db, result)); // executed successfully

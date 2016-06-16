@@ -65,13 +65,13 @@ export default class DbView
           };
           this._updateNanoRecordsDesign(name, view, (err) => {
             if (err)
-              callback(err);
+              callback(err, new List(this.db));
             else
               this._only(keys, values, params, callback, tries);
           });
         }
         else
-          callback(err);
+          callback(err, new List(this.db));
       }
       else
         callback(undefined, new List(this.db, result)); // executed successfully
@@ -109,13 +109,13 @@ export default class DbView
         if (tries <= 1 && (err.name == "no_db_file" || err.name == "not_found")) {
           this._updateDesign(design, [name], (err) => {
             if (err)
-              callback(err);
+              callback(err, new List(this.db));
             else
               this._catalog(design, name, params, callback, tries);
           });
         }
         else
-          callback(err);
+          callback(err, new List(this.db));
       }
       else
         callback(undefined, new List(this.db, result)); // executed successfully

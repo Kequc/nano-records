@@ -11,7 +11,8 @@ DbViewAssert.all_Fail = (db, keys, params, errorName, done) => {
   db.view.all(keys, params, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
-    expect(list).to.be.undefined;
+    expect(list).to.be.ok;
+    expect(list.rows.length).to.equal(0);
     done();
   });
 };
@@ -30,7 +31,8 @@ DbViewAssert.only_Fail = (db, keys, values, params, errorName, done) => {
   db.view.only(keys, values, params, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
-    expect(list).to.be.undefined;
+    expect(list).to.be.ok;
+    expect(list.rows.length).to.equal(0);
     done();
   });
 };
@@ -49,7 +51,8 @@ DbViewAssert.catalog_Fail = (db, design, name, errorName, done) => {
   db.view.catalog(design, name, {}, (err, list) => {
     expect(err).to.be.ok;
     expect(err.name).to.equal(errorName);
-    expect(list).to.be.undefined;
+    expect(list).to.be.ok;
+    expect(list.rows.length).to.equal(0);
     done();
   });
 };
@@ -75,7 +78,8 @@ DbViewAssert.catalog_Retries_Fail = (db, design, name, done) => {
     db.view.catalog(design, name, {}, (err, list) => {
       expect(err).to.be.ok;
       expect(err.name).to.equal("conflict");
-      expect(list).to.be.undefined;
+      expect(list).to.be.ok;
+      expect(list.rows.length).to.equal(0);
       done();
     }, db.maxTries); // tried x times
   });

@@ -19,17 +19,21 @@ export interface ErrListCallback {
 
 export default class List
 {
-  total: number;
-  offset: number;
-  rows: ViewRow[];
+  total: number = 0;
+  offset: number = 0;
+  rows: ViewRow[] = [];
+  
   db: Db;
   
-  constructor (db: Db, body: ViewResult)
+  constructor (db: Db, body?: ViewResult)
   {
     this.db = db;
-    this.total = body.total_rows;
-    this.offset = body.offset;
-    this.rows = body.rows;
+    
+    if (body) {
+      this.total = body.total_rows;
+      this.offset = body.offset;
+      this.rows = body.rows;
+    }
   }
   
   ids (): string[]

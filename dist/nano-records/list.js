@@ -12,10 +12,15 @@ var doc_1 = require('./doc');
 var _ = require('underscore');
 var List = (function () {
     function List(db, body) {
+        this.total = 0;
+        this.offset = 0;
+        this.rows = [];
         this.db = db;
-        this.total = body.total_rows;
-        this.offset = body.offset;
-        this.rows = body.rows;
+        if (body) {
+            this.total = body.total_rows;
+            this.offset = body.offset;
+            this.rows = body.rows;
+        }
     }
     List.prototype.ids = function () {
         return _.map(this.rows, function (row) { return row.id; });

@@ -9,7 +9,7 @@ export default class List {
     offset: number;
     rows: ViewRow[];
     db: Db;
-    constructor(db: Db, body: ViewResult);
+    constructor(db: Db, body?: ViewResult);
     ids(): string[];
     keys(): any[];
     values(): any[];
