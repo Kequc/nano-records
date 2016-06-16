@@ -1,42 +1,42 @@
 {
-  "name": "nano-records",
-  "version": "1.1.0",
-  "description": "Utility returns objects for interacting with CouchDB.",
-  "author": "mr.kequc@gmail.com",
-  "license": "ISC",
-  "scripts": {
-    "build": "tsc -p ./src",
-    "watch": "tsc -w -p ./src",
-    "test": "mocha --recursive ./test/spec"
-  },
-  "files": [
-    "dist/"
-  ],
-  "main": "./dist/nano-records.js",
-  "typings": "./dist/nano-records.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Kequc/nano-records.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Kequc/nano-records/issues"
-  },
-  "homepage": "http://www.kequc.com",
-  "keywords": [
-    "nano",
-    "couchdb",
-    "nodejs",
-    "typescript"
-  ],
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^2.4.5",
-    "nano": "^6.2.0",
-    "typescript": "^1.8.7"
-  },
-  "dependencies": {
-    "deep-extend": "^0.4.1",
-    "dev-null": "^0.1.1",
-    "underscore": "^1.8.3"
-  }
+    "name": "nano-records",
+    "version": "1.1.0",
+    "description": "Utility returns objects for interacting with CouchDB.",
+    "author": "mr.kequc@gmail.com",
+    "license": "ISC",
+    "scripts": {
+        "build": "tsc -p ./src",
+        "watch": "tsc -w -p ./src",
+        "test": "mocha --recursive ./test/spec"
+    },
+    "files": [
+        "dist/"
+    ],
+    "main": "./dist/nano-records.js",
+    "typings": "./dist/nano-records.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kequc/nano-records.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Kequc/nano-records/issues"
+    },
+    "homepage": "http://www.kequc.com",
+    "keywords": [
+        "nano",
+        "couchdb",
+        "nodejs",
+        "typescript"
+    ],
+    "devDependencies": {
+        "chai": "^3.5.0",
+        "mocha": "^2.4.5",
+        "nano": "^6.2.0",
+        "typescript": "^1.8.7"
+    },
+    "dependencies": {
+        "deep-extend": "^0.4.1",
+        "dev-null": "^0.1.1",
+        "underscore": "^1.8.3"
+    }
 }
