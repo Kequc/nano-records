@@ -11,7 +11,7 @@
 
 import {default as Err, ErrCallback, ErrResultCallback, ErrHeadCallback} from './err';
 import {default as Db} from './db';
-import {default as DocAttachment} from './doc/attachment';
+import {default as DocAttachment} from './doc-attachment';
 import deepExtend = require('deep-extend');
 
 export interface ErrDocCallback {

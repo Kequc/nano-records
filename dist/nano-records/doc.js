@@ -10,7 +10,7 @@
  */
 "use strict";
 var err_1 = require('./err');
-var attachment_1 = require('./doc/attachment');
+var doc_attachment_1 = require('./doc-attachment');
 var deepExtend = require('deep-extend');
 var Doc = (function () {
     function Doc(db, body, result) {
@@ -18,7 +18,7 @@ var Doc = (function () {
         if (result === void 0) { result = {}; }
         this.body = {};
         this.db = db;
-        this.attachment = new attachment_1.default(this);
+        this.attachment = new doc_attachment_1.default(this);
         deepExtend(this.body, body);
         this.body['_id'] = result['id'] || this.body['_id'];
         this.body['_rev'] = this._latestRev = result['rev'] || this.body['_rev'];

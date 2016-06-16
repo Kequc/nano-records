@@ -1,7 +1,7 @@
 import { ErrCallback } from './err';
-import { default as DbDoc } from './db/doc';
-import { default as DbView } from './db/view';
-import { default as DbShow } from './db/show';
+import { default as DbDoc } from './db-doc';
+import { default as DbView } from './db-view';
+import { default as DbShow } from './db-show';
 export default class Db {
     maxTries: number;
     nano: any;

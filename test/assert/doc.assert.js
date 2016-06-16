@@ -3,7 +3,7 @@ var mocha  = require('mocha');
 var expect = require('chai').expect;
 var deepExtend = require('deep-extend');
 
-var Helper = require('./../helper');
+var Helper = require('../helper');
 
 var DocAssert = {};
 

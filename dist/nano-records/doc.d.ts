@@ -1,6 +1,6 @@
 import { default as Err, ErrCallback, ErrHeadCallback } from './err';
 import { default as Db } from './db';
-import { default as DocAttachment } from './doc/attachment';
+import { default as DocAttachment } from './doc-attachment';
 export interface ErrDocCallback {
     (err?: Err, doc?: Doc): any;
 }

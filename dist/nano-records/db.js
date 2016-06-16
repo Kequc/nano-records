@@ -9,9 +9,9 @@
  */
 "use strict";
 var err_1 = require('./err');
-var doc_1 = require('./db/doc');
-var view_1 = require('./db/view');
-var show_1 = require('./db/show');
+var db_doc_1 = require('./db-doc');
+var db_view_1 = require('./db-view');
+var db_show_1 = require('./db-show');
 var deepExtend = require('deep-extend');
 var Db = (function () {
     function Db(nano, dbName, designs) {
@@ -28,9 +28,9 @@ var Db = (function () {
             };
         }
         deepExtend(this.designs, designs);
-        this.doc = new doc_1.default(this);
-        this.view = new view_1.default(this);
-        this.show = new show_1.default(this);
+        this.doc = new db_doc_1.default(this);
+        this.view = new db_view_1.default(this);
+        this.show = new db_show_1.default(this);
     }
     Db.prototype.create = function (callback) {
         if (callback === void 0) { callback = function () { }; }

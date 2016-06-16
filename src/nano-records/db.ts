@@ -10,9 +10,9 @@
 
 import {default as Err, ErrCallback} from './err';
 import {default as Doc} from './doc';
-import {default as DbDoc} from './db/doc';
-import {default as DbView} from './db/view';
-import {default as DbShow} from './db/show';
+import {default as DbDoc} from './db-doc';
+import {default as DbView} from './db-view';
+import {default as DbShow} from './db-show';
 import deepExtend = require('deep-extend');
 
 export default class Db
