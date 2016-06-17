@@ -269,7 +269,7 @@ db.view.catalog(design, name, params, (err, list) => {
 });
 ```
 
-Persist a view similar to `db.show.catalog` and return the result.
+Persist a view similar to `db.show.catalog` and return the result. An empty list object is returned if there is an error.
 
 ### View helpers
 
@@ -286,7 +286,7 @@ Will generate a view for you using the provided keys, which returns a list of do
 
 Useful for simple search functions, for example `keys` may be `"user_id"` then you can provide `{ key: "myuserid" }` to `params` and find relevant results. The `keys` parameter may also be an array of values, or nested values. It's best not to provide parameters to this function which are dynamic in nature, as a new view is persisted to the database for each set of keys provided.
 
-Complex views are still best constructed manually.
+Complex views are still best constructed manually. Read more about view helpers on: [CouchDB design documents using view helpers in nano-records](http://www.kequc.com/2016/05/24/couchdb-design-documents-using-view-helpers-in-nano-records).
 
 ```javascript
 db.view.only(keys, values, params, (err, list) => {
@@ -315,6 +315,8 @@ list.doc(index); // NanoRecords document
 ```
 
 The `list.docs` method may not give you complete document objects depending on the values that were returned by the view. However running `doc.read` will fetch the full document from the database, similarly all normal NanoRecords document functions should work as you expect.
+
+A common way to get just the first document is `list.doc(0)`.
 
 ### Db
 
