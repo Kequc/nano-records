@@ -373,3 +373,5 @@ You might see `no_db_file` if your CouchDB has security locked down.
 ### Contribute
 
 If you like what you see please feel encouraged to [get involved](https://github.com/Kequc/nano-records/issues) report problems and submit pull requests! As of the time of this writing the project is new with one maintainer.
+
+New repository under development: [couch-recliner](https://github.com/Kequc/couch-recliner)
