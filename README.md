@@ -7,6 +7,10 @@ Conflicts are avoided with automated retries, errors are sanitised, designs are 
 
 [npm](https://www.npmjs.com/package/nano-records)
 
+### Notice
+
+If you are using CouchDB2.0/Cloudant this library `nano-records` has been superceded by [Couch Recliner](https://www.npmjs.com/package/couch-recliner).
+
 ### Upgrading from 1.0.9 to 1.1.0
 
 * `db.doc.forcedWrite` is now `db.doc.write`
